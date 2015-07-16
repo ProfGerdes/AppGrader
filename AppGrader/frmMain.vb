@@ -23,14 +23,14 @@ Public Class frmMain
     End Structure
 
     '  Dim VBProjects(200) As MyVBProjects
-    Dim nVBProjects As Integer
-    Dim crcData() As crcdatum
+    '   Dim nVBProjects As Integer
+    '  Dim crcData() As crcdatum
 
     Private Submissions As New List(Of Submission)
     Private GUIDs As New List(Of GUIDData)
 
 
-    Dim crcN As Integer = -1
+    '   Dim crcN As Integer = -1
 
     '  Dim WithEvents zip As New ZipUtility
     ' http://www.vbforums.com/showthread.php?t=413705&highlight=ziplib
@@ -39,15 +39,15 @@ Public Class frmMain
         Dim Ncomments As Integer
     End Structure
 
-    Public Structure AssignmentInfo
-        Dim StudentID As String
-        Dim AssignRoot As String
-        Dim AssignPath As String
-        Dim vbVersion As String
-        Dim hasSLNFile As Boolean
-        Dim hasVBProjFile As Boolean
-        Dim FormClass() As myFormClass
-    End Structure
+    'Public Structure AssignmentInfo
+    '    Dim StudentID As String
+    '    Dim AssignRoot As String
+    '    Dim AssignPath As String
+    '    Dim vbVersion As String
+    '    Dim hasSLNFile As Boolean
+    '    Dim hasVBProjFile As Boolean
+    '    Dim FormClass() As myFormClass
+    'End Structure
 
     Dim AInfo As AssignmentInfo
     Dim AssignmentName As String = ""
@@ -67,7 +67,8 @@ Public Class frmMain
             Dim sr As StreamReader = File.OpenText(Application.StartupPath & "\demodir.txt")
             lblDemoDir.Text = sr.ReadLine
             sr.Close()
-        End If
+'        End If
+
 
         ' ----------------------------------------------------------------------
         File.Delete(Application.StartupPath & "/CantFind.txt")
@@ -182,7 +183,7 @@ Public Class frmMain
         Dim HasSLNFile As Boolean = False
         Dim hasVBFile As Boolean
 
-        Dim vbVersion As String = ""
+        '   Dim vbVersion As String = ""
 
         Dim fn As String
 
@@ -234,11 +235,6 @@ Public Class frmMain
         End Try
         n = 0
         path = ""
-
-
-
-
-
 
         ' -------------------------------------------------------------------------------------------------
         ' First check to see if they have specified a template for the gradesheets, if the user specified
@@ -350,12 +346,12 @@ Public Class frmMain
             ' ===================================================================================
             TotalLinesOfCode = 0
 
-            ' create structure to hold data
-            Dim StudentAssignment As New Assignment
-            Dim IntegratedStudentAssignment As New Assignment.AppSummary
+            ' create variables to hold data
+            Dim StudentAssignment As AssignmentInfo
 
-            Dim StudentAppSummary As New Assignment.AppSummary
-            Dim StudentAppForm As New Assignment.AppForm
+            Dim IntegratedStudentAssignment(NSummary) As MyItems
+            Dim StudentAppSummary(NSummary) As MyItems
+            Dim StudentAppForm(nForm) As MyItems
 
             '  PopulateNonCheckCSS_Summary(AppSummary)  ' this sets css to control what happens with Properties that are not being checked in the assignment (hide/show/gray/white)
 
@@ -418,7 +414,7 @@ Public Class frmMain
 
 
                 ' check for sln and/or vbProj file. One of these is needed to run app, so it is a bad submission if neither is present.
-                CheckSLNvbProj(StudentAssignment, StudentAppSummary)
+                CheckSLNvbProj(StudentAssignment)
                 HasSLNFile = CBool(StudentAssignment.hasSLN.Status)
                 HasVBProjFile = CBool(StudentAssignment.hasVBproj.Status)
 
@@ -434,25 +430,25 @@ Public Class frmMain
 
                     '     Dim worker As System.ComponentModel.BackgroundWorker = DirectCast(sender, System.ComponentModel.BackgroundWorker)
                     Dim filesource As String
-                    Dim nComment As Integer = 0
+                    '  Dim nComment As Integer = 0
                     '   Dim i As Integer = 0
-                    Dim hasFiles As Boolean = False
-                    Dim OptionStrict As Boolean = False
-                    Dim OptionStrictOff As Boolean = False
-                    Dim hasOptionExplicit As Boolean = False
-                    Dim hasOptionExplicitOff As Boolean = False
+                    '   Dim hasFiles As Boolean = False
+                    '   Dim OptionStrict As Boolean = False
+                    '   Dim OptionStrictOff As Boolean = False
+                    '   Dim hasOptionExplicit As Boolean = False
+                    '   Dim hasOptionExplicitOff As Boolean = False
 
 
                     Dim Filesinbuild As New List(Of String)
 
                     Dim RemoveFromList As Boolean = True
                     Dim AppDir As String = ""
-                    Dim var1 As String = ""
+                    '    Dim var1 As String = ""
                     ' Dim x As Integer
-                    Dim Appform(0) As Assignment.AppForm
+                    Dim Appform(0) As MyItems
                     Dim NAppForm As Integer = 0
                     Dim hasForm As Boolean
-                    Dim gradesheetext As String = "txt"
+                    '     Dim gradesheetext As String = "txt"
                     Dim first As Boolean
 
                     '   Dim sw As StreamWriter  ' This is used to write out the student report file
@@ -581,11 +577,11 @@ Public Class frmMain
                     ' =================================================================================================== 
                     first = True
                     For Each filename As String In Filesinbuild
-                        StudentAppSummary.TotalScore = 0
+                        StudentAssignment.TotalScore = 0
                         FileLinesOfCode = 0
 
                         '      If StudentAppSummary.Status.Length > 0 Then
-                        StudentAppSummary.Clear()
+                        ClearAppArray(StudentAppSummary)
                         '      End If
 
                         '   Dim AppSummary As New MyAppSummary    ' ??????????jhg?????????? Need a new appsummary to avoid double counting - This throws away all previous info.
@@ -601,7 +597,7 @@ Public Class frmMain
                         ' creates a new AppForm structure for each new Form File. Avoids Classes and Modules
                         hasForm = False
                         If File.Exists(filename.Replace(".vb", ".designer.vb")) Then
-                            If StudentAppForm.FormName.Status <> Nothing Then StudentAppForm.Clear() ' don't clear it if it is already cleared.
+                            If StudentAppForm(EnForm.FormName).Status <> Nothing Then ClearAppArray(StudentAppForm) ' don't clear it if it is already cleared.
                             hasForm = True
 
                             NAppForm += 1
@@ -633,7 +629,7 @@ Public Class frmMain
                             CheckFormProperties2(filename, StudentAppForm)
                             CheckObjectNaming2(filename, StudentAppForm)
                             '    CheckFormLoad(StudentAppSummary, filesource)
-                            ProcessReq(StudentAppSummary.LogicFormLoad, "Form Load Method not found", "Form Load Method found", "LogicFormLoad")
+                            ProcessReq(StudentAppSummary(EnSummary.LogicFormLoad), "Form Load Method not found", "Form Load Method found", "LogicFormLoad")
 
 
                             BuildReport("Form Objects", StudentAssignment, StudentAppForm, StudentAppSummary, "")
@@ -664,7 +660,7 @@ Public Class frmMain
                             strFacReport &= "<tr><td>" & "" & "</td><td>" & ReturnLastField(filename, "\") & "</td><td>" & FileLinesOfCode.ToString("n0") & "</td><td>" & TotalScore & "</td></tr>" & vbCrLf
                         End If
 
-                        integrateSSummary(StudentAppSummary, IntegratedStudentAssignment, first)
+                        integrateSSummary(StudentAppSummary, IntegratedStudentAssignment, filename, first)
                         first = False
 
                     Next filename      ' end of Filename loop
@@ -706,14 +702,14 @@ Public Class frmMain
             Next
 
             ' jhg Need to check how this handles multiple file submissions.
-            strAssignmentSummary &= AddStudentDataToSummary(strStudentID, SubmissionCompileTime, SubmissionCompileDate, TotalLinesOfCode.ToString, TotalScore)
+            strAssignmentSummary &= AddStudentDataToSummary(strStudentID, SubmissionCompileTime, SubmissionCompileDate, TotalLinesOfCode.ToString, TotalScore.ToString)
 
             ' jhg - may need to total submission info if the student submitted multiple files.
         Next ii    ' End of student loop
 
         ' -------------------------------------Create Faculty file. ----------------------------------------------
 
-        If Not cbxJustUnzip.Checked Then CloseFacReport(path, AssignmentName)
+        If Not cbxJustUnzip.Checked Then CloseFacReport(path)
 
             ' ############################################################################################
 
@@ -725,11 +721,11 @@ Public Class frmMain
             If Not cbxJustUnzip.Checked Then
                 Dim fname As String
                 '   Dim sw As StreamWriter
-                Dim lastUser As String = ""
+            '   Dim lastUser As String = ""
                 Dim lastCRC As String = ""
                 Dim ShortFilename As String = ""
                 Dim DupFlag As Boolean
-                Dim NoDesignerVB As Boolean = True
+            '      Dim NoDesignerVB As Boolean = True
 
                 fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt"
                 sw = File.CreateText(fname)
@@ -943,37 +939,37 @@ Public Class frmMain
         Return String.Format(tmp, sn, ct, cd, tloc, sc)
     End Function
 
+ 
+
+    'Private Function PrefixString(ByVal s1 As String, ByVal s2 As String) As String
+    '    ' finds the common prefix applied to all submission by Blackboard.
+    '    Dim i As Integer
+    '    Dim n As Integer
+    '    Try
+    '        n = s1.Length
+
+    '        If s2.Length < n Then n = s2.Length
+    '        PrefixString = ""
+    '        For i = 1 To n
+    '            If s1.Substring(0, i) = s2.Substring(0, i) Then
+    '                PrefixString = s1.Substring(0, i)
+    '            Else
+    '                Exit For
+    '            End If
+    '        Next
+    '    Catch
+    '        PrefixString = ""
+    '    End Try
 
 
-    Private Function PrefixString(ByVal s1 As String, ByVal s2 As String) As String
-        ' finds the common prefix applied to all submission by Blackboard.
-        Dim i As Integer
-        Dim n As Integer
-        Try
-            n = s1.Length
-
-            If s2.Length < n Then n = s2.Length
-            PrefixString = ""
-            For i = 1 To n
-                If s1.Substring(0, i) = s2.Substring(0, i) Then
-                    PrefixString = s1.Substring(0, i)
-                Else
-                    Exit For
-                End If
-            Next
-        Catch
-            PrefixString = ""
-        End Try
-
-
-    End Function
+    'End Function
 
 
     Sub LoadConfig()
         ' This is designed to process the Config file. The Config file must be in the same directory as the executable file. If found, it opens it up and processing the file line by line. Each line should have a Key Variable followed by a Property. Some Keys can only take a certain set of properties.  The code parses the Key/Property pair and sets the assocaited config value, which is defined in the JHGModule. This allows the user to modify the operation of the application.
         ' -----------------------------------------------------------------------------------------------------
-        Dim msg As String = ""
-        Dim msgflag As Boolean = False
+        '  Dim msg As String = ""
+        '  Dim msgflag As Boolean = False
 
         ' Check to see if the Config file exists. If not bypass the remainder of the the load process.
         If File.Exists(Application.StartupPath & "\templates\defaultConfig.cfg") Then
@@ -993,11 +989,11 @@ Public Class frmMain
     End Function
 
 
-    Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        ' Exit application.
-        Me.Close()
-        Application.Exit()
-    End Sub
+    'Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    ' Exit application.
+    '    Me.Close()
+    '    Application.Exit()
+    'End Sub
 
 
     Private Sub btnOutput_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnOutput.Click, ViewOutputToolStripMenuItem.Click

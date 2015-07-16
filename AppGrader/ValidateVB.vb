@@ -5,9 +5,11 @@
 
 Module ValidateVB
 
-    Public ValidateReport As String
+    '   Public ValidateReport As String
     Public strStudentReport As String
     Public strFacReport As String
+
+
 
     Sub InitializeStudentReport()
         Dim s As String
@@ -74,7 +76,7 @@ Module ValidateVB
     End Function
 
 
-    Public Sub CloseFacReport(path As String, Project As String)
+    Public Sub CloseFacReport(path As String)
         Dim sr As StreamReader
         Dim sw As StreamWriter
 
@@ -150,7 +152,7 @@ Module ValidateVB
     ' Code Checks start here
     ' ==============================================================================================================
 
-    Sub CheckSLNvbProj(ByRef AppInfo As Assignment, ByRef AppSum As Assignment.AppSummary)
+    Sub CheckSLNvbProj(ByRef AppInfo As AssignmentInfo)
         ' This checks for both the SLN and VBProj files. It also gets the VB Version used to create the application.
         ' This information is placed in the AppSum Structure
         ' -----------------------------------------------------------------------------------------------------------
@@ -200,7 +202,7 @@ Module ValidateVB
 
 
 
-    Sub CheckAPPInfo2(AppDir As String, ByRef SSummary As Assignment.AppSummary)
+    Sub CheckAPPInfo2(AppDir As String, ByRef SSummary() As MyItems)
         Dim s As String = ""
         Dim s2 As String = ""
         Try
@@ -213,22 +215,22 @@ Module ValidateVB
             'cfgAssignmentTitle = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
             'SSummary.AppTitle = cfgAssignmentTitle
 
-            With SSummary
-                s = s2
-                .InfoAppTitle.Status = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
-                s = s2
-                .InfoDescription.Status = returnBetween(s, "<Assembly: AssemblyDescription(""", """)>", True)
-                s = s2
-                .InfoCompany.Status = returnBetween(s, "<Assembly: AssemblyCompany(""", """)>", True)
-                s = s2
-                .InfoProduct.Status = returnBetween(s, "<Assembly: AssemblyProduct(""", """)>", True)
-                s = s2
-                .InfoCopyright.Status = returnBetween(s, "<Assembly: AssemblyCopyright(""", """)>", True)
-                s = s2
-                .InfoTrademark.Status = returnBetween(s, "<Assembly: AssemblyTrademark(""", """)>", True)
-                s = s2
-                .InfoGUID.Status = returnBetween(s, "<Assembly: Guid(""", """)>", True)
-            End With
+
+            s = s2
+            SSummary(EnSummary.InfoAppTitle).Status = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
+            s = s2
+            SSummary(EnSummary.InfoDescription).Status = returnBetween(s, "<Assembly: AssemblyDescription(""", """)>", True)
+            s = s2
+            SSummary(EnSummary.InfoCompany).Status = returnBetween(s, "<Assembly: AssemblyCompany(""", """)>", True)
+            s = s2
+            SSummary(EnSummary.InfoProduct).Status = returnBetween(s, "<Assembly: AssemblyProduct(""", """)>", True)
+            s = s2
+            SSummary(EnSummary.InfoCopyright).Status = returnBetween(s, "<Assembly: AssemblyCopyright(""", """)>", True)
+            s = s2
+            SSummary(EnSummary.InfoTrademark).Status = returnBetween(s, "<Assembly: AssemblyTrademark(""", """)>", True)
+            s = s2
+            SSummary(EnSummary.InfoGUID).Status = returnBetween(s, "<Assembly: Guid(""", """)>", True)
+
             ' ----------------------------------------------------------------------------------------------
             If Find_Setting("InfoAppTitle", "CheckAppInfo2").Req Then       ' **************** is this correct? *************** Info AppTile is different than AppTitle
                 'If cfgAssignmentTitle = str5 Then
@@ -242,18 +244,18 @@ Module ValidateVB
     End Sub
 
 
-    Sub CheckForOptions2(path As String, filesinbuild As List(Of String), ByRef item As Assignment.MyItems, optiontype As String)   ' ByRef HasOptionStrict As Boolean, ByRef HasOptionStrictOff As Boolean)
+    Sub CheckForOptions2(path As String, filesinbuild As List(Of String), ByRef item As MyItems, optiontype As String)   ' ByRef HasOptionStrict As Boolean, ByRef HasOptionStrictOff As Boolean)
         ' Checks the designed directory fn for the directive Option Strict / Option Explicit
 
         Dim source As String = ""
-        Dim tmp As String = ""
+        '    Dim tmp As String = ""
 
         With item
             .Status = "Not Set"
 
             ' Check each file plus Application.Designer. If it is set of off, that is a big problem and overrides any point where it is set on
 
-            Dim i As Integer = 0
+            '      Dim i As Integer = 0
 
             'Searches directory and it's subdirectories for all files, which "*" stands for
             'Say for example you only want to search for jpeg files... then change "*" to "*.jpg"  
@@ -292,16 +294,16 @@ Module ValidateVB
 
 
 
-    Function CheckForComments2(filesource As String, ByRef SSummary As Assignment.AppSummary, ByRef AppForm As Assignment.AppForm, sender As System.ComponentModel.BackgroundWorker) As Integer
+    Function CheckForComments2(filesource As String, ByRef SSummary() As MyItems, ByRef AppForm() As MyItems, sender As System.ComponentModel.BackgroundWorker) As Integer
 
         Dim worker As System.ComponentModel.BackgroundWorker = DirectCast(sender, System.ComponentModel.BackgroundWorker)
         Dim i As Integer
         Dim ncomments As Integer
         Dim isInIf As Integer
         Dim isInFor As Integer
-        Dim isinSub As Boolean
-        Dim isinFunction As Boolean
-        Dim LastlineComment As Integer
+        ' Dim isinSub As Boolean
+        ' Dim isinFunction As Boolean
+        ' Dim LastlineComment As Integer
         Dim ss() As String
         Dim lineno() As Integer
         Dim n As Integer
@@ -309,7 +311,7 @@ Module ValidateVB
         Dim firstword As String = ""
         Dim PreviousWord As String = ""
         Dim comBad As String = ""
-        Dim comGood As String = ""
+        '   Dim comGood As String = ""
         Dim x As Integer
         Dim srName(0) As String
         Dim swName(0) As String
@@ -349,313 +351,364 @@ Module ValidateVB
         TotalLinesOfCode += ss.Length
         FileLinesOfCode = ss.Length
         ' ---------------------------------------------------------------------------------------------------------
-        With SSummary
-            ' set default to green
-            .LogicIF.cssClass = "itemgreen"
-            .LogicFor.cssClass = "itemgreen"
-            .LogicDo.cssClass = "itemgreen"
-            .LogicSelectCase.cssClass = "itemgreen"
-            .LogicWhile.cssClass = "itemgreen"
-            .LogicSub.cssClass = "itemgreen"
 
-            ' Now process each line and assess for flow control elements
+        ' set default to green
+        SSummary(EnSummary.LogicIF).cssClass = "itemgreen"
+        SSummary(EnSummary.LogicFor).cssClass = "itemgreen"
+        SSummary(EnSummary.LogicDo).cssClass = "itemgreen"
+        SSummary(EnSummary.LogicSelectCase).cssClass = "itemgreen"
+        SSummary(EnSummary.LogicWhile).cssClass = "itemgreen"
+        SSummary(EnSummary.LogicSub).cssClass = "itemgreen"
 
-            For i = 0 To ss.GetUpperBound(0)
-                x = CInt(i * 100 / ss.GetUpperBound(0))
-                worker.ReportProgress(x, "Line by Line")
+        ' Now process each line and assess for flow control elements
 
-                firstword = TrimAfter(ss(i) + " ", " ", True)
+        For i = 0 To ss.GetUpperBound(0)
+            x = CInt(i * 100 / ss.GetUpperBound(0))
+            worker.ReportProgress(x, "Line by Line")
 
-                ' in some cases, we what 2 word phrases. So grab them when needed.
-                If firstword = "End" Or firstword = "Else" Or firstword = "Public" Or firstword = "Private" Then
-                    n = (ss(i) & "  ").IndexOf(" ", firstword.Length + 1)
-                    If ss(i).Length >= n Then
-                        firstword = ss(i).Substring(0, n).Trim
-                    Else
-                        firstword = ss(i).Trim
-                    End If
-                End If
+            firstword = TrimAfter(ss(i) + " ", " ", True)
 
-                ' need to also trim off any trailing comment. This is needed to identify single line IF statements.
-                If ss(i) = Nothing Then
-                    ss(i) = ""
+            ' in some cases, we what 2 word phrases. So grab them when needed.
+            If firstword = "End" Or firstword = "Else" Or firstword = "Public" Or firstword = "Private" Then
+                n = (ss(i) & "  ").IndexOf(" ", firstword.Length + 1)
+                If ss(i).Length >= n Then
+                    firstword = ss(i).Substring(0, n).Trim
                 Else
-                    n = (ss(i).ToUpper & " ").IndexOf(" THEN ")
-                    If n > -1 Then
-                        n = (ss(i).ToUpper & " ").IndexOf(" '", n)
-                        If n > -1 Then ss(i) = ss(i).Substring(0, n).Trim
+                    firstword = ss(i).Trim
+                End If
+            End If
+
+            ' need to also trim off any trailing comment. This is needed to identify single line IF statements.
+            If ss(i) = Nothing Then
+                ss(i) = ""
+            Else
+                n = (ss(i).ToUpper & " ").IndexOf(" THEN ")
+                If n > -1 Then
+                    n = (ss(i).ToUpper & " ").IndexOf(" '", n)
+                    If n > -1 Then ss(i) = ss(i).Substring(0, n).Trim
+                End If
+            End If
+            ' -----------------------------------------------------------------------------------
+            If firstword.StartsWith("Messagebox") Or firstword.StartsWith("MsgBox") Then
+                ' Move this to case below
+            End If
+
+
+            Select Case firstword.ToUpper
+                Case "'"   ' This line is a comment
+                    ncomments = ncomments + 1
+                    '       LastlineComment = i   ' Note, this points to the array element, not the file line
+
+                Case "CASE"
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+
+                Case "CATCH"
+
+                Case "DIM"    ' Tracks the declaration of variables
+                    If ss(i).ToUpper.Contains(" AS INTEGER") Then
+                        SSummary(EnSummary.VarInteger).n += 1
+                        SSummary(EnSummary.VarInteger).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
                     End If
-                End If
-                ' -----------------------------------------------------------------------------------
-                If firstword.StartsWith("Messagebox") Or firstword.StartsWith("MsgBox") Then
-                    ' Move this to case below
-                End If
+                    If ss(i).ToUpper.Contains(" AS DECIMAL") Or ss(i).ToUpper.Contains("DOUBLE") Then
+                        SSummary(EnSummary.VarDecimal).n += 1
+                        SSummary(EnSummary.VarDecimal).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
+                    If ss(i).ToUpper.Contains(" AS BOOLEAN") Then
+                        SSummary(EnSummary.VarBoolean).n += 1
+                        SSummary(EnSummary.VarBoolean).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
+                    If ss(i).ToUpper.Contains(" AS DATE") Then
+                        SSummary(EnSummary.VarDate).n += 1
+                        SSummary(EnSummary.VarDate).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
+                    If ss(i).ToUpper.Contains(" AS STRING") Then
+                        SSummary(EnSummary.VarString).n += 1
+                        SSummary(EnSummary.VarString).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
 
+                    If ss(i).ToUpper.Contains(") AS ") Then
+                        SSummary(EnSummary.VarArrays).n += 1
+                        SSummary(EnSummary.VarArrays).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
 
-                Select Case firstword.ToUpper
-                    Case "'"   ' This line is a comment
-                        ncomments = ncomments + 1
-                        LastlineComment = i   ' Note, this points to the array element, not the file line
+                    If ss(i).ToUpper.Contains("LIST (OF") Then
+                        SSummary(EnSummary.VarLists).n += 1
+                        SSummary(EnSummary.VarLists).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
 
-                    Case "CASE"
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+                    If ss(i).ToUpper.Contains(" STRUCTURE ") Then
+                        SSummary(EnSummary.VarStructures).n += 1
+                        SSummary(EnSummary.VarStructures).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
 
-                    Case "CATCH"
+                    If ss(i).ToUpper.Contains(" AS STREAMREADER") Or ss(i).ToUpper.Contains(" AS NEW STREAMREADER") Then
+                        SSummary(EnSummary.LogicStreamReader).n += 1
+                        SSummary(EnSummary.LogicStreamReader).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
 
-                    Case "DIM"    ' Tracks the declaration of variables
-                        If ss(i).ToUpper.Contains(" AS INTEGER") Then
-                            .VarInteger.n += 1
-                            .VarInteger.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        End If
-                        If ss(i).ToUpper.Contains(" AS DECIMAL") Or ss(i).ToUpper.Contains("DOUBLE") Then
-                            .VarDecimal.n += 1
-                            .VarDecimal.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        End If
-                        If ss(i).ToUpper.Contains(" AS BOOLEAN") Then
-                            .VarBoolean.n += 1
-                            .VarBoolean.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        End If
-                        If ss(i).ToUpper.Contains(" AS DATE") Then
-                            .VarDate.n += 1
-                            .VarDate.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        End If
-                        If ss(i).ToUpper.Contains(" AS STRING") Then
-                            .VarString.n += 1
-                            .VarString.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        End If
+                        s = returnBetween(ss(i), "DIM ", "AS STREAMREADER", True).Trim
 
-                        If ss(i).ToUpper.Contains(") AS ") Then
-                            .VarArrays.n += 1
-                            .VarArrays.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                        If srName.Length > 0 Then
+                            ReDim Preserve srName(srName.Count)
+                            srName(srName.GetUpperBound(0)) = s
                         End If
 
-                        If ss(i).ToUpper.Contains("LIST (OF") Then
-                            .VarLists.n += 1
-                            .VarLists.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    End If
+                    If ss(i).ToUpper.Contains(" AS STREAMWRITER") Or ss(i).ToUpper.Contains(" AS NEW STREAMWRITER") Then
+                        SSummary(EnSummary.LogicStreamWriter).n += 1
+                        SSummary(EnSummary.LogicStreamWriter).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+
+                        s = returnBetween(ss(i), "DIM ", "AS STREAMWRITER", True).Trim
+
+                        If swName.Length > 0 Then
+                            ReDim Preserve swName(swName.Count)
+                            swName(swName.GetUpperBound(0)) = s
                         End If
 
-                        If ss(i).ToUpper.Contains(" STRUCTURE ") Then
-                            .VarStructures.n += 1
-                            .VarStructures.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        End If
-
-                        If ss(i).ToUpper.Contains(" AS STREAMREADER") Or ss(i).ToUpper.Contains(" AS NEW STREAMREADER") Then
-                            .LogicStreamReader.n += 1
-                            .LogicStreamReader.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-
-                            s = returnBetween(ss(i), "DIM ", "AS STREAMREADER", True).Trim
-
-                            If srName.Length > 0 Then
-                                ReDim Preserve srName(srName.Count)
-                                srName(srName.GetUpperBound(0)) = s
-                            End If
-
-                        End If
-                        If ss(i).ToUpper.Contains(" AS STREAMWRITER") Or ss(i).ToUpper.Contains(" AS NEW STREAMWRITER") Then
-                            .LogicStreamWriter.n += 1
-                            .LogicStreamWriter.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-
-                            s = returnBetween(ss(i), "DIM ", "AS STREAMWRITER", True).Trim
-
-                            If swName.Length > 0 Then
-                                ReDim Preserve swName(swName.Count)
-                                swName(swName.GetUpperBound(0)) = s
-                            End If
-
-                        End If
+                    End If
 
 
-                        ' The following tracks the opening of streamreaders and writers. Tracking closings is done above.
+                    ' The following tracks the opening of streamreaders and writers. Tracking closings is done above.
 
 
 
-                    Case "DO"
-                        .LogicDo.n += 1
+                Case "DO"
+                    SSummary(EnSummary.LogicDo).n += 1
 
-                        ' accept a comment before or on the same line as the DO
-                        With .CommentDo
-                            If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
-                                ' build the Good list
-                                If .good = Nothing Then
-                                    .good &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .good &= ", (" & lineno(i).ToString & ")"
-                                End If
+                    ' accept a comment before or on the same line as the DO
+                    With SSummary(EnSummary.CommentDo)
+                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                            ' build the Good list
+                            If .good = Nothing Then
+                                .good &= "(" & lineno(i).ToString & ")"
                             Else
-                                ' build the bad list
-                                If .bad = Nothing Then
-                                    .bad &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .bad &= ", (" & lineno(i).ToString & ")"
-                                End If
-                                .cssClass = "itemred"
+                                .good &= ", (" & lineno(i).ToString & ")"
                             End If
-                        End With
-
-                        ' --------------------------------------------
-                        ' Check for complex conditions
-                        CheckForComplexConditions(SSummary, ss(i), lineno(i))
-
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
-
-                    Case "ELSE"
-                        .LogicElse.n += 1
-                        .LogicElse.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-
-                    Case "ELSEIF"
-                        .LogicElseIF.n += 1
-                        .LogicElseIF.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-
-                        ' --------------------------------------------
-                        ' Check for complex conditions
-                        CheckForComplexConditions(SSummary, ss(i), lineno(i))
-
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
-
-                    Case "END FUNCTION"
-                        isinFunction = False ' not really used. Potentially could track nested functions
-
-
-                    Case "END IF"
-                        isInIf -= 1  ' used to track nested IF
-                        If isInIf < 0 Then
-                            '       Beep()
-                        End If
-
-                    Case "END SELECT"
-
-                    Case "END SUB"
-                        isinSub = False     ' not really used. Potentially could track nested subs
-                        '   ChangeFormText()     ' not sure what changed here ????????????????????? jhg 
-                    Case "END TRY"
-
-                    Case "END WITH"
-
-
-                    Case "FOR"
-                        .LogicFor.n += 1   ' counts number of For statements
-                        isInFor += 1       ' tracks if we are in a For statement, to identify Nested For statements
-
-                        ' check for nested For
-                        If isInFor > 1 Then
-                            With .LogicNestedFOR
-                                .n += 1
-                                If .n = 1 Then
-                                    .Status &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .Status &= ", (" & lineno(i).ToString & ")"
-                                End If
-                            End With
-                        End If
-
-                        ' ---------------------------------------------
-
-                        ' Look for proper commenting of FOR statement
-                        ' It should be before the for statement. It also accepts it if on the same line. 
-                        With .CommentFor
-                            If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
-
-                                If .good = Nothing Then
-                                    .good &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .good &= ", " & lineno(i).ToString & ")"
-                                End If
+                        Else
+                            ' build the bad list
+                            If .bad = Nothing Then
+                                .bad &= "(" & lineno(i).ToString & ")"
                             Else
-                                If .bad = Nothing Then
-                                    .bad &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .bad &= ", (" & lineno(i).ToString & ")"
-                                End If
-                                .cssClass = "itemred"
+                                .bad &= ", (" & lineno(i).ToString & ")"
                             End If
-                        End With
-
-
-                    Case "IF"
-
-                        .LogicIF.n += 1
-                        isInIf += 1
-                        ' Ignorore single line IF Statements. THE Is InIF counter is backed out
-                        If ss(i).Trim.ToUpper.Contains(" THEN ") Then isInIf -= 1
-
-                        ' checks for nested IF statements
-                        If isInIf > 1 Then
-                            With .LogicNestedIF
-                                .n += 1
-                                If .n = 1 Then
-                                    .Status &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .Status &= ", (" & lineno(i).ToString & ")"
-                                End If
-                            End With
+                            .cssClass = "itemred"
                         End If
+                    End With
 
-                        ' ----------------------------------------
-                        ' checks for comments preceeding IF statements
-                        ' Acceptable comments are either preceeding or on the same line as IF statement.
-                        With .CommentIF
-                            If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
-                                If .good = Nothing Then
-                                    .good &= " (" & lineno(i).ToString & ")"
-                                Else
-                                    .good &= ", (" & lineno(i).ToString & ")"
-                                End If
-                            Else
-                                If .bad = Nothing Then
-                                    .bad &= " (" & lineno(i).ToString & ")"
-                                Else
-                                    .bad &= ", (" & lineno(i).ToString & ")"
-                                End If
-                                .cssClass = "itemred"
-                            End If
-                        End With
+                    ' --------------------------------------------
+                    ' Check for complex conditions
+                    CheckForComplexConditions(SSummary, ss(i), lineno(i))
 
-                        ' --------------------------------------------
-                        ' Check for complex conditions
-                        CheckForComplexConditions(SSummary, ss(i), lineno(i))
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
 
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
-                        ' ===============================================
+                Case "ELSE"
+                    SSummary(EnSummary.LogicElse).n += 1
+                    SSummary(EnSummary.LogicElse).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
 
-                    Case "IMPORTS"
-                        ' Check Imports System.x
+                Case "ELSEIF"
+                    SSummary(EnSummary.LogicElseIF).n += 1
+                    SSummary(EnSummary.LogicElseIF).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
 
-                        If ss(i).Contains("System.IO") Then
-                            .SystemIO.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        Else
-                            .SystemIO.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - Not found</p>" & vbCrLf
-                        End If
+                    ' --------------------------------------------
+                    ' Check for complex conditions
+                    CheckForComplexConditions(SSummary, ss(i), lineno(i))
 
-                        If ss(i).Contains("System.Net") Then
-                            .SystemNet.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        Else
-                            .SystemNet.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - Not found</p>" & vbCrLf
-                        End If
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
 
-                        If ss(i).Contains("System.DB") Then
-                            .SystemDB.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-                        Else
-                            .SystemDB.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - Not found</p>" & vbCrLf
-                        End If
+                Case "END FUNCTION"
+                    '           isinFunction = False ' not really used. Potentially could track nested functions
 
 
-                    Case "LOOP"
-                        ' --------------------------------------------
-                        ' Check for complex conditions
-                        CheckForComplexConditions(SSummary, ss(i), lineno(i))
+                Case "END IF"
+                    isInIf -= 1  ' used to track nested IF
+                    If isInIf < 0 Then
+                        '       Beep()
+                    End If
 
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+                Case "END SELECT"
 
-                    Case "MESSAGEBOX.SHOW", "MSGBOX"
-                        With .LogicMessageBox
+                Case "END SUB"
+                    '             isinSub = False     ' not really used. Potentially could track nested subs
+                    '   ChangeFormText()     ' not sure what changed here ????????????????????? jhg 
+                Case "END TRY"
+
+                Case "END WITH"
+
+
+                Case "FOR"
+                    SSummary(EnSummary.LogicFor).n += 1   ' counts number of For statements
+                    isInFor += 1       ' tracks if we are in a For statement, to identify Nested For statements
+
+                    ' check for nested For
+                    If isInFor > 1 Then
+                        With SSummary(EnSummary.LogicNestedFor)
                             .n += 1
+                            If .n = 1 Then
+                                .Status &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .Status &= ", (" & lineno(i).ToString & ")"
+                            End If
+                        End With
+                    End If
 
-                            If (ss(i - 1).StartsWith("MSGBOX")) Then
+                    ' ---------------------------------------------
+
+                    ' Look for proper commenting of FOR statement
+                    ' It should be before the for statement. It also accepts it if on the same line. 
+                    With SSummary(EnSummary.CommentFor)
+                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+
+                            If .good = Nothing Then
+                                .good &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .good &= ", " & lineno(i).ToString & ")"
+                            End If
+                        Else
+                            If .bad = Nothing Then
+                                .bad &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .bad &= ", (" & lineno(i).ToString & ")"
+                            End If
+                            .cssClass = "itemred"
+                        End If
+                    End With
+
+
+                Case "IF"
+
+                    SSummary(EnSummary.LogicIF).n += 1
+                    isInIf += 1
+                    ' Ignorore single line IF Statements. THE Is InIF counter is backed out
+                    If ss(i).Trim.ToUpper.Contains(" THEN ") Then isInIf -= 1
+
+                    ' checks for nested IF statements
+                    If isInIf > 1 Then
+                        With SSummary(EnSummary.LogicNestedIF)
+                            .n += 1
+                            If .n = 1 Then
+                                .Status &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .Status &= ", (" & lineno(i).ToString & ")"
+                            End If
+                        End With
+                    End If
+
+                    ' ----------------------------------------
+                    ' checks for comments preceeding IF statements
+                    ' Acceptable comments are either preceeding or on the same line as IF statement.
+                    With SSummary(EnSummary.CommentIF)
+                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                            If .good = Nothing Then
+                                .good &= " (" & lineno(i).ToString & ")"
+                            Else
+                                .good &= ", (" & lineno(i).ToString & ")"
+                            End If
+                        Else
+                            If .bad = Nothing Then
+                                .bad &= " (" & lineno(i).ToString & ")"
+                            Else
+                                .bad &= ", (" & lineno(i).ToString & ")"
+                            End If
+                            .cssClass = "itemred"
+                        End If
+                    End With
+
+                    ' --------------------------------------------
+                    ' Check for complex conditions
+                    CheckForComplexConditions(SSummary, ss(i), lineno(i))
+
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+                    ' ===============================================
+
+                Case "IMPORTS"
+                    ' Check Imports System.x
+
+                    If ss(i).Contains("System.IO") Then
+                        SSummary(EnSummary.SystemIO).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    Else
+                        SSummary(EnSummary.SystemIO).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - Not found</p>" & vbCrLf
+                    End If
+
+                    If ss(i).Contains("System).net") Then
+                        SSummary(EnSummary.SystemNet).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    Else
+                        SSummary(EnSummary.SystemNet).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - Not found</p>" & vbCrLf
+                    End If
+
+                    If ss(i).Contains("System.DB") Then
+                        SSummary(EnSummary.SystemDB).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+                    Else
+                        SSummary(EnSummary.SystemDB).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - Not found</p>" & vbCrLf
+                    End If
+
+
+                Case "LOOP"
+                    ' --------------------------------------------
+                    ' Check for complex conditions
+                    CheckForComplexConditions(SSummary, ss(i), lineno(i))
+
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+
+                Case "MESSAGEBOX.SHOW", "MSGBOX"
+                    With SSummary(EnSummary.LogicMessageBox)
+                        .n += 1
+
+                        If (ss(i - 1).StartsWith("MSGBOX")) Then
+                            .bad &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
+                            .cssClass = "itemred"
+                        Else
+                            .good &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
+                        End If
+                    End With
+
+
+                Case "NEXT"
+                    isInFor -= 1
+
+                Case "OPTION STRICT"
+                    ' This is not validated in the file itself. It is checked in the application config.
+
+                Case "PUBLIC STRUCTURE", "PRIVATE STRUCTURE"
+                    SSummary(EnSummary.VarStructures).n += 1
+                    SSummary(EnSummary.VarStructures).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+
+                Case "SELECT"
+                    SSummary(EnSummary.LogicSelectCase).n += 1
+
+                    ' check for comment. Accept on line before or on the same line.
+                    With SSummary(EnSummary.CommentSelect)
+                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                            If .good = Nothing Then
+                                .good &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .good &= ", (" & lineno(i).ToString & ")"
+                            End If
+                        Else
+                            If .bad = Nothing Then
+                                .bad &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .bad &= ", (" & lineno(i).ToString & ")"
+                            End If
+                            .cssClass = "itemred"
+                        End If
+                    End With
+
+                    ' --------------------------------------------
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+
+                Case "SUB", "PUBLIC SUB", "PRIVATE SUB", "FUNCTION", "PUBLIC FUNCTION", "PRIVATE FUNCTION"
+
+                    SSummary(EnSummary.LogicSub).n += 1
+
+                    ' Check for a comment in first line of sub/function. This accepts it as the previous line
+                    If i < ss.GetUpperBound(0) Then
+                        With SSummary(EnSummary.CommentSub)
+                            If (ss(i - 1).StartsWith("'") Or ss(i + 1).StartsWith("'")) Then
                                 .bad &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
                                 .cssClass = "itemred"
                             Else
@@ -663,153 +716,126 @@ Module ValidateVB
                             End If
                         End With
 
+                    End If
 
-                    Case "NEXT"
-                        isInFor -= 1
-
-                    Case "OPTION STRICT"
-                        ' This is not validated in the file itself. It is checked in the application config.
-
-                    Case "PUBLIC STRUCTURE", "PRIVATE STRUCTURE"
-                        .VarStructures.n += 1
-                        .VarStructures.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
-
-                    Case "SELECT"
-                        .LogicSelectCase.n += 1
-
-                        ' check for comment. Accept on line before or on the same line.
-                        With .CommentSelect
-                            If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
-                                If .good = Nothing Then
-                                    .good &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .good &= ", (" & lineno(i).ToString & ")"
-                                End If
-                            Else
-                                If .bad = Nothing Then
-                                    .bad &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .bad &= ", (" & lineno(i).ToString & ")"
-                                End If
-                                .cssClass = "itemred"
-                            End If
-                        End With
-
-                        ' --------------------------------------------
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
-
-                    Case "SUB", "PUBLIC SUB", "PRIVATE SUB", "FUNCTION", "PUBLIC FUNCTION", "PRIVATE FUNCTION"
-
-                        .LogicSub.n += 1
-
-                        ' Check for a comment in first line of sub/function. This accepts it as the previous line
-                        If i < ss.GetUpperBound(0) Then
-                            With .CommentSub
-                                If (ss(i - 1).StartsWith("'") Or ss(i + 1).StartsWith("'")) Then
-                                    .bad &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
-                                    .cssClass = "itemred"
-                                Else
-                                    .good &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
-                                End If
-                            End With
-
+                    ' ------------------------------------------
+                    ' check for optional parameters
+                    With SSummary(EnSummary.LogicOptional)
+                        If ss(i).Contains(" Optional ") Then
+                            .Status = TrimAfter(ss(i), "(", True) & " defined in line (" & lineno(i).ToString & ") has an Optional Parameter" & " </p>" & vbCrLf
+                            .n += 1
                         End If
+                    End With
 
-                        ' ------------------------------------------
-                        ' check for optional parameters
-                        With .LogicOptional
-                            If ss(i).Contains(" Optional ") Then
-                                .Status = TrimAfter(ss(i), "(", True) & " defined in line (" & lineno(i).ToString & ") has an Optional Parameter" & " </p>" & vbCrLf
-                                .n += 1
+                    ' -------------------------------------
+                    ' check for byref parameters
+                    With SSummary(EnSummary.LogicByRef)
+                        If ss(i).Contains(" ByRef ") Then
+                            .Status = TrimAfter(ss(i), "(", True) & " defined in line (" & lineno(i).ToString & ") has a ByRef Parameter" & " <br />" & vbCrLf
+                            .n += 1
+                        End If
+                    End With
+
+                Case "TRY"
+                    ' just looks for the try. Should likely also look for the catch, but does not currently
+                    SSummary(EnSummary.LogicTryCatch).n += 1
+                    If SSummary(EnSummary.LogicTryCatch).n = 1 Then
+                        SSummary(EnSummary.LogicTryCatch).Status &= "(" & lineno(i).ToString & ")"
+                    Else
+                        SSummary(EnSummary.LogicTryCatch).Status &= ", (" & lineno(i).ToString & ")"
+                    End If
+
+                    ' ========================================
+                Case "WHILE"
+                    SSummary(EnSummary.LogicWhile).n += 1
+
+                    ' Comment While
+                    With SSummary(EnSummary.CommentWhile)
+                        If ss(i - 1).StartsWith("'") Then
+                            If .good = Nothing Then
+                                .good &= "(" & lineno(i).ToString & ")"
+                            Else
+                                .good &= ", (" & lineno(i).ToString & ")"
                             End If
-                        End With
-
-                        ' -------------------------------------
-                        ' check for byref parameters
-                        With .LogicByRef
-                            If ss(i).Contains(" ByRef ") Then
-                                .Status = TrimAfter(ss(i), "(", True) & " defined in line (" & lineno(i).ToString & ") has a ByRef Parameter" & " <br />" & vbCrLf
-                                .n += 1
-                            End If
-                        End With
-
-                    Case "TRY"
-                        ' just looks for the try. Should likely also look for the catch, but does not currently
-                        .LogicTryCatch.n += 1
-                        If .LogicTryCatch.n = 1 Then
-                            .LogicTryCatch.Status &= "(" & lineno(i).ToString & ")"
                         Else
-                            .LogicTryCatch.Status &= ", (" & lineno(i).ToString & ")"
-                        End If
-
-                        ' ========================================
-                    Case "WHILE"
-                        .LogicWhile.n += 1
-
-                        ' Comment While
-                        With .CommentWhile
-                            If ss(i - 1).StartsWith("'") Then
-                                If .good = Nothing Then
-                                    .good &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .good &= ", (" & lineno(i).ToString & ")"
-                                End If
+                            If .bad = Nothing Then
+                                .bad &= "(" & lineno(i).ToString & ")"
                             Else
-                                If .bad = Nothing Then
-                                    .bad &= "(" & lineno(i).ToString & ")"
-                                Else
-                                    .bad &= ", (" & lineno(i).ToString & ")"
-                                End If
-                                .cssClass = "itemred"
+                                .bad &= ", (" & lineno(i).ToString & ")"
                             End If
-                        End With
+                            .cssClass = "itemred"
+                        End If
+                    End With
 
-                        ' --------------------------------------------
-                        ' Check for complex conditions
-                        CheckForComplexConditions(SSummary, ss(i), lineno(i))
+                    ' --------------------------------------------
+                    ' Check for complex conditions
+                    CheckForComplexConditions(SSummary, ss(i), lineno(i))
 
-                        ' Looks for code the implements case insensitiveity
-                        CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
+                    ' Looks for code the implements case insensitiveity
+                    CheckForCaseInsensitivity(SSummary, ss(i), lineno(i))
 
 
-                    Case "WITH"
+                Case "WITH"
 
-                End Select
+            End Select
 
-                doneflag = False
-                For j = 1 To srName.GetUpperBound(0)
-                    If ss(i).ToUpper.Contains(srName(j).ToUpper.Trim & ".CLOSE") And Not doneflag Then
-                        .LogicStreamReaderClose.n += 1
-                        .LogicStreamReaderClose.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & " </p>" & vbCrLf
-                        doneflag = True
+            doneflag = False
+            For j = 1 To srName.GetUpperBound(0)
+                If ss(i).ToUpper.Contains(srName(j).ToUpper.Trim & ".CLOSE") And Not doneflag Then
+                    SSummary(EnSummary.LogicStreamReaderClose).n += 1
+                    SSummary(EnSummary.LogicStreamReaderClose).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & " </p>" & vbCrLf
+                    doneflag = True
+                End If
+            Next j
+
+            doneflag = False
+            For j = 1 To swName.GetUpperBound(0)
+
+                If ss(i).ToUpper.Contains(swName(j).ToUpper.Trim & ".CLOSE") And Not doneflag Then
+                    SSummary(EnSummary.LogicStreamWriterClose).n += 1
+                    SSummary(EnSummary.LogicStreamWriterClose).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & " </p>" & vbCrLf
+                    doneflag = True
+                End If
+            Next j
+
+            ' =================================================================================
+            ' Now we need to look at the contents of the whole line to check for other issues.
+
+            ' Check for the FormLoad Method
+            If ss(i).Contains("Handles MyBase.Load") Then
+                SSummary(EnSummary.LogicFormLoad).n += 1
+                SSummary(EnSummary.LogicFormLoad).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
+            End If
+
+            ' -----------------------------------
+            ' Check for String Concatination
+            With SSummary(EnSummary.LogicConcatination)
+                If ss(i) <> Nothing AndAlso firstword <> "'" AndAlso ss(i).Contains(" & ") Then
+                    .n += 1
+                    If .n = 1 Then
+                        .Status &= "(" & lineno(i).ToString & ")"
+                    Else
+                        .Status &= ", (" & lineno(i).ToString & ")"
                     End If
-                Next j
+                End If
+            End With
 
-                doneflag = False
-                For j = 1 To swName.GetUpperBound(0)
-
-                    If ss(i).ToUpper.Contains(swName(j).ToUpper.Trim & ".CLOSE") And Not doneflag Then
-                        .LogicStreamWriterClose.n += 1
-                        .LogicStreamWriterClose.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & " </p>" & vbCrLf
-                        doneflag = True
+            ' ------------------------------------------------------------------------------
+            ' handling string conversions and formatting
+            If Not ss(i).StartsWith("'") Then   ' Ignore comments
+                If ss(i).Contains("CStr(") Or ss(i).Contains(".ToString") Then
+                    SSummary(EnSummary.LogicConvertToString).n += 1
+                    If SSummary(EnSummary.LogicConvertToString).n = 1 Then
+                        SSummary(EnSummary.LogicConvertToString).Status &= "(" & lineno(i).ToString & ")"
+                    Else
+                        SSummary(EnSummary.LogicConvertToString).Status &= ", (" & lineno(i).ToString & ")"
                     End If
-                Next j
-
-                ' =================================================================================
-                ' Now we need to look at the contents of the whole line to check for other issues.
-
-                ' Check for the FormLoad Method
-                If ss(i).Contains("Handles MyBase.Load") Then
-                    .LogicFormLoad.n += 1
-                    .LogicFormLoad.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & ss(i) & "</p>" & vbCrLf
                 End If
 
-                ' -----------------------------------
-                ' Check for String Concatination
-                With .LogicConcatination
-                    If ss(i) <> Nothing AndAlso firstword <> "'" AndAlso ss(i).Contains(" & ") Then
-                        .n += 1
+                ' Check to see if code is using a format string with tostring
+                With SSummary(EnSummary.LogicToStringFormat)
+                    If ss(i).Contains(".ToString(") Then
+                        .cnt += 1 ' This counts how many times they used the formating feature
                         If .n = 1 Then
                             .Status &= "(" & lineno(i).ToString & ")"
                         Else
@@ -818,153 +844,129 @@ Module ValidateVB
                     End If
                 End With
 
-                ' ------------------------------------------------------------------------------
-                ' handling string conversions and formatting
-                If Not ss(i).StartsWith("'") Then   ' Ignore comments
-                    If ss(i).Contains("CStr(") Or ss(i).Contains(".ToString") Then
-                        .LogicConvertToString.n += 1
-                        If .LogicConvertToString.n = 1 Then
-                            .LogicConvertToString.Status &= "(" & lineno(i).ToString & ")"
-                        Else
-                            .LogicConvertToString.Status &= ", (" & lineno(i).ToString & ")"
-                        End If
-                    End If
+                ' check the String.format approach
 
-                    ' Check to see if code is using a format string with tostring
-                    With .LogicToStringFormat
-                        If ss(i).Contains(".ToString(") Then
-                            .cnt += 1 ' This counts how many times they used the formating feature
-                            If .n = 1 Then
-                                .Status &= "(" & lineno(i).ToString & ")"
-                            Else
-                                .Status &= ", (" & lineno(i).ToString & ")"
-                            End If
+                If ss(i).Contains(".Format(") Then
+                    With SSummary(EnSummary.LogicStringFormat)
+                        .n += 1 ' This counts the number of string.format commands
+                        If .n = 1 Then
+                            .Status &= "(" & lineno(i).ToString & ")"
+                        Else
+                            .Status &= ", (" & lineno(i).ToString & ")"
                         End If
                     End With
 
-                    ' check the String.format approach
-
-                    If ss(i).Contains(".Format(") Then
-                        With .LogicStringFormat
-                            .n += 1 ' This counts the number of string.format commands
-                            If .n = 1 Then
-                                .Status &= "(" & lineno(i).ToString & ")"
-                            Else
-                                .Status &= ", (" & lineno(i).ToString & ")"
-                            End If
-                        End With
-
-                        ' Also try to determine if there are parameters. This is done by seeing if there is at least one comma in the parameter list
-                        s = TrimUpTo(ss(i), "Format(")
-                        If s.Contains(",") Then
-                            .LogicStringFormatParameters.n += 1
-                            .LogicStringFormatParameters.Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") " & ss(i) & "</p>" & vbCrLf
-                        End If
+                    ' Also try to determine if there are parameters. This is done by seeing if there is at least one comma in the parameter list
+                    s = TrimUpTo(ss(i), "Format(")
+                    If s.Contains(",") Then
+                        SSummary(EnSummary.LogicStringFormatParameters).n += 1
+                        SSummary(EnSummary.LogicStringFormatParameters).Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") " & ss(i) & "</p>" & vbCrLf
                     End If
-
                 End If
 
-                '
-                ' ------------------------------------------------------------------------------
-            Next i    ' end of processing each line
-            ' ==================================================================================
-
-            ' ============================================================
-            ' NOW LOOK THROUGH ASSESSMENTS AND SET THE cssClass
-            ' -------------------------------------------------------------------------------------------------------
-            ' Process Comments
-            ProcessComment(.LogicSub, .CommentSub, "Subs / Functions", "CommentSubs")
-            ProcessComment(.LogicIF, .CommentIF, "IF statements", "CommentIF")
-            ProcessComment(.LogicFor, .CommentFor, "FOR statements", "CommentFOR")
-            ProcessComment(.LogicDo, .CommentDo, "DO statements", "CommentDO")
-            ProcessComment(.LogicWhile, .CommentWhile, "WHILE statements", "CommentWHILE")
-            ProcessComment(.LogicSelectCase, .CommentSelect, "SELECT CASE statements", "CommentSELECT")
-            ' ------------------------------------------------------------------------------------------------------------
-
-            If .LogicCStr.n > 0 Or .LogicToString.n > 0 Then
-                .LogicToString.Status = "<span class=""boldtext"">Converting to Strings </span><br />" & vbCrLf
-
-                If .LogicCStr.n > 0 Then
-                    .LogicToString.Status &= "<span class=""boldtext""><br />Using CStr() to convert to string </span><br /><br />" & vbCrLf
-                End If
-
-                If .LogicToString.n > 0 Then
-                    .LogicToString.Status &= "<span class=""boldtext""><br />Using .ToString to convert to string </span><br /><br />" & vbCrLf
-                End If
             End If
-            ' ------------------------------------------------------------------------------------------------------------
 
-            If .LogicToStringFormat.n > 0 Or .LogicStringFormat.n > 0 Then
-                If .LogicToStringFormat.n > 0 Then
-                    .LogicToStringFormat.Status &= "<span class=""boldtext""><br />Included .ToString(format) command </span><br /><br />" & vbCrLf
-                End If
-                If .LogicStringFormat.n > 0 Then
-                    .LogicStringFormat.Status &= "<span class=""boldtext""><br />Included String.Format(Template)  </span><br /><br />" & vbCrLf
-                End If
+            '
+            ' ------------------------------------------------------------------------------
+        Next i    ' end of processing each line
+        ' ==================================================================================
+
+        ' ============================================================
+        ' NOW LOOK THROUGH ASSESSMENTS AND SET THE cssClass
+        ' -------------------------------------------------------------------------------------------------------
+        ' Process Comments
+        ProcessComment(SSummary(EnSummary.LogicSub), SSummary(EnSummary.CommentSub), "Subs / Functions", "CommentSubs")
+        ProcessComment(SSummary(EnSummary.LogicIF), SSummary(EnSummary.CommentIF), "IF statements", "CommentIF")
+        ProcessComment(SSummary(EnSummary.LogicFor), SSummary(EnSummary.CommentFor), "FOR statements", "CommentFOR")
+        ProcessComment(SSummary(EnSummary.LogicDo), SSummary(EnSummary.CommentDo), "DO statements", "CommentDO")
+        ProcessComment(SSummary(EnSummary.LogicWhile), SSummary(EnSummary.CommentWhile), "WHILE statements", "CommentWHILE")
+        ProcessComment(SSummary(EnSummary.LogicSelectCase), SSummary(EnSummary.CommentSelect), "SELECT CASE statements", "CommentSELECT")
+        ' ------------------------------------------------------------------------------------------------------------
+
+        If SSummary(EnSummary.LogicCStr).n > 0 Or SSummary(EnSummary.LogicToString).n > 0 Then
+            SSummary(EnSummary.LogicToString).Status = "<span class=""boldtext"">Converting to Strings </span><br />" & vbCrLf
+
+            If SSummary(EnSummary.LogicCStr).n > 0 Then
+                SSummary(EnSummary.LogicToString).Status &= "<span class=""boldtext""><br />Using CStr() to convert to string </span><br /><br />" & vbCrLf
             End If
-            ' ------------------------------------------------------------------------------------------------------------
-            ' -------------------------------------------------------------------------------------------------------
-            ' AppInfo
-            ProcessReq(.InfoAppTitle, "Application Title not modified", "Application Title modified", "InfoAppTitle")
-            ProcessReq(.InfoDescription, "Application Description not modified", "Application Description modified", "InfoDescription")
-            ProcessReq(.InfoCompany, "Application Company Info not modified", "Application Company Info modified", "InfoCompany")
-            ProcessReq(.InfoProduct, "Application Product Info not modified", "Application Product Info modified", "InfoProduct")
-            ProcessReq(.InfoTrademark, "Application Trademark not modified", "Application Trademark modified", "InfoTrademark")
-            ProcessReq(.InfoCopyright, "Application Copyright not modified", "Application Copyright modified", "InfoCopyright")
 
-            'Compile Options
-            'ProcessReq(.OptionStrict, "No System.IO found", "Imports System.IO found (Line No.)", "Include System.IO")
-            'ProcessReq(.SystemNet, "No System.Net found", "Imports System.Net found (Line No.)", "Include System.Net")
+            If SSummary(EnSummary.LogicToString).n > 0 Then
+                SSummary(EnSummary.LogicToString).Status &= "<span class=""boldtext""><br />Using .ToString to convert to string </span><br /><br />" & vbCrLf
+            End If
+        End If
+        ' ------------------------------------------------------------------------------------------------------------
 
-            ' Form Design
+        If SSummary(EnSummary.LogicToStringFormat).n > 0 Or SSummary(EnSummary.LogicStringFormat).n > 0 Then
+            If SSummary(EnSummary.LogicToStringFormat).n > 0 Then
+                SSummary(EnSummary.LogicToStringFormat).Status &= "<span class=""boldtext""><br />Included .ToString(format) command </span><br /><br />" & vbCrLf
+            End If
+            If SSummary(EnSummary.LogicStringFormat).n > 0 Then
+                SSummary(EnSummary.LogicStringFormat).Status &= "<span class=""boldtext""><br />Included String.Format(Template)  </span><br /><br />" & vbCrLf
+            End If
+        End If
+        ' ------------------------------------------------------------------------------------------------------------
+        ' -------------------------------------------------------------------------------------------------------
+        ' AppInfo
+        ProcessReq(SSummary(EnSummary.InfoAppTitle), "Application Title not modified", "Application Title modified", "InfoAppTitle")
+        ProcessReq(SSummary(EnSummary.InfoDescription), "Application Description not modified", "Application Description modified", "InfoDescription")
+        ProcessReq(SSummary(EnSummary.InfoCompany), "Application Company Info not modified", "Application Company Info modified", "InfoCompany")
+        ProcessReq(SSummary(EnSummary.InfoProduct), "Application Product Info not modified", "Application Product Info modified", "InfoProduct")
+        ProcessReq(SSummary(EnSummary.InfoTrademark), "Application Trademark not modified", "Application Trademark modified", "InfoTrademark")
+        ProcessReq(SSummary(EnSummary.InfoCopyright), "Application Copyright not modified", "Application Copyright modified", "InfoCopyright")
+
+        'Compile Options
+        'ProcessReq(.OptionStrict, "No System.IO found", "Imports System.IO found (Line No.)", "Include System.IO")
+        'ProcessReq(.SystemNet, "No System).net found", "Imports System).net found (Line No.)", "Include System).net")
+
+        ' Form Design
 
 
-            ' Imports
-            ProcessReq(.SystemIO, "No System.IO found", "Imports System.IO found (Line No.)", "SystemIO")
-            ProcessReq(.SystemNet, "No System.Net found", "Imports System.Net found (Line No.)", "SystemNet")
-            ProcessReq(.SystemDB, "No System.DB found", "Imports System.DB found (Line No.)", "SystemDB")
+        ' Imports
+        ProcessReq(SSummary(EnSummary.SystemIO), "No System.IO found", "Imports System.IO found (Line No.)", "SystemIO")
+        ProcessReq(SSummary(EnSummary.SystemNet), "No System).net found", "Imports System).net found (Line No.)", "SystemNet")
+        ProcessReq(SSummary(EnSummary.SystemDB), "No System.DB found", "Imports System.DB found (Line No.)", "SystemDB")
 
-            ' Vars
-            ProcessReq(.VarArrays, "No Arrays declared", "Data Arrays declared (Line No.)", "VarArrays")
-            ProcessReq(.VarLists, "No Lists declared", "Lists(of T) declared (Line No.)", "VarLists")
-            ProcessReq(.VarStructures, "No Structures declared", "Data Structures defined (Line No.)", "VarStructures")
-            ProcessReq(.VarString, "No String variables declared", "String variables declared (Line No.)", "VarString")
-            ProcessReq(.VarInteger, "No Integer variables declared", "Integer variables declared (Line No.)", "VarInteger")
-            ProcessReq(.VarDecimal, "No Decimal / Double variables declared", "Decimal / Double variables declared (Line No.)", "VarDecimal")
-            ProcessReq(.VarDate, "No Date variables declared", "Date variables declared (Line No.)", "VarDate")
-            ProcessReq(.VarBoolean, "No Boolean variables declared", "Boolean variables declared (Line No.)", "VarBoolean")
+        ' Vars
+        ProcessReq(SSummary(EnSummary.VarArrays), "No Arrays declared", "Data Arrays declared (Line No.)", "VarArrays")
+        ProcessReq(SSummary(EnSummary.VarLists), "No Lists declared", "Lists(of T) declared (Line No.)", "VarLists")
+        ProcessReq(SSummary(EnSummary.VarStructures), "No Structures declared", "Data Structures defined (Line No.)", "VarStructures")
+        ProcessReq(SSummary(EnSummary.VarString), "No String variables declared", "String variables declared (Line No.)", "VarString")
+        ProcessReq(SSummary(EnSummary.VarInteger), "No Integer variables declared", "Integer variables declared (Line No.)", "VarInteger")
+        ProcessReq(SSummary(EnSummary.VarDecimal), "No Decimal / Double variables declared", "Decimal / Double variables declared (Line No.)", "VarDecimal")
+        ProcessReq(SSummary(EnSummary.VarDate), "No Date variables declared", "Date variables declared (Line No.)", "VarDate")
+        ProcessReq(SSummary(EnSummary.VarBoolean), "No Boolean variables declared", "Boolean variables declared (Line No.)", "VarBoolean")
 
-            ' Logic
-            ProcessReq(.LogicWhile, "No While statements found", "While statements found (Line No.)", "LogicWHILE")
-            ProcessReq(.LogicSelectCase, "No SelectCase statements found", "Select Case statements found (Line No.)", "LogicSelectCase")
+        ' Logic
+        ProcessReq(SSummary(EnSummary.LogicWhile), "No While statements found", "While statements found (Line No.)", "LogicWHILE")
+        ProcessReq(SSummary(EnSummary.LogicSelectCase), "No SelectCase statements found", "Select Case statements found (Line No.)", "LogicSelectCase")
 
-            ProcessReq(.LogicConvertToString, "No Conversion to String (.CStr or .toString) found", "Conversion to String (.CStr or .toString) found (Line No.)", "LogicConvertToString")
-            ProcessReq(.LogicStringFormat, "No String Formatting (.toString() or String.Format()) found", "String Formatting (.toString() or String.Format()) found (Line No.)", "LogicStringFormat")
-            ProcessReq(.LogicStringFormatParameters, "No Parameterized string formats (string.format(f,{0}) found", "Parameterized String Formatting (string.format(f,{0}) found (Line No.)", "LogicStringFormatParameters")
+        ProcessReq(SSummary(EnSummary.LogicConvertToString), "No Conversion to String (.CStr or .toString) found", "Conversion to String (.CStr or .toString) found (Line No.)", "LogicConvertToString")
+        ProcessReq(SSummary(EnSummary.LogicStringFormat), "No String Formatting (.toString() or String.Format()) found", "String Formatting (.toString() or String.Format()) found (Line No.)", "LogicStringFormat")
+        ProcessReq(SSummary(EnSummary.LogicStringFormatParameters), "No Parameterized string formats (string.format(f,{0}) found", "Parameterized String Formatting (string.format(f,{0}) found (Line No.)", "LogicStringFormatParameters")
 
-            ProcessReq(.LogicConcatination, "No String Concatination found", "String Concatination found (Line No.)", "LogicConcatination")
-            ProcessReq(.LogicCaseInsensitive, "No Case-Insensitive comparisons found", "Case-Insensitive comparisons found (Line No.)", "LogicCaseInsensitive")
-            ProcessReq(.LogicComplexConditions, "No Complex Conditions (AND / OR / ANDALSO / ORELSE) found", "Complex Conditions (AND / OR / ANDALSO / ORELSE) found (Line No.)", "LogicComplexConditions")
+        ProcessReq(SSummary(EnSummary.LogicConcatination), "No String Concatination found", "String Concatination found (Line No.)", "LogicConcatination")
+        ProcessReq(SSummary(EnSummary.LogicCaseInsensitive), "No Case-Insensitive comparisons found", "Case-Insensitive comparisons found (Line No.)", "LogicCaseInsensitive")
+        ProcessReq(SSummary(EnSummary.LogicComplexConditions), "No Complex Conditions (AND / OR / ANDALSO / ORELSE) found", "Complex Conditions (AND / OR / ANDALSO / ORELSE) found (Line No.)", "LogicComplexConditions")
 
-            ProcessReq(.LogicElse, "No Else statements found", "Else statements found (Line No.)", "LogicElse")
-            ProcessReq(.LogicElseIF, "No ElseIF statements found", "ElseIF statements found (Line No.)", "LogicElseIF")
-            ProcessReq(.LogicNestedIF, "No Nested IF statements found", "Nested IF statements found (Line No.)", "LogicNestedIF")
-            ProcessReq(.LogicNestedFOR, "No Nested FOR statements found", "Nested FOR statements found (Line No.)", "LogicNestedFOR")
-            ProcessReq(.LogicOptional, "No Optional Sub / Fuction Parameters found", "Optional Sub / Fuction Parameters found (Line No.)", "LogicOptional")
-            ProcessReq(.LogicByRef, "No Sub / Function ByRef Parameters found", "Sub / Function ByRef Parameters found (Line No.)", "LogicByRef")
-            ProcessReq(.LogicTryCatch, "No Try ... Catch Statement Found", "Try ... Catch Statements found (Line No.)", "LogicTryCatch")
-            ProcessReq(.LogicFormLoad, "No Form Load Method Found", "Form Load Method found (Line No.)", "LogicFormLoad")
+        ProcessReq(SSummary(EnSummary.LogicElse), "No Else statements found", "Else statements found (Line No.)", "LogicElse")
+        ProcessReq(SSummary(EnSummary.LogicElseIF), "No ElseIF statements found", "ElseIF statements found (Line No.)", "LogicElseIF")
+        ProcessReq(SSummary(EnSummary.LogicNestedIF), "No Nested IF statements found", "Nested IF statements found (Line No.)", "LogicNestedIF")
+        ProcessReq(SSummary(EnSummary.LogicNestedFor), "No Nested FOR statements found", "Nested FOR statements found (Line No.)", "LogicNestedFOR")
+        ProcessReq(SSummary(EnSummary.LogicOptional), "No Optional Sub / Fuction Parameters found", "Optional Sub / Fuction Parameters found (Line No.)", "LogicOptional")
+        ProcessReq(SSummary(EnSummary.LogicByRef), "No Sub / Function ByRef Parameters found", "Sub / Function ByRef Parameters found (Line No.)", "LogicByRef")
+        ProcessReq(SSummary(EnSummary.LogicTryCatch), "No Try ... Catch Statement Found", "Try ... Catch Statements found (Line No.)", "LogicTryCatch")
+        ProcessReq(SSummary(EnSummary.LogicFormLoad), "No Form Load Method Found", "Form Load Method found (Line No.)", "LogicFormLoad")
 
-            ProcessReq(.LogicStreamReader, "No StreamReaders found", "StreamReader found (Line No.)", "LogicStreamReader")
-            ProcessReq(.LogicStreamReaderClose, "No StreamReader.Close found", "StreamReader.Close found (Line No.)", "LogicStreamReaderClose")
-            ProcessReq(.LogicStreamWriter, "No StreamWriters found", "StreamWriters found (Line No.)", "LogicStreamWriter")
-            ProcessReq(.LogicStreamWriterClose, "No StreamWriter.Close found", "StreamWriter.Close found (Line No.)", "LogicStreamWriterClose")
-        End With
+        ProcessReq(SSummary(EnSummary.LogicStreamReader), "No StreamReaders found", "StreamReader found (Line No.)", "LogicStreamReader")
+        ProcessReq(SSummary(EnSummary.LogicStreamReaderClose), "No StreamReader.Close found", "StreamReader.Close found (Line No.)", "LogicStreamReaderClose")
+        ProcessReq(SSummary(EnSummary.LogicStreamWriter), "No StreamWriters found", "StreamWriters found (Line No.)", "LogicStreamWriter")
+        ProcessReq(SSummary(EnSummary.LogicStreamWriterClose), "No StreamWriter.Close found", "StreamWriter.Close found (Line No.)", "LogicStreamWriterClose")
+
         Return ncomments
     End Function
 
 
-    Sub ProcessComment(ByRef logictype As Assignment.MyItems, ByRef commenttype As Assignment.MyItems, construct As String, nm As String)
+    Sub ProcessComment(ByRef logictype As MyItems, ByRef commenttype As MyItems, construct As String, nm As String)
         If logictype.n = 0 Then
             logictype.Status = "No " & construct & " Found"
             commenttype.Status = "No " & construct & " Found" & vbCrLf
@@ -994,7 +996,7 @@ Module ValidateVB
 
     End Sub
 
-    Sub ProcessReq(ByRef type As Assignment.MyItems, NotFound As String, Found As String, nm As String)
+    Sub ProcessReq(ByRef type As MyItems, NotFound As String, Found As String, nm As String)
         If type.n = 0 Then
             type.Status = "<span class=""boldtext"">" & NotFound & "</span><br />" & vbCrLf
             type.cssClass = "itemred"
@@ -1012,34 +1014,30 @@ Module ValidateVB
     End Sub
 
 
-    Sub CheckForComplexConditions(ByRef ssum As Assignment.AppSummary, s As String, lineno As Integer)
+    Sub CheckForComplexConditions(ByRef ssum() As MyItems, s As String, lineno As Integer)
         ' This checks a line of code for evidence of complex consitions
-        With ssum
-            With .LogicComplexConditions
-                If s.ToUpper.Contains(" AND ") Or s.ToUpper.Contains(" OR ") Then
-                    .n += 1
-                    .Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno.ToString & ") - " & s & "</p>" & vbCrLf
-                    .cssClass = "itemgreen"
-                End If
-            End With
+        With ssum(EnSummary.LogicComplexConditions)
+            If s.ToUpper.Contains(" AND ") Or s.ToUpper.Contains(" OR ") Then
+                .n += 1
+                .Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno.ToString & ") - " & s & "</p>" & vbCrLf
+                .cssClass = "itemgreen"
+            End If
         End With
-
     End Sub
 
-    Sub CheckForCaseInsensitivity(ByRef ssum As Assignment.AppSummary, s As String, lineno As Integer)
+    Sub CheckForCaseInsensitivity(ByRef ssum() As MyItems, s As String, lineno As Integer)
         ' This check the line of code for evidence of case insensitivity
-        With ssum
-            With .LogicCaseInsensitive
-                If s.ToUpper.Contains(".TOUPPER") Or s.ToUpper.Contains(".tolower") Then
-                    .n += 1
-                    .Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno.ToString & ") - " & s & "</p>" & vbCrLf
-                    .cssClass = "itemgreen"
-                End If
-            End With
+
+        With ssum(EnSummary.LogicCaseInsensitive)
+            If s.ToUpper.Contains(".TOUPPER") Or s.ToUpper.Contains(".tolower") Then
+                .n += 1
+                .Status &= "<p class=""hangingindent2"">" & bullet & "(" & lineno.ToString & ") - " & s & "</p>" & vbCrLf
+                .cssClass = "itemgreen"
+            End If
         End With
     End Sub
 
-    Function CheckForSplashScreen2(ByRef filesinbuild As List(Of String), ByRef item As Assignment.MyItems, RemoveFromList As Boolean) As Boolean
+    Function CheckForSplashScreen2(ByRef filesinbuild As List(Of String), ByRef item As MyItems, RemoveFromList As Boolean) As Boolean
         Dim s As String
         With item
             .Status = vbFalse.ToString
@@ -1063,7 +1061,7 @@ Module ValidateVB
 
 
 
-    Sub CheckFormProperties2(filename As String, ByRef AppForm As Assignment.AppForm)
+    Sub CheckFormProperties2(filename As String, ByRef AppForm() As MyItems)
         Dim s As String = ""
         Dim ss As String = ""
         Dim cArray() As String
@@ -1083,43 +1081,43 @@ Module ValidateVB
 
                 If s.Contains("Me.BackColor") Then
                     If s.Contains("System.Drawing.SystemColors.") Then
-                        .FormBackColor.Status = "<span class=""boldtext"">Form color = " & TrimUpTo(ss, "System.Drawing.SystemColors. </span>")
-                        .FormBackColor.cssClass = "itemgreen"
+                        AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form color = " & TrimUpTo(ss, "System.Drawing.SystemColors. </span>")
+                        AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
                     ElseIf s.Contains("System.Drawing.Color.FromArgb(") Then
 
                         ss = returnBetween(s, "Me.BackColor =", vbCrLf)
                         cArray = ss.Split(delim, StringSplitOptions.None)
                         Try
-                            .FormBackColor.Status = "<span class=""boldtext"">Form color is nongray (#" & ReturnHexEquivalent(TrimAfter(cArray(1), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(2), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(3), ",", True)) & ") </span>"
-                            .FormBackColor.cssClass = "itemgreen"
+                            AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form color is nongray (#" & ReturnHexEquivalent(TrimAfter(cArray(1), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(2), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(3), ",", True)) & ") </span>"
+                            AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
                         Catch
-                            .FormBackColor.Status = "Form color = " & ss
+                            AppForm(EnForm.FormBackColor).Status = "Form color = " & ss
                         End Try
                     ElseIf s.Contains("System.Drawing.Color.") Then
-                        .FormBackColor.Status = "<span class=""boldtext"">Form color = " & returnBetween(s, "Me.BackColor = System.Drawing.Color.", vbCrLf) & "</span>"
-                        .FormBackColor.cssClass = "itemgreen"
+                        AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form color = " & returnBetween(s, "Me.BackColor = System.Drawing.Color.", vbCrLf) & "</span>"
+                        AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
                     End If
                 Else
-                    .FormBackColor.Status = "<span class=""boldtext"">Form Color was not changed at design time (still gray) </span>"
-                    .FormBackColor.cssClass = "itemred"
+                    AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form Color was not changed at design time (still gray) </span>"
+                    AppForm(EnForm.FormBackColor).cssClass = "itemred"
                 End If
 
 
                 If s.Contains("Me.Text") Then
-                    .FormText.Status = "<span class=""boldtext"">" & returnBetween(s, "Me.Text = """, """") & "</span>"
-                    .FormText.cssClass = "itemgreen"
+                    AppForm(EnForm.FormText).Status = "<span class=""boldtext"">" & returnBetween(s, "Me.Text = """, """") & "</span>"
+                    AppForm(EnForm.FormText).cssClass = "itemgreen"
                 Else
-                    .FormText.Status = "<span class=""boldtext"">The form text was not changed.</span>"
-                    .FormText.cssClass = "itemred"
+                    AppForm(EnForm.FormText).Status = "<span class=""boldtext"">The form text was not changed.</span>"
+                    AppForm(EnForm.FormText).cssClass = "itemred"
 
                 End If
 
                 If s.Contains("Me.StartPosition") Then
-                    .FormStartPosition.Status = "<span class=""boldtext"">Set to: " & returnBetween(s, "Me.StartPosition = System.Windows.Forms.FormStartPosition.", vbCrLf) & "</span>"
-                    .FormStartPosition.cssClass = "itemgreen"
+                    AppForm(EnForm.FormStartPosition).Status = "<span class=""boldtext"">Set to: " & returnBetween(s, "Me.StartPosition = System.Windows.Forms.FormStartPosition.", vbCrLf) & "</span>"
+                    AppForm(EnForm.FormStartPosition).cssClass = "itemgreen"
                 Else
-                    .FormStartPosition.Status = "<span class=""boldtext"">Form StartPosition not Modified. </span>"
-                    .FormStartPosition.cssClass = "itemred"
+                    AppForm(EnForm.FormStartPosition).Status = "<span class=""boldtext"">Form StartPosition not Modified. </span>"
+                    AppForm(EnForm.FormStartPosition).cssClass = "itemred"
                 End If
 
 
@@ -1128,19 +1126,19 @@ Module ValidateVB
                 s = sr.ReadToEnd
                 sr.Close()
                 If s.Contains("Me.AcceptButton") Then
-                    .FormAcceptButton.Status = "<span class=""boldtext"">" & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</span>"
-                    .FormAcceptButton.cssClass = "itemgreen"
+                    AppForm(EnForm.FormAcceptButton).Status = "<span class=""boldtext"">" & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</span>"
+                    AppForm(EnForm.FormAcceptButton).cssClass = "itemgreen"
                 Else
-                    .FormAcceptButton.Status = "<span class=""boldtext"">Accept Button Property not set at design time.</span>"
-                    .FormAcceptButton.cssClass = "itemred"
+                    AppForm(EnForm.FormAcceptButton).Status = "<span class=""boldtext"">Accept Button Property not set at design time.</span>"
+                    AppForm(EnForm.FormAcceptButton).cssClass = "itemred"
                 End If
 
                 If s.Contains("Me.CancelButton") Then
-                    .FormCancelButton.Status = "<span class=""boldtext"">" & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</span>"
-                    .FormCancelButton.cssClass = "itemgreen"
+                    AppForm(EnForm.FormCancelButton).Status = "<span class=""boldtext"">" & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</span>"
+                    AppForm(EnForm.FormCancelButton).cssClass = "itemgreen"
                 Else
-                    .FormCancelButton.Status = "<span class=""boldtext"">Cancel Button Property not set at design time.</span>"
-                    .FormCancelButton.cssClass = "itemred"
+                    AppForm(EnForm.FormCancelButton).Status = "<span class=""boldtext"">Cancel Button Property not set at design time.</span>"
+                    AppForm(EnForm.FormCancelButton).cssClass = "itemred"
                 End If
             End If
 
@@ -1157,7 +1155,7 @@ Module ValidateVB
 
 
 
-    Sub CheckForAboutBox2(ByRef filesinbuild As List(Of String), ByRef item As Assignment.MyItems, RemoveFromList As Boolean)
+    Sub CheckForAboutBox2(ByRef filesinbuild As List(Of String), ByRef item As MyItems, RemoveFromList As Boolean)
         Dim s As String
         With item
             .Status = vbFalse.ToString
@@ -1179,28 +1177,28 @@ Module ValidateVB
 
 
 
-    Sub CheckForfrmPrefix2(filesinbuild As List(Of String), ByRef Item As Assignment.MyItems)
-        Dim fn As String
+    'Sub CheckForfrmPrefix2(filesinbuild As List(Of String), ByRef Item As MyItems)
+    '    Dim fn As String
 
 
-        With Item
-            .Status = "All files start with frm prefix"
+    '    With Item
+    '        .Status = "All files start with frm prefix"
 
-            For Each filename As String In filesinbuild
+    '        For Each filename As String In filesinbuild
 
-                filename = filename.Replace("/", "\")
-                fn = ReturnLastField(filename, "\")
-                ' ------------------------------------------------
-                If Not fn.ToLower.StartsWith("frm") Then
-                    ' .Status = vbFalse.ToString
-                    .Status = filename & " does not start with frm prefix." & vbCrLf
-                End If
-            Next
-        End With
-    End Sub
+    '            filename = filename.Replace("/", "\")
+    '            fn = ReturnLastField(filename, "\")
+    '            ' ------------------------------------------------
+    '            If Not fn.ToLower.StartsWith("frm") Then
+    '                ' .Status = vbFalse.ToString
+    '                .Status = filename & " does not start with frm prefix." & vbCrLf
+    '            End If
+    '        Next
+    '    End With
+    'End Sub
 
 
-    Sub CheckForModules2(filesinbuild As List(Of String), ByRef item As Assignment.MyItems)
+    Sub CheckForModules2(filesinbuild As List(Of String), ByRef item As MyItems)
         Dim source As String = ""
         Dim nmodules As Integer = 0
 
@@ -1231,7 +1229,7 @@ Module ValidateVB
     End Sub
 
 
-    Sub CheckObjectNaming2(filename As String, ByRef AppForm As Assignment.AppForm)
+    Sub CheckObjectNaming2(filename As String, ByRef AppForm() As MyItems)
         ' ----------------------------------------------------------
         ' Check the form design to see if objects on form are named properly
         ' ----------------------------------------------------------
@@ -1288,16 +1286,18 @@ Module ValidateVB
             ' ----------------------------------------------------------------------------------------------------------------
             ' the code below is wrong. it looks at the file name, not the FormText
             tmp = ReturnLastField(filename, "\")
-            If tmp.ToLower.StartsWith("frm") Then
-                AppForm.FormName.Status = tmp & " starts with frm prefix"
-                AppForm.FormName.cssClass = "itemgreen"
-                AppForm.FormName.cnt = 0
-            Else
-                AppForm.FormName.Status = tmp & " does not start with the frm prefix"
-                AppForm.FormName.cssClass = "itemred"
-                AppForm.FormName.cnt = 0
-            End If
 
+            With AppForm(EnForm.FormName)
+                If tmp.ToLower.StartsWith("frm") Then
+                    .Status = tmp & " starts with frm prefix"
+                    .cssClass = "itemgreen"
+                    .cnt = 0
+                Else
+                    .Status = tmp & " does not start with the frm prefix"
+                    .cssClass = "itemred"
+                    .cnt = 0
+                End If
+            End With
             ' ----------------------------------------------------------------------------------------------------------------
             For Each strObj As String In strObjects  ' list of the types of objects we are interested in
                 statgood = ""
@@ -1376,65 +1376,65 @@ Module ValidateVB
 
                 Select Case tmpObj
                     Case "Button"
-                        AppForm.ObjButton.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjButton.cssClass = css
-                        AppForm.ObjButton.cnt = cnt
+                        AppForm(EnForm.ObjButton).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjButton).cssClass = css
+                        AppForm(EnForm.ObjButton).cnt = cnt
                     Case "Label"
-                        AppForm.ObjLabel.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjLabel.cssClass = css
-                        AppForm.ObjLabel.cnt = cnt
+                        AppForm(EnForm.objLabel).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.objLabel).cssClass = css
+                        AppForm(EnForm.objLabel).cnt = cnt
                     Case "LabelActive"
-                        AppForm.ObjActiveLabel.Status = buildObjSummary("Active Label", cnt, statgood, statbad, css)
-                        AppForm.ObjActiveLabel.cssClass = css
-                        AppForm.ObjActiveLabel.cnt = cnt
+                        AppForm(EnForm.ObjActiveLabel).Status = buildObjSummary("Active Label", cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjActiveLabel).cssClass = css
+                        AppForm(EnForm.ObjActiveLabel).cnt = cnt
                     Case "LabelNonactive"
-                        AppForm.ObjNonactiveLabel.Status = buildObjSummary("Nonactive Label", cnt, statgood, statbad, css)
-                        AppForm.ObjNonactiveLabel.cssClass = css
-                        AppForm.ObjNonactiveLabel.cnt = cnt
+                        AppForm(EnForm.ObjNonactiveLabel).Status = buildObjSummary("Nonactive Label", cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjNonactiveLabel).cssClass = css
+                        AppForm(EnForm.ObjNonactiveLabel).cnt = cnt
                     Case "Textbox"
-                        AppForm.ObjTextbox.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjTextbox.cssClass = css
-                        AppForm.ObjTextbox.cnt = cnt
+                        AppForm(EnForm.ObjTextbox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjTextbox).cssClass = css
+                        AppForm(EnForm.ObjTextbox).cnt = cnt
                     Case "Listbox"
-                        AppForm.ObjListbox.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjListbox.cssClass = css
-                        AppForm.ObjListbox.cnt = cnt
+                        AppForm(EnForm.ObjListbox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjListbox).cssClass = css
+                        AppForm(EnForm.ObjListbox).cnt = cnt
                     Case "Combobox"
-                        AppForm.ObjCombobox.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjCombobox.cssClass = css
-                        AppForm.ObjCombobox.cnt = cnt
+                        AppForm(EnForm.ObjCombobox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjCombobox).cssClass = css
+                        AppForm(EnForm.ObjCombobox).cnt = cnt
                     Case "RadioButton"
-                        AppForm.ObjRadioButton.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjRadioButton.cssClass = css
-                        AppForm.ObjRadioButton.cnt = cnt
+                        AppForm(EnForm.ObjRadioButton).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjRadioButton).cssClass = css
+                        AppForm(EnForm.ObjRadioButton).cnt = cnt
                     Case "CheckBox"
-                        AppForm.ObjCheckbox.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjCheckbox.cssClass = css
-                        AppForm.ObjCheckbox.cnt = cnt
+                        AppForm(EnForm.ObjCheckbox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjCheckbox).cssClass = css
+                        AppForm(EnForm.ObjCheckbox).cnt = cnt
                     Case "GroupBox"
-                        AppForm.ObjGroupBox.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjGroupBox.cssClass = css
-                        AppForm.ObjGroupBox.cnt = cnt
+                        AppForm(EnForm.ObjGroupBox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjGroupBox).cssClass = css
+                        AppForm(EnForm.ObjGroupBox).cnt = cnt
                     Case "OpenFileDialog"
-                        AppForm.ObjOpenFileDialog.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjOpenFileDialog.cssClass = css
-                        AppForm.ObjOpenFileDialog.cnt = cnt
+                        AppForm(EnForm.ObjOpenFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjOpenFileDialog).cssClass = css
+                        AppForm(EnForm.ObjOpenFileDialog).cnt = cnt
                     Case "SaveFileDialog"
-                        AppForm.ObjSaveFileDialog.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjSaveFileDialog.cssClass = css
-                        AppForm.ObjSaveFileDialog.cnt = cnt
+                        AppForm(EnForm.ObjSaveFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjSaveFileDialog).cssClass = css
+                        AppForm(EnForm.ObjSaveFileDialog).cnt = cnt
                     Case "WebBrowser"
-                        AppForm.ObjWebBrowser.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjWebBrowser.cssClass = css
-                        AppForm.ObjWebBrowser.cnt = cnt
+                        AppForm(EnForm.ObjWebBrowser).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjWebBrowser).cssClass = css
+                        AppForm(EnForm.ObjWebBrowser).cnt = cnt
                     Case "OpenFileDialog"
-                        AppForm.ObjOpenFileDialog.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjOpenFileDialog.cssClass = css
-                        AppForm.ObjOpenFileDialog.cnt = cnt
+                        AppForm(EnForm.ObjOpenFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjOpenFileDialog).cssClass = css
+                        AppForm(EnForm.ObjOpenFileDialog).cnt = cnt
                     Case "SaveFileDialog"
-                        AppForm.ObjSaveFileDialog.Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm.ObjSaveFileDialog.cssClass = css
-                        AppForm.ObjSaveFileDialog.cnt = cnt
+                        AppForm(EnForm.ObjSaveFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        AppForm(EnForm.ObjSaveFileDialog).cssClass = css
+                        AppForm(EnForm.ObjSaveFileDialog).cnt = cnt
                 End Select
 
                 cnt = 0
@@ -1475,7 +1475,7 @@ Module ValidateVB
     End Function
     ' ============================================ End of Checks ===================================================
 
-    Sub BuildReport(key As String, ByRef SAssignment As Assignment, ByRef AppForm As Assignment.AppForm, ByRef SSummary As Assignment.AppSummary, Var1 As String)
+    Sub BuildReport(key As String, ByRef SAssignment As AssignmentInfo, ByRef AppForm() As MyItems, ByRef SSummary() As MyItems, Var1 As String)
         Dim dummyItem As New Assignment.MyItems
         Dim varlist() As String
 
@@ -1485,7 +1485,7 @@ Module ValidateVB
         Dim starttable As String = "<table class=""info"">" & vbCrLf
         Dim th As String = "<tr> <th class=""req"" > Req </th> <th class=""req"" >OK </th>  <th class=""titlecol""> Item </th>   <th class=""statuscol"" > Status </th>  <th class=""ptcol"" > Possible<br /> Pts. </th>   <th class=""ptcol"">  Your<br /> Score</th>  <th class=""commentcol""> Comment </th> </tr>" & vbCrLf
         ' ----------------------------------------------------------------------------------
-        Dim h2 As String = "<h2> {0} </h2>"
+        '    Dim h2 As String = "<h2> {0} </h2>"
         Dim h3 As String = "<h3> {0} </h3>"
         ' ----------------------------------------------------------------------------------------------------
         With SSummary
@@ -1499,11 +1499,11 @@ Module ValidateVB
 
                     strStudentReport &= starttable
                     strStudentReport &= th
-                    strStudentReport = AppendToReport(strStudentReport, 3, "Development Environment", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - SLN File", SAssignment.hasSLN, errcnt, errComment, "hasSLN", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - vbProj File", SAssignment.hasVBproj, errcnt, errComment, "hasvbProj", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - VB Version", SAssignment.VBVersion, errcnt, errComment, "hasVBVersion", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 10, "General Help", SAssignment.VBVersion, errcnt, errComment, "", SSummary.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 3, "Development Environment", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 2, " - SLN File", SAssignment.hasSLN, errcnt, errComment, "hasSLN", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 2, " - vbProj File", SAssignment.hasVBproj, errcnt, errComment, "hasvbProj", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 2, " - VB Version", SAssignment.VBVersion, errcnt, errComment, "hasVBVersion", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 10, "General Help", SAssignment.VBVersion, errcnt, errComment, "", SAssignment.TotalScore)
                     errcnt = 0
                     errComment = ""
 
@@ -1512,17 +1512,17 @@ Module ValidateVB
 
                     If SomeVarDisplayed(varlist) Then
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Application Info", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Application Info", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
 
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Splash Screen", SAssignment.hasSplashScreen, errcnt, errComment, "hasSplashScreen", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - About Box", SAssignment.hasAboutBox, errcnt, errComment, "hasAboutBox", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Application Title", .InfoAppTitle, errcnt, errComment, "InfoAppTitle", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Description", .InfoDescription, errcnt, errComment, "InfoDescription", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Company", .InfoCompany, errcnt, errComment, "InfoCompany", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Product", .InfoProduct, errcnt, errComment, "InfoProduct", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Trademark", .InfoTrademark, errcnt, errComment, "InfoTrademark", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Copyright", .InfoCopyright, errcnt, errComment, "InfoCopyright", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, " Application Info", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Splash Screen", SAssignment.hasSplashScreen, errcnt, errComment, "hasSplashScreen", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - About Box", SAssignment.hasAboutBox, errcnt, errComment, "hasAboutBox", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Application Title", SSummary(EnSummary.InfoAppTitle), errcnt, errComment, "InfoAppTitle", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Description", SSummary(EnSummary.InfoDescription), errcnt, errComment, "InfoDescription", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Company", SSummary(EnSummary.InfoCompany), errcnt, errComment, "InfoCompany", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Product", SSummary(EnSummary.InfoProduct), errcnt, errComment, "InfoProduct", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Trademark", SSummary(EnSummary.InfoTrademark), errcnt, errComment, "InfoTrademark", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Copyright", SSummary(EnSummary.InfoCopyright), errcnt, errComment, "InfoCopyright", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 10, " Application Info", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
                     End If
@@ -1532,24 +1532,24 @@ Module ValidateVB
 
                     If SomeVarDisplayed(varlist) Then
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Compile Options", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Option Strict", SAssignment.OptionStrict, errcnt, errComment, "OptionStrict", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Option Explicit", SAssignment.OptionExplicit, errcnt, errComment, "OptionExplicit", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Options", .InfoCopyright, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Compile Options", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Option Strict", SAssignment.OptionStrict, errcnt, errComment, "OptionStrict", SAssignment.TotalScore)   ' ????????????????????????????/ jhg
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Option Explicit", SAssignment.OptionExplicit, errcnt, errComment, "OptionExplicit", SAssignment.TotalScore) ' ????????????????????????????/ jhg
+                        strStudentReport = AppendToReport(strStudentReport, 10, "Options", SSummary(EnSummary.InfoCopyright), errcnt, errComment, "", SAssignment.TotalScore)
 
                     End If
                     strStudentReport &= "</table>" & vbCrLf & vbCrLf
 
                 Case "Debugging"
                     ' This has not been implemented. I am not sure if it is possible, and if so how to determine if these features have been set within the student's environment.
-                    strStudentReport &= String.Format(h3, "Debugging", errcnt, errComment, "", SSummary.TotalScore)
+                    strStudentReport &= String.Format(h3, "Debugging")
 
                     strStudentReport &= starttable
                     strStudentReport &= th
-                    strStudentReport = AppendToReport(strStudentReport, 3, "Debugging", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - BreakPoints", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - Watch Variables", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 10, "Debugging", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 3, "Debugging", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 2, " - BreakPoints", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 2, " - Watch Variables", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strStudentReport = AppendToReport(strStudentReport, 10, "Debugging", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                     errcnt = 0
                     errComment = ""
 
@@ -1557,11 +1557,11 @@ Module ValidateVB
 
 
                 Case "New Project File"
-                    '                strStudentReport &= String.Format(h2, "Comments Related to <span class=""boldtext"">" & Var1 & "</span>", errcnt, errComment, "", ssummary.totalscore)
+                    '                strStudentReport &= String.Format(h2, "Comments Related to <span class=""boldtext"">" & Var1 & "</span>", errcnt, errComment, "", SAssignment.TotalScore)
 
                 Case "Form Objects"
                     With AppForm
-                        strStudentReport &= String.Format(h3, "Form Objects", errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport &= String.Format(h3, "Form Objects")
 
                         strStudentReport &= starttable
                         strStudentReport &= th
@@ -1571,16 +1571,16 @@ Module ValidateVB
 
                         If SomeVarDisplayed(varlist) Then
 
-                            strStudentReport = AppendToReport(strStudentReport, 3, "Design Time Form Properties", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 3, "Design Time Form Properties", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
 
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Form Text Property", .FormText, errcnt, errComment, "ChangeFormText", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Accept Button", .FormAcceptButton, errcnt, errComment, "SetFormAcceptButton", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Cancel Button", .FormCancelButton, errcnt, errComment, "SetFormCancelButton", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Start Position", .FormStartPosition, errcnt, errComment, "ModifyStartPosition", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Non-Gray Form Color", .FormBackColor, errcnt, errComment, "ChangeFormColor", SSummary.TotalScore)
-                            '         strStudentReport = AppendToReport(strStudentReport, 2, " - Form Load Method", .FormLoadMethod, errcnt, errComment, "UtilizeFormLoadMethod", ssummary.totalscore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Form Text Property", AppForm(EnForm.FormText), errcnt, errComment, "ChangeFormText", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Accept Button", AppForm(EnForm.FormAcceptButton), errcnt, errComment, "SetFormAcceptButton", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Cancel Button", AppForm(EnForm.FormCancelButton), errcnt, errComment, "SetFormCancelButton", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Start Position", AppForm(EnForm.FormStartPosition), errcnt, errComment, "ModifyStartPosition", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Non-Gray Form Color", AppForm(EnForm.FormBackColor), errcnt, errComment, "ChangeFormColor", SAssignment.TotalScore)
+                            '         strStudentReport = AppendToReport(strStudentReport, 2, " - Form Load Method", AppForm(enForm.FormLoadMethod, errcnt, errComment, "UtilizeFormLoadMethod", SAssignment.TotalScore)
 
-                            strStudentReport = AppendToReport(strStudentReport, 10, "", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 10, "", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                             errcnt = 0
                             errComment = ""
                         End If
@@ -1589,23 +1589,23 @@ Module ValidateVB
                         varlist = {"IncludeFrmInFormName", "ButtonObj", "ObjTextbox", "ActiveLabel", "NonactiveLabel", "ObjCombobox", "ObjListbox", "ObjRadioButton", "ObjCheckbox", "ObjGroupBox", "ObjOpenFileDialog", "ObjSaveFileDialog", "ObjWebBrowser"}
 
                         If SomeVarDisplayed(varlist) Then
-                            strStudentReport = AppendToReport(strStudentReport, 3, "Form Object Names Incorporate Object Prefix", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 3, "Form Object Names Incorporate Object Prefix", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
 
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Form (frm)", .FormName, errcnt, errComment, "IncludeFrmInFormName", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Buttons (btn)", .ObjButton, errcnt, errComment, "ButtonObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Textboxes (txt)", .ObjTextbox, errcnt, errComment, "TextboxObj", SSummary.TotalScore)
-                            '  strStudentReport = AppendToReport(strStudentReport, 2, " - Labels (lbl)", .objLabel, errcnt, errComment, "", ssummary.totalscore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Active Labels (lbl)", .ObjActiveLabel, errcnt, errComment, "ActiveLabels", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - NonActive Labels (no prefix needed)", .ObjNonactiveLabel, errcnt, errComment, "NonActiveLabels", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Combobox (cbx)", .ObjCombobox, errcnt, errComment, "ComboBoxObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Listbox (lbx)", .ObjListbox, errcnt, errComment, "ListBoxObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Radiobutton (rbn)", .ObjRadioButton, errcnt, errComment, "RadioButtonObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Checkbox (cbx)", .ObjCheckbox, errcnt, errComment, "CheckBoxObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Groupbox (gbx)", .ObjGroupBox, errcnt, errComment, "GroupBoxObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - OpenFileDialog (ofd)", .ObjOpenFileDialog, errcnt, errComment, "ObjOpenFileDialog", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - SaveFileDialog (sfd)", .ObjSaveFileDialog, errcnt, errComment, "ObjSaveFileDialog", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - WebBrowser (wb)", .ObjWebBrowser, errcnt, errComment, "WebBrowserObj", SSummary.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 10, "Form Objects", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Form (frm)", AppForm(EnForm.FormName), errcnt, errComment, "IncludeFrmInFormName", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Buttons (btn)", AppForm(EnForm.ObjButton), errcnt, errComment, "ButtonObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Textboxes (txt)", AppForm(EnForm.ObjTextbox), errcnt, errComment, "TextboxObj", SAssignment.TotalScore)
+                            '  strStudentReport = AppendToReport(strStudentReport, 2, " - Labels (lbl)", AppForm(enForm.objLabel), errcnt, errComment, "", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Active Labels (lbl)", AppForm(EnForm.ObjActiveLabel), errcnt, errComment, "ActiveLabels", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - NonActive Labels (no prefix needed)", AppForm(EnForm.ObjNonactiveLabel), errcnt, errComment, "NonActiveLabels", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Combobox (cbx)", AppForm(EnForm.ObjCombobox), errcnt, errComment, "ComboBoxObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Listbox (lbx)", AppForm(EnForm.ObjListbox), errcnt, errComment, "ListBoxObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Radiobutton (rbn)", AppForm(EnForm.ObjRadioButton), errcnt, errComment, "RadioButtonObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Checkbox (cbx)", AppForm(EnForm.ObjCheckbox), errcnt, errComment, "CheckBoxObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - Groupbox (gbx)", AppForm(EnForm.ObjGroupBox), errcnt, errComment, "GroupBoxObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - OpenFileDialog (ofd)", AppForm(EnForm.ObjOpenFileDialog), errcnt, errComment, "ObjOpenFileDialog", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - SaveFileDialog (sfd)", AppForm(EnForm.ObjSaveFileDialog), errcnt, errComment, "ObjSaveFileDialog", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 2, " - WebBrowser (wb)", AppForm(EnForm.ObjWebBrowser), errcnt, errComment, "WebBrowserObj", SAssignment.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 10, "Form Objects", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                             errcnt = 0
                             errComment = ""
                         End If
@@ -1615,7 +1615,7 @@ Module ValidateVB
 
                 Case "Coding Standards"
 
-                    strStudentReport &= String.Format(h3, "Coding Standards", errcnt, errComment, "", SSummary.TotalScore)
+                    strStudentReport &= String.Format(h3, "Coding Standards")
 
                     strStudentReport &= starttable
                     strStudentReport &= th
@@ -1625,20 +1625,20 @@ Module ValidateVB
                     varlist = {"CommentSubs", "CommentIF", "CommentFOR", "CommentDO", "CommentWHILE", "CommentSELECT"}
 
                     If SomeVarDisplayed(varlist) Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Use of Comments", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - First Line of Sub/Function", .CommentSub, errcnt, errComment, "CommentSubs", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to IF", .CommentIF, errcnt, errComment, "CommentIF", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to For", .CommentFor, errcnt, errComment, "CommentFOR", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to Do", .CommentDo, errcnt, errComment, "CommentDO", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to While", .CommentWhile, errcnt, errComment, "CommentWHILE", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to Select Case", .CommentSelect, errcnt, errComment, "CommentSELECT", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Use of Comments", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - First Line of Sub/Function", SSummary(EnSummary.CommentSub), errcnt, errComment, "CommentSubs", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to IF", SSummary(EnSummary.CommentIF), errcnt, errComment, "CommentIF", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to For", SSummary(EnSummary.CommentFor), errcnt, errComment, "CommentFOR", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to Do", SSummary(EnSummary.CommentDo), errcnt, errComment, "CommentDO", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to While", SSummary(EnSummary.CommentWhile), errcnt, errComment, "CommentWHILE", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to Select Case", SSummary(EnSummary.CommentSelect), errcnt, errComment, "CommentSELECT", SAssignment.TotalScore)
 
                         If errComment.Length > 0 Then
                             '  errComment = ""
                             dummyItem.cssClass = "itemred"
-                            strStudentReport = AppendToReport(strStudentReport, 10, "General Comments on Comments", dummyItem, errcnt, errComment, "CommentGeneral", SSummary.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 10, "General Comments on Comments", dummyItem, errcnt, errComment, "CommentGeneral", SAssignment.TotalScore)
                         Else
-                            strStudentReport = AppendToReport(strStudentReport, 10, "Use of Comments", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                            strStudentReport = AppendToReport(strStudentReport, 10, "Use of Comments", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         End If
 
                         errcnt = 0
@@ -1652,11 +1652,11 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
                         '     If .VarArrays.showVar OrElse .VarLists.showVar OrElse .VarStructures.showVar Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Data Structures", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Arrays", .VarArrays, errcnt, errComment, "VarArrays", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Lists", .VarLists, errcnt, errComment, "VarLists", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Structures", .VarStructures, errcnt, errComment, "VarStructures", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Data Structures", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Data Structures", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Arrays", SSummary(EnSummary.VarArrays), errcnt, errComment, "VarArrays", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Lists", SSummary(EnSummary.VarLists), errcnt, errComment, "VarLists", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Structures", SSummary(EnSummary.VarStructures), errcnt, errComment, "VarStructures", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 10, "Data Structures", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
                     End If
@@ -1667,13 +1667,13 @@ Module ValidateVB
 
                     If SomeVarDisplayed(varlist) Then
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Variable Data Types - Checking to see which data types are used ", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - String", .VarString, errcnt, errComment, "VarString", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Integer", .VarInteger, errcnt, errComment, "VarInteger", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Decimal/Double", .VarDecimal, errcnt, errComment, "VarDecimal", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Date", .VarDate, errcnt, errComment, "VarDate", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Boolean", .VarBoolean, errcnt, errComment, "VarBoolean", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Variable Data Types", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Variable Data Types - Checking to see which data types are used ", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - String", SSummary(EnSummary.VarString), errcnt, errComment, "VarString", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Integer", SSummary(EnSummary.VarInteger), errcnt, errComment, "VarInteger", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Decimal/Double", SSummary(EnSummary.VarDecimal), errcnt, errComment, "VarDecimal", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Date", SSummary(EnSummary.VarDate), errcnt, errComment, "VarDate", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Boolean", SSummary(EnSummary.VarBoolean), errcnt, errComment, "VarBoolean", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 10, "Variable Data Types", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
                     End If
@@ -1685,25 +1685,25 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Program Logic - Checking to see if each Programming Control Stucture is used or not", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Else", .LogicElse, errcnt, errComment, "LogicElse", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - ElseIF", .LogicElseIF, errcnt, errComment, "LogicElseIF", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Nested IF", .LogicNestedIF, errcnt, errComment, "LogicNestedIF", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Nested For/Do", .LogicNestedFOR, errcnt, errComment, "LogicNestedFOR", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Convert to String (cStr or .toString)", .LogicConvertToString, errcnt, errComment, "LogicConvertToString", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Format String (.toString() or String.Format())", .LogicStringFormat, errcnt, errComment, "LogicStringFormat", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Template Parameters", .LogicStringFormatParameters, errcnt, errComment, "LogicStringFormatParameters", SSummary.TotalScore)
-                        '   strStudentReport = AppendToReport(strStudentReport, 2, " - ByRef Parameters", .LogicByRef, errcnt, errComment, "LogicByRef", ssummary.totalscore)
-                        '   strStudentReport = AppendToReport(strStudentReport, 2, " - Optional Parameters", .LogicOptional, errcnt, errComment, "LogicOptional", ssummary.totalscore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Concatenation", .LogicConcatination, errcnt, errComment, "LogicConcatination", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Case Insensitve ", .LogicCaseInsensitive, errcnt, errComment, "LogicCaseInsensitive", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Try ... Catch", .LogicTryCatch, errcnt, errComment, "LogicTryCatch", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Complex Conditions", .LogicComplexConditions, errcnt, errComment, "LogicComplexConditions", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req Use of a StreamReader", .LogicStreamReader, errcnt, errComment, "LogicStreamReader", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req matching StreamReader.Close", .LogicStreamReaderClose, errcnt, errComment, "LogicStreamReaderClose", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req Use of a StreamWriter", .LogicStreamWriter, errcnt, errComment, "LogicStreamWriter", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req matching StreamWriter.Close", .LogicStreamWriterClose, errcnt, errComment, "LogicStreamWriterClose", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Program Logic", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Program Logic - Checking to see if each Programming Control Stucture is used or not", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Else", SSummary(EnSummary.LogicElse), errcnt, errComment, "LogicElse", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - ElseIF", SSummary(EnSummary.LogicElseIF), errcnt, errComment, "LogicElseIF", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Nested IF", SSummary(EnSummary.LogicNestedIF), errcnt, errComment, "LogicNestedIF", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Nested For/Do", SSummary(EnSummary.LogicNestedFor), errcnt, errComment, "LogicNestedFOR", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Convert to String (cStr or .toString)", SSummary(EnSummary.LogicConvertToString), errcnt, errComment, "LogicConvertToString", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Format String (.toString() or String.Format())", SSummary(EnSummary.LogicStringFormat), errcnt, errComment, "LogicStringFormat", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Template Parameters", SSummary(EnSummary.LogicStringFormatParameters), errcnt, errComment, "LogicStringFormatParameters", SAssignment.TotalScore)
+                        '   strStudentReport = AppendToReport(strStudentReport, 2, " - ByRef Parameters", ssummary(ensummary.LogicByRef), errcnt, errComment, "LogicByRef", SAssignment.TotalScore)
+                        '   strStudentReport = AppendToReport(strStudentReport, 2, " - Optional Parameters", ssummary(ensummary.LogicOptional), errcnt, errComment, "LogicOptional", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Concatenation", SSummary(EnSummary.LogicConcatination), errcnt, errComment, "LogicConcatination", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Case Insensitve ", SSummary(EnSummary.LogicCaseInsensitive), errcnt, errComment, "LogicCaseInsensitive", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Try ... Catch", SSummary(EnSummary.LogicTryCatch), errcnt, errComment, "LogicTryCatch", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Complex Conditions", SSummary(EnSummary.LogicComplexConditions), errcnt, errComment, "LogicComplexConditions", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req Use of a StreamReader", SSummary(EnSummary.LogicStreamReader), errcnt, errComment, "LogicStreamReader", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req matching StreamReader.Close", SSummary(EnSummary.LogicStreamReaderClose), errcnt, errComment, "LogicStreamReaderClose", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req Use of a StreamWriter", SSummary(EnSummary.LogicStreamWriter), errcnt, errComment, "LogicStreamWriter", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req matching StreamWriter.Close", SSummary(EnSummary.LogicStreamWriterClose), errcnt, errComment, "LogicStreamWriterClose", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 10, "Program Logic", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
 
@@ -1717,11 +1717,11 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
                         '    If .SystemIO.showVar OrElse .SystemNet.showVar OrElse .SystemDB.showVar Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Imports", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.IO", .SystemIO, errcnt, errComment, "SystemIO", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.Net", .SystemNet, errcnt, errComment, "SystemNet", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.DB", .SystemDB, errcnt, errComment, "SystemDB", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Imports", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Imports", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.IO", SSummary(EnSummary.SystemIO), errcnt, errComment, "SystemIO", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.Net", SSummary(EnSummary.SystemNet), errcnt, errComment, "SystemNet", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.DB", SSummary(EnSummary.SystemDB), errcnt, errComment, "SystemDB", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 10, "Imports", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
 
@@ -1734,14 +1734,14 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
                         '    If .SystemIO.showVar OrElse .SystemNet.showVar OrElse .SystemDB.showVar Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Subs / Functions", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Subs", .LogicSub, errcnt, errComment, "LogicSub", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Optional Variables", .LogicOptional, errcnt, errComment, "LogicOptional", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - ByRef Variables", .LogicByRef, errcnt, errComment, "LogicByRef", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Multiple Forms", .LogicMultipleForms, errcnt, errComment, "LogicMultipleForms", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Include Module", .LogicModule, errcnt, errComment, "LogicModule", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Form Load Method", .LogicFormLoad, errcnt, errComment, "LogicFormLoad", SSummary.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Subs / Functions", dummyItem, errcnt, errComment, "", SSummary.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 3, "Subs / Functions", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Subs", SSummary(EnSummary.LogicSub), errcnt, errComment, "LogicSub", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Optional Variables", SSummary(EnSummary.LogicOptional), errcnt, errComment, "LogicOptional", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - ByRef Variables", SSummary(EnSummary.LogicByRef), errcnt, errComment, "LogicByRef", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Multiple Forms", SSummary(EnSummary.LogicMultipleForms), errcnt, errComment, "LogicMultipleForms", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Include Module", SSummary(EnSummary.LogicModule), errcnt, errComment, "LogicModule", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 2, " - Form Load Method", SSummary(EnSummary.LogicFormLoad), errcnt, errComment, "LogicFormLoad", SAssignment.TotalScore)
+                        strStudentReport = AppendToReport(strStudentReport, 10, "Subs / Functions", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
 
@@ -1753,10 +1753,10 @@ Module ValidateVB
 
                     strStudentReport = strStudentReport.Replace("[TLOC]", TotalLinesOfCode.ToString("n0") & " Lines of Code (not including comments)")
 
-                    '  TotalScore = (SSummary.TotalScore / TotalPossiblePts).ToString("p1")
-                    TotalScore = SSummary.TotalScore.ToString("n1") & " deduction out of " & TotalPossiblePts.ToString("n1") & " possible points = " & (SSummary.TotalScore / TotalPossiblePts).ToString("p1")
+                    '  TotalScore = (SAssignment.TotalScore / TotalPossiblePts).ToString("p1")
+                    SAssignment.strTotalScore = SAssignment.TotalScore.ToString("n1") & " deduction out of " & TotalPossiblePts.ToString("n1") & " possible points = " & (SAssignment.TotalScore / TotalPossiblePts).ToString("p1")
 
-                    strStudentReport = strStudentReport.Replace("[SCORE]", TotalScore & vbCrLf)
+                    strStudentReport = strStudentReport.Replace("[SCORE]", SAssignment.strTotalScore & vbCrLf)
 
 
                 Case Else
@@ -1769,16 +1769,12 @@ Module ValidateVB
         End With
     End Sub
 
-    Sub integrateSSummary(SSummary As Assignment.AppSummary, ByRef IntSSummary As Assignment.AppSummary, isFirst As Boolean)
-
-    End Sub
-
     Function SomeVarDisplayed(a() As String) As Boolean
         ' This checks an array of strings to see if any of them have settings which are either required or show var. If so, it returns true, else it returns false.
-        Dim Flag As Boolean
+        '      Dim Flag As Boolean
         Dim Setting As New MySettings
 
-        Flag = False
+        '    Flag = False
 
         For Each s As String In a
             Setting = Find_Setting(s, "SomeVarDisplayed")
@@ -1793,11 +1789,11 @@ Module ValidateVB
 
 
 
-    Function AppendToReport(rpt As String, Template As Integer, Title As String, topic As Assignment.MyItems, ByRef errcnt As Integer, ByRef err As String, Item As String, ByRef total As Decimal) As String
+    Function AppendToReport(rpt As String, Template As Integer, Title As String, topic As MyItems, ByRef errcnt As Integer, ByRef err As String, Item As String, ByRef total As Decimal) As String
         Dim s As String = ""
         Dim isok As String = ""
         Dim req As String
-        Dim errstring As String = ""
+        '     Dim errstring As String = ""
         Dim EC As New ErrComments
         Dim feedback As String
         Dim nonChk As String = ""
@@ -1878,6 +1874,7 @@ Module ValidateVB
 
 
                 ' check to see if item is required
+                req = ""
                 If Setting.Req Then
                     If Setting.Req Then req = "*" Else req = ""
                     If .cssClass = "itemred" Then
@@ -1926,7 +1923,7 @@ Module ValidateVB
                 ' generate the HTML segment
                 Select Case Template
                     Case 1
-                        s = String.Format(tr1, "", req, isok, nonChk, Title, .cssClass, .Status, Setting.MaxPts, .YourPts, .Comments)
+                        s = String.Format(tr1, "", req, isok, nonChk, Title, .cssClass, .Status, Setting.MaxPts, .YourPts)
                     Case 2
                         s = String.Format(tr2, "", req, isok, nonChk, Title, .cssClass, .Status, Setting.MaxPts, .YourPts, .Comments)
                     Case 3
@@ -1955,7 +1952,7 @@ Module ValidateVB
     End Function
 
 
-    Sub PopulateNonCheckCSS_Form2(ByRef AppForm As Assignment.AppForm)
+    Sub PopulateNonCheckCSS_Form2(ByRef AppForm() As MyItems)
         Dim nc As String = ""                       ' Non-checked property
         Dim c As String = "ncWhite"    ' Checked property
 
@@ -1969,168 +1966,167 @@ Module ValidateVB
             nc = "ncWhite"
         End If
 
-        With AppForm
-            ' -----------------------------------------------------------
 
-            If Find_Setting("RenameObjects", "PopulatenonCheckCSS").Req Then
-                .ObjButton.cssNonChk = c
-                .ObjLabel.cssNonChk = c
-                .ObjActiveLabel.cssNonChk = c
-                .ObjNonactiveLabel.cssNonChk = c
-                .ObjTextbox.cssNonChk = c
-                .ObjListbox.cssNonChk = c
-                .ObjCombobox.cssNonChk = c
-                .ObjRadioButton.cssNonChk = c
-                .ObjCheckbox.cssNonChk = c
-                .ObjGroupBox.cssNonChk = c
-                .ObjPanel.cssNonChk = c
-                .ObjWebBrowser.cssNonChk = c
-                .ObjOpenFileDialog.cssNonChk = c
-                .ObjSaveFileDialog.cssNonChk = c
+        ' -----------------------------------------------------------
 
-            Else
-                .ObjButton.cssNonChk = nc
-                .ObjLabel.cssNonChk = nc
-                .ObjActiveLabel.cssNonChk = nc
-                .ObjNonactiveLabel.cssNonChk = nc
-                .ObjTextbox.cssNonChk = nc
-                .ObjListbox.cssNonChk = nc
-                .ObjCombobox.cssNonChk = nc
-                .ObjRadioButton.cssNonChk = nc
-                .ObjCheckbox.cssNonChk = nc
-                .ObjGroupBox.cssNonChk = nc
-                .ObjPanel.cssNonChk = nc
-                .ObjWebBrowser.cssNonChk = nc
-                .ObjOpenFileDialog.cssNonChk = nc
-                .ObjSaveFileDialog.cssNonChk = nc
+        If Find_Setting("RenameObjects", "PopulatenonCheckCSS").Req Then
+            AppForm(EnForm.ObjButton).cssNonChk = c
+            AppForm(EnForm.objLabel).cssNonChk = c
+            AppForm(EnForm.ObjActiveLabel).cssNonChk = c
+            AppForm(EnForm.ObjNonactiveLabel).cssNonChk = c
+            AppForm(EnForm.ObjTextbox).cssNonChk = c
+            AppForm(EnForm.ObjListbox).cssNonChk = c
+            AppForm(EnForm.ObjCombobox).cssNonChk = c
+            AppForm(EnForm.ObjRadioButton).cssNonChk = c
+            AppForm(EnForm.ObjCheckbox).cssNonChk = c
+            AppForm(EnForm.ObjGroupBox).cssNonChk = c
+            AppForm(EnForm.ObjPanel).cssNonChk = c
+            AppForm(EnForm.ObjWebBrowser).cssNonChk = c
+            AppForm(EnForm.ObjOpenFileDialog).cssNonChk = c
+            AppForm(EnForm.ObjSaveFileDialog).cssNonChk = c
 
-            End If
+        Else
+            AppForm(EnForm.ObjButton).cssNonChk = nc
+            AppForm(EnForm.objLabel).cssNonChk = nc
+            AppForm(EnForm.ObjActiveLabel).cssNonChk = nc
+            AppForm(EnForm.ObjNonactiveLabel).cssNonChk = nc
+            AppForm(EnForm.ObjTextbox).cssNonChk = nc
+            AppForm(EnForm.ObjListbox).cssNonChk = nc
+            AppForm(EnForm.ObjCombobox).cssNonChk = nc
+            AppForm(EnForm.ObjRadioButton).cssNonChk = nc
+            AppForm(EnForm.ObjCheckbox).cssNonChk = nc
+            AppForm(EnForm.ObjGroupBox).cssNonChk = nc
+            AppForm(EnForm.ObjPanel).cssNonChk = nc
+            AppForm(EnForm.ObjWebBrowser).cssNonChk = nc
+            AppForm(EnForm.ObjOpenFileDialog).cssNonChk = nc
+            AppForm(EnForm.ObjSaveFileDialog).cssNonChk = nc
 
-            If Find_Setting("ObjOpenFileDialog", "PopulatenonCheckCSS").Req Then .ObjOpenFileDialog.cssNonChk = c Else .ObjOpenFileDialog.cssNonChk = nc
-            If Find_Setting("ObjSaveFileDialog", "PopulatenonCheckCSS").Req Then .ObjSaveFileDialog.cssNonChk = c Else .ObjSaveFileDialog.cssNonChk = nc
+        End If
 
-            If Find_Setting("ChangeFormText", "PopulatenonCheckCSS").Req Then .FormText.cssNonChk = c Else .FormText.cssNonChk = nc
+        If Find_Setting("ObjOpenFileDialog", "PopulatenonCheckCSS").Req Then AppForm(EnForm.ObjOpenFileDialog).cssNonChk = c Else AppForm(EnForm.ObjOpenFileDialog).cssNonChk = nc
+        If Find_Setting("ObjSaveFileDialog", "PopulatenonCheckCSS").Req Then AppForm(EnForm.ObjSaveFileDialog).cssNonChk = c Else AppForm(EnForm.ObjSaveFileDialog).cssNonChk = nc
 
-            If Find_Setting("ChangeFormColor", "PopulatenonCheckCSS").Req Then .FormBackColor.cssNonChk = c Else .FormBackColor.cssNonChk = nc
-            If Find_Setting("SetFormAcceptButton", "PopulatenonCheckCSS").Req Then .FormAcceptButton.cssNonChk = c Else .FormAcceptButton.cssNonChk = nc
-            If Find_Setting("SetFormCancelButton", "PopulatenonCheckCSS").Req Then .FormCancelButton.cssNonChk = c Else .FormCancelButton.cssNonChk = nc
-            If Find_Setting("ModifyStartPosition", "PopulatenonCheckCSS").Req Then .FormStartPosition.cssNonChk = c Else .FormStartPosition.cssNonChk = nc
-            If Find_Setting("LogicFormLoad", "PopulatenonCheckCSS").Req Then .FormLoadMethod.cssNonChk = c Else .FormLoadMethod.cssNonChk = nc
+        If Find_Setting("ChangeFormText", "PopulatenonCheckCSS").Req Then AppForm(EnForm.FormText).cssNonChk = c Else AppForm(EnForm.FormText).cssNonChk = nc
 
-            ' ----------------------------------------------------------
-
-        End With
-
-    End Sub
-
-
-
-    Sub PopulateNonCheckCSS_Summary(ByRef AppSum As Assignment.AppSummary, ByRef Assign As Assignment)
-        Dim nc As String = ""                       ' Non-checked property
-        Dim c As String = "ncWhite"    ' Checked property
-        Dim item As New MySettings
+        If Find_Setting("ChangeFormColor", "PopulatenonCheckCSS").Req Then AppForm(EnForm.FormBackColor).cssNonChk = c Else AppForm(EnForm.FormBackColor).cssNonChk = nc
+        If Find_Setting("SetFormAcceptButton", "PopulatenonCheckCSS").Req Then AppForm(EnForm.FormAcceptButton).cssNonChk = c Else AppForm(EnForm.FormAcceptButton).cssNonChk = nc
+        If Find_Setting("SetFormCancelButton", "PopulatenonCheckCSS").Req Then AppForm(EnForm.FormCancelButton).cssNonChk = c Else AppForm(EnForm.FormCancelButton).cssNonChk = nc
+        If Find_Setting("ModifyStartPosition", "PopulatenonCheckCSS").Req Then AppForm(EnForm.FormStartPosition).cssNonChk = c Else AppForm(EnForm.FormStartPosition).cssNonChk = nc
+        If Find_Setting("LogicFormLoad", "PopulatenonCheckCSS").Req Then AppForm(EnForm.FormLoadMethod).cssNonChk = c Else AppForm(EnForm.FormLoadMethod).cssNonChk = nc
 
         ' ----------------------------------------------------------
 
-        If HideGray = "Gray" Then
-            nc = "ncGray"
-        ElseIf HideGray = "Hide" Then
-            nc = "ncHide"
-        Else
-            nc = "ncWhite"
-        End If
 
-        With AppSum
-            ' ----------------------------------------------------------
-            setchecked(Find_Setting("InfoAppTitle", "PopulatenonCheckCSS_summary").Req, .InfoAppTitle, nc, c)
-            setchecked(Find_Setting("InfoDescription", "PopulatenonCheckCSS_summary").Req, .InfoDescription, nc, c)
-            setchecked(Find_Setting("InfoCompany", "PopulatenonCheckCSS_summary").Req, .InfoCompany, nc, c)
-            setchecked(Find_Setting("InfoProduct", "PopulatenonCheckCSS_summary").Req, .InfoProduct, nc, c)
-            setchecked(Find_Setting("InfoTrademark", "PopulatenonCheckCSS_summary").Req, .InfoTrademark, nc, c)
-            setchecked(Find_Setting("InfoCopyright", "PopulatenonCheckCSS_summary").Req, .InfoCopyright, nc, c)
-            setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").Req, .InfoGUID, nc, c)
-
-
-            setchecked(Find_Setting("CommentSubs", "PopulatenonCheckCSS_summary").Req, .CommentSub, nc, c)
-            setchecked(Find_Setting("CommentIF", "PopulatenonCheckCSS_summary").Req, .CommentIF, nc, c)
-            setchecked(Find_Setting("CommentFOR", "PopulatenonCheckCSS_summary").Req, .CommentFor, nc, c)
-            setchecked(Find_Setting("CommentDO", "PopulatenonCheckCSS_summary").Req, .CommentDo, nc, c)
-            setchecked(Find_Setting("CommentWHILE", "PopulatenonCheckCSS_summary").Req, .CommentWhile, nc, c)
-            setchecked(Find_Setting("CommentSELECT", "PopulatenonCheckCSS_summary").Req, .CommentSelect, nc, c)
-
-            setchecked(Find_Setting("VarString", "PopulatenonCheckCSS_summary").Req, .VarString, nc, c)
-            setchecked(Find_Setting("VarBoolean", "PopulatenonCheckCSS_summary").Req, .VarBoolean, nc, c)
-            setchecked(Find_Setting("VarInteger", "PopulatenonCheckCSS_summary").Req, .VarInteger, nc, c)
-            setchecked(Find_Setting("VarDecimal", "PopulatenonCheckCSS_summary").Req, .VarDecimal, nc, c)
-            setchecked(Find_Setting("VarDate", "PopulatenonCheckCSS_summary").Req, .VarDate, nc, c)
-
-            setchecked(Find_Setting("VarArray", "PopulatenonCheckCSS_summary").Req, .VarArrays, nc, c)
-            setchecked(Find_Setting("VarList", "PopulatenonCheckCSS_summary").Req, .VarLists, nc, c)
-            setchecked(Find_Setting("VarStructure", "PopulatenonCheckCSS_summary").Req, .VarStructures, nc, c)
-
-            setchecked(Find_Setting("VariablePrefixes", "PopulatenonCheckCSS_summary").Req, .varPrefixes, nc, c)
-
-            ' setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").req, .LogicFlowControl, nc, c)
-            setchecked(Find_Setting("LogicIF", "PopulatenonCheckCSS_summary").Req, .LogicIF, nc, c)
-            setchecked(Find_Setting("LogicFOR", "PopulatenonCheckCSS_summary").Req, .LogicFor, nc, c)
-            setchecked(Find_Setting("LogicDO", "PopulatenonCheckCSS_summary").Req, .LogicDo, nc, c)
-            setchecked(Find_Setting("LogicWHILE", "PopulatenonCheckCSS_summary").Req, .LogicWhile, nc, c)
-            setchecked(Find_Setting("LogicSelectCase", "PopulatenonCheckCSS_summary").Req, .LogicSelectCase, nc, c)
-            setchecked(Find_Setting("LogicElse", "PopulatenonCheckCSS_summary").Req, .LogicElse, nc, c)
-            setchecked(Find_Setting("LogicElseIF", "PopulatenonCheckCSS_summary").Req, .LogicElseIF, nc, c)
-            setchecked(Find_Setting("LogicTryCatch", "PopulatenonCheckCSS_summary").Req, .LogicTryCatch, nc, c)
-            setchecked(Find_Setting("LogicStreamReader", "PopulatenonCheckCSS_summary").Req, .LogicStreamReader, nc, c)
-            setchecked(Find_Setting("LogicStreamWriter", "PopulatenonCheckCSS_summary").Req, .LogicStreamWriter, nc, c)
-            setchecked(Find_Setting("LogicStreamReaderClose", "PopulatenonCheckCSS_summary").Req, .LogicStreamReaderClose, nc, c)
-            setchecked(Find_Setting("LogicStreamWriterClose", "PopulatenonCheckCSS_summary").Req, .LogicStreamWriterClose, nc, c)
-            setchecked(Find_Setting("LogicSub", "PopulatenonCheckCSS_summary").Req, .LogicSub, nc, c)
-            '  setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").req, .LogicFunction, nc, c)
-            setchecked(Find_Setting("LogicOptional", "PopulatenonCheckCSS_summary").Req, .LogicOptional, nc, c)
-            setchecked(Find_Setting("LogicByRef", "PopulatenonCheckCSS_summary").Req, .LogicByRef, nc, c)
-            setchecked(Find_Setting("LogicConvertToString", "PopulatenonCheckCSS_summary").Req, .LogicCStr, nc, c)
-            '   setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").req, .LogicToString, nc, c)
-            setchecked(Find_Setting("LogicStringFormat", "PopulatenonCheckCSS_summary").Req, .LogicStringFormat, nc, c)
-
-
-
-            '     setchecked(Find_Setting("Req Variable Prefixes", "PopulatenonCheckCSS_summary").req, .LogicVarPrefixes, nc, c)
-            setchecked(Find_Setting("LogicNestedIF", "PopulatenonCheckCSS_summary").Req, .LogicNestedIF, nc, c)
-            setchecked(Find_Setting("LogicNestedFOR", "PopulatenonCheckCSS_summary").Req, .LogicNestedFOR, nc, c)
-
-            '        setchecked(find_Setting("", "PopulatenonCheckCSS_summary").req, .LogicStringFormatting, nc, c)
-            setchecked(Find_Setting("LogicComplexConditions", "PopulatenonCheckCSS_summary").Req, .LogicComplexConditions, nc, c)
-            setchecked(Find_Setting("LogicCaseInsensitive", "PopulatenonCheckCSS_summary").Req, .LogicCaseInsensitive, nc, c)
-            setchecked(Find_Setting("LogicStringFormatParameters", "PopulatenonCheckCSS_summary").Req, .LogicStringFormat, nc, c)
-            setchecked(Find_Setting("LogicConcatination", "PopulatenonCheckCSS_summary").Req, .LogicConcatination, nc, c)
-
-            '     setchecked(Find_Setting("UtilizeLogicFormLoad", "PopulatenonCheckCSS_summary").Req, .FormLoadMethod, nc, c)
-
-            setchecked(Find_Setting("SystemIO", "PopulatenonCheckCSS_summary").Req, .SystemIO, nc, c)
-            setchecked(Find_Setting("SystemNet", "PopulatenonCheckCSS_summary").Req, .SystemNet, nc, c)
-            setchecked(Find_Setting("SystemDB", "PopulatenonCheckCSS_summary").Req, .SystemDB, nc, c)
-
-
-            setchecked(Find_Setting("OptionStrict", "PopulatenonCheckCSS_summary").Req, Assign.OptionStrict, nc, c)
-            setchecked(Find_Setting("OptionExplicit", "PopulatenonCheckCSS_summary").Req, Assign.OptionExplicit, nc, c)
-            ' ----------------------------------------------------------
-            setchecked(Find_Setting("hasSLN", "PopulatenonCheckCSS_summary").Req, Assign.hasSLN, nc, c)
-            setchecked(Find_Setting("hasvbProj", "PopulatenonCheckCSS_summary").Req, Assign.hasVBproj, nc, c)
-            setchecked(Find_Setting("hasSplashScreen", "PopulatenonCheckCSS_summary").Req, Assign.hasSplashScreen, nc, c)
-            setchecked(Find_Setting("hasAboutBox", "PopulatenonCheckCSS_summary").Req, Assign.hasAboutBox, nc, c)
-            setchecked(Find_Setting("LogicModule", "PopulatenonCheckCSS_summary").Req, Assign.Modules, nc, c)
-            ' ----------------------------------------------------------
-         End With
-        ' ----------------------------------------------------------
     End Sub
 
-    Sub setchecked(chk As Boolean, ByRef obj As Assignment.MyItems, nc As String, c As String)
-        If Not chk Then
-            obj.cssNonChk = nc
-            obj.req = False
-        Else
-            obj.cssNonChk = c
-            obj.req = True
-        End If
-    End Sub
+
+
+    'Sub PopulateNonCheckCSS_Summary(ByRef AppSum() As MyItems, ByRef Assign As AssignmentInfo)
+    '    Dim nc As String = ""                       ' Non-checked property
+    '    Dim c As String = "ncWhite"    ' Checked property
+    '    Dim item As New MySettings
+
+    '    ' ----------------------------------------------------------
+
+    '    If HideGray = "Gray" Then
+    '        nc = "ncGray"
+    '    ElseIf HideGray = "Hide" Then
+    '        nc = "ncHide"
+    '    Else
+    '        nc = "ncWhite"
+    '    End If
+
+
+    '    ' ----------------------------------------------------------
+    '    setchecked(Find_Setting("InfoAppTitle", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoAppTitle), nc, c)
+    '    setchecked(Find_Setting("InfoDescription", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoDescription), nc, c)
+    '    setchecked(Find_Setting("InfoCompany", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoCompany), nc, c)
+    '    setchecked(Find_Setting("InfoProduct", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoProduct), nc, c)
+    '    setchecked(Find_Setting("InfoTrademark", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoTrademark), nc, c)
+    '    setchecked(Find_Setting("InfoCopyright", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoCopyright), nc, c)
+    '    setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.InfoGUID), nc, c)
+
+
+    '    setchecked(Find_Setting("CommentSubs", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.CommentSub), nc, c)
+    '    setchecked(Find_Setting("CommentIF", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.CommentIF), nc, c)
+    '    setchecked(Find_Setting("CommentFOR", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.CommentFor), nc, c)
+    '    setchecked(Find_Setting("CommentDO", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.CommentDo), nc, c)
+    '    setchecked(Find_Setting("CommentWHILE", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.CommentWhile), nc, c)
+    '    setchecked(Find_Setting("CommentSELECT", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.CommentSelect), nc, c)
+
+    '    setchecked(Find_Setting("VarString", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarString), nc, c)
+    '    setchecked(Find_Setting("VarBoolean", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarBoolean), nc, c)
+    '    setchecked(Find_Setting("VarInteger", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarInteger), nc, c)
+    '    setchecked(Find_Setting("VarDecimal", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarDecimal), nc, c)
+    '    setchecked(Find_Setting("VarDate", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarDate), nc, c)
+
+    '    setchecked(Find_Setting("VarArray", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarArrays), nc, c)
+    '    setchecked(Find_Setting("VarList", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarLists), nc, c)
+    '    setchecked(Find_Setting("VarStructure", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarStructures), nc, c)
+
+    '    setchecked(Find_Setting("VariablePrefixes", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.VarPrefixes), nc, c)
+
+    '    ' setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").Req, AppSum(enSummary.LogicFlowControl), nc, c)
+    '    setchecked(Find_Setting("LogicIF", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicIF), nc, c)
+    '    setchecked(Find_Setting("LogicFOR", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicFor), nc, c)
+    '    setchecked(Find_Setting("LogicDO", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicDo), nc, c)
+    '    setchecked(Find_Setting("LogicWHILE", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicWhile), nc, c)
+    '    setchecked(Find_Setting("LogicSelectCase", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicSelectCase), nc, c)
+    '    setchecked(Find_Setting("LogicElse", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicElse), nc, c)
+    '    setchecked(Find_Setting("LogicElseIF", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicElseIF), nc, c)
+    '    setchecked(Find_Setting("LogicTryCatch", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicTryCatch), nc, c)
+    '    setchecked(Find_Setting("LogicStreamReader", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicStreamReader), nc, c)
+    '    setchecked(Find_Setting("LogicStreamWriter", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicStreamWriter), nc, c)
+    '    setchecked(Find_Setting("LogicStreamReaderClose", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicStreamReaderClose), nc, c)
+    '    setchecked(Find_Setting("LogicStreamWriterClose", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicStreamWriterClose), nc, c)
+    '    setchecked(Find_Setting("LogicSub", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicSub), nc, c)
+    '    '  setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").Req, AppSum(enSummary.LogicFunction), nc, c)
+    '    setchecked(Find_Setting("LogicOptional", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicOptional), nc, c)
+    '    setchecked(Find_Setting("LogicByRef", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicByRef), nc, c)
+    '    setchecked(Find_Setting("LogicConvertToString", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicCStr), nc, c)
+    '    '   setchecked(Find_Setting("", "PopulatenonCheckCSS_summary").Req, AppSum(enSummary.LogicToString), nc, c)
+    '    setchecked(Find_Setting("LogicStringFormat", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicStringFormat), nc, c)
+
+
+
+    '    '     setchecked(Find_Setting("Req Variable Prefixes", "PopulatenonCheckCSS_summary").Req, AppSum(enSummary.LogicVarPrefixes), nc, c)
+    '    setchecked(Find_Setting("LogicNestedIF", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicNestedIF), nc, c)
+    '    setchecked(Find_Setting("LogicNestedFOR", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicNestedFor), nc, c)
+
+    '    '        setchecked(find_Setting("", "PopulatenonCheckCSS_summary").Req, AppSum(enSummary.LogicStringFormatting), nc, c)
+    '    setchecked(Find_Setting("LogicComplexConditions", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicComplexConditions), nc, c)
+    '    setchecked(Find_Setting("LogicCaseInsensitive", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicCaseInsensitive), nc, c)
+    '    setchecked(Find_Setting("LogicStringFormatParameters", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicStringFormat), nc, c)
+    '    setchecked(Find_Setting("LogicConcatination", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.LogicConcatination), nc, c)
+
+    '    '     setchecked(Find_Setting("UtilizeLogicFormLoad", "PopulatenonCheckCSS_summary").Req, AppSum(enSummary.FormLoadMethod), nc, c)
+
+    '    setchecked(Find_Setting("SystemIO", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.SystemIO), nc, c)
+    '    setchecked(Find_Setting("SystemNet", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.SystemNet), nc, c)
+    '    setchecked(Find_Setting("SystemDB", "PopulatenonCheckCSS_summary").Req, AppSum(EnSummary.SystemDB), nc, c)
+
+
+    '    setchecked(Find_Setting("OptionStrict", "PopulatenonCheckCSS_summary").Req, Assign.OptionStrict, nc, c)
+    '    setchecked(Find_Setting("OptionExplicit", "PopulatenonCheckCSS_summary").Req, Assign.OptionExplicit, nc, c)
+    '    ' ----------------------------------------------------------
+    '    setchecked(Find_Setting("hasSLN", "PopulatenonCheckCSS_summary").Req, Assign.hasSLN, nc, c)
+    '    setchecked(Find_Setting("hasvbProj", "PopulatenonCheckCSS_summary").Req, Assign.hasVBproj, nc, c)
+    '    setchecked(Find_Setting("hasSplashScreen", "PopulatenonCheckCSS_summary").Req, Assign.hasSplashScreen, nc, c)
+    '    setchecked(Find_Setting("hasAboutBox", "PopulatenonCheckCSS_summary").Req, Assign.hasAboutBox, nc, c)
+    '    setchecked(Find_Setting("LogicModule", "PopulatenonCheckCSS_summary").Req, Assign.Modules, nc, c)
+    '    ' ----------------------------------------------------------
+
+    '    ' ----------------------------------------------------------
+    'End Sub
+
+    'Sub setchecked(chk As Boolean, ByRef obj As MyItems, nc As String, c As String)
+    '    If Not chk Then
+    '        obj.cssNonChk = nc
+    '        obj.req = False
+    '    Else
+    '        obj.cssNonChk = c
+    '        obj.req = True
+    '    End If
+    'End Sub
 
 End Module

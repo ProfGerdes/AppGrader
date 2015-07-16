@@ -3,7 +3,7 @@
 Module Settings
 
     Public Class MySettings
-        Public ID As Integer
+        '  Public ID As Integer
         Public nm As String
         Public DVG As String
         Public Name As String

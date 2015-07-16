@@ -1,6 +1,6 @@
-﻿Public Class Assignment
+﻿Module Assignment
 
-    Enum dgvs
+    Public Enum dgvs
         ApplicationSettings = 1
         SystemVariables = 2
         LogicVariables = 3
@@ -10,476 +10,410 @@
     End Enum
     ' ======================================================================
 
-    ' Application variables - there is only one of each of these per app.
-    Public StudentID As String
-    Public AppTitle As String
-    Public AssignRoot As String
-    Public AssignPath As String    ' This is specific to the student
-    Public CompileDate As String
-    ' --------------------------
+    Public Enum EnForm
+        ObjFormPrefixes = 0
+        ObjButton = 1
+        objLabel = 2
+        ObjActiveLabel = 3
+        ObjNonactiveLabel = 4
+        ObjTextbox = 5
+        ObjListbox = 6
+        ObjCombobox = 7
+        ObjRadioButton = 8
+        ObjCheckbox = 9
+        ObjGroupBox = 10
+        ObjPanel = 11
+        ObjWebBrowser = 12
+        ObjWebClient = 13
+        ' -----------------------------
+        ObjOpenFileDialog = 14
+        ObjSaveFileDialog = 15
+        ' -----------------------------
+        FormName = 16
+        FormText = 17
+        FormBackColor = 18
+        FormAcceptButton = 19
+        FormCancelButton = 20
+        FormStartPosition = 21
+        FormLoadMethod = 22
+    End Enum
 
-    Public OptionStrict As New MyItems
-    Public OptionExplicit As New MyItems
+    Public Const nForm As Integer = 22
 
-    Public hasSLN As New MyItems
-    Public VBVersion As New MyItems
-    Public hasVBproj As New MyItems
-    Public hasSplashScreen As New MyItems
-    Public hasAboutBox As New MyItems
+    Public EnFormNames() As String = {"ObjFormPrefixes", "ObjButton", "objLabel", "ObjActiveLabel", "ObjNonactiveLabel", "ObjTextbox", "ObjListbox", "ObjCombobox", "ObjRadioButton", "ObjCheckbox", "ObjGroupBox", "ObjPanel", "ObjWebBrowser", "ObjWebClient", "ObjOpenFileDialog", "ObjSaveFileDialog", "FormName", "FormText", "FormBackColor", "FormAcceptButton", "FormCancelButton", "FormStartPosition", "FormLoadMethod"}
 
-    Public Modules As New MyItems    ' ????????????????????
-    '     Dim BreakPoints As myitems
-    '     Dim WatchVariables As myitems
+    Public Enum EnSummary
+        StudentID = 0
 
-    Public Sub New()
-        Dim nc As String = ""                       ' Non-checked property
-        Dim c As String = "ncWhite"    ' Checked property
-        ' ----------------------------------------------------------
-        If HideGray = "Gray" Then
-            nc = "ncGray"
-        ElseIf HideGray = "Hide" Then
-            nc = "ncHide"
-        Else
-            nc = "ncWhite"
-        End If
+        OptionStrict = 1
+        OptionExplicit = 2
 
-         ' ----------------------------------------------------------
-        setchecked(Find_Setting("OptionStrict", "new").Req, OptionStrict, nc, c)
-        setchecked(Find_Setting("OptionExplicit", "new").Req, OptionExplicit, nc, c)
-        ' ----------------------------------------------------------
-        setchecked(Find_Setting("hasSLN", "new").Req, hasSLN, nc, c)
-        setchecked(Find_Setting("hasvbProj", "new").Req, hasVBproj, nc, c)
-        setchecked(Find_Setting("hasSplashScreen", "new").Req, hasSplashScreen, nc, c)
-        setchecked(Find_Setting("hasAboutBox", "new").Req, hasAboutBox, nc, c)
-        '       setchecked(Find_Setting("Module","new").req, Modules, nc, c)
+        hasSLN = 3
+        hasVBproj = 4
+        hasSplashScreen = 5
+        hasAboutBox = 6
 
-    End Sub
+        InfoAppTitle = 7
+        InfoDescription = 8
+        InfoCompany = 9
+        InfoProduct = 10
+        InfoTrademark = 11
+        InfoCopyright = 12
+        InfoGUID = 13
 
-    Public Sub setchecked(chk As Boolean, ByRef obj As MyItems, nc As String, c As String)
-        If Not chk Then
-            obj.cssNonChk = nc
-            obj.req = False
-        Else
-            obj.cssNonChk = c
-            obj.req = True
-        End If
-    End Sub
-
-
-    Public Sub StuffAppData(StudID As String, ApplicationName As String, AssignmentRoot As String, AssignmentPath As String, CompDate As Date, OptStrict As Boolean, optExplicit As Boolean, has_SLN As Boolean, VB_Version As String, has_VBProj As Boolean, has_SplashScreen As Boolean, has_AboutBox As Boolean, N_Modules As Integer)
-
-        Try
-            StudentID = StudID
-            AppTitle = ApplicationName
-            AssignRoot = AssignmentRoot
-            AssignPath = AssignmentPath
-            CompileDate = CompDate.ToString
-
-
-            OptionStrict.Status = OptStrict.ToString
-            OptionExplicit.Status = optExplicit.ToString
-
-            hasSLN.Status = has_SLN.ToString
-            VBVersion.Status = VB_Version
-            hasVBproj.Status = has_VBProj.ToString
-            hasSplashScreen.Status = has_SplashScreen.ToString
-            hasAboutBox.Status = has_AboutBox.ToString
-            Modules.Status = N_Modules.ToString
-        Catch ex As Exception
-            MessageBox.Show(ex.Message)
-        End Try
-    End Sub
-
-    ' ========================================================================
-    Public Class MyItems
-        ' each assessment item has a MyItems structure. Req, PtsperError, and PossiblePts are set by instructor to determine
-        ' the grading for each assessment item per assignment.
-        Public req As Boolean
-        Public showVar As Boolean  ' if we want this, need to bring it in on the datagridview.
-        Public PtsPerError As Decimal
-        Public PossiblePts As Decimal
-
-        Public Status As String          ' holds the main strings associated with the item
-        Public cnt As Integer
-        Public n As Integer              ' number of instances found
-        Public cssClass As String
-        Public cssNonChk As String       ' can be either hidden, gray or white(none)
-        Public bad As String
-        Public good As String
-
-        Public BlockID As Integer
-        Public YourPts As Decimal
-        Public Comments As String
-        Public isBad As Boolean
-        Public ID As String
-
-        Sub clear()
-            req = False
-            showVar = False
-            PtsPerError = 0
-            PossiblePts = 0
-
-            Status = ""
-            cnt = 0
-            n = 0
-            cssClass = ""
-            cssNonChk = ""
-            bad = ""
-            good = ""
-
-            BlockID = 0
-            YourPts = 0
-            Comments = ""
-            isBad = False
-            ID = ""
-        End Sub
-
-    End Class
-    ' ========================================================================
-
-
-    ' ========================================================================
-    ' Form variables - one each of these per form (Class with form)
-    Public Class AppForm
-        Public ObjFormPrefixes As New MyItems
-
-        Public ObjButton As New MyItems
-        Public ObjLabel As New MyItems
-        Public ObjActiveLabel As New MyItems
-        Public ObjNonactiveLabel As New MyItems
-        Public ObjTextbox As New MyItems
-        Public ObjListbox As New MyItems
-        Public ObjCombobox As New MyItems
-        Public ObjRadioButton As New MyItems
-        Public ObjCheckbox As New MyItems
-        Public ObjGroupBox As New MyItems
-        Public ObjPanel As New MyItems
-        Public ObjWebBrowser As New MyItems
-        ' Public ObjWebClient As New MyIte
-
-        Public ObjOpenFileDialog As New MyItems
-        Public ObjSaveFileDialog As New MyItems
-
-        Public FormName As New MyItems
-        Public FormText As New MyItems
-        Public FormBackColor As New MyItems
-        Public FormAcceptButton As New MyItems
-        Public FormCancelButton As New MyItems
-        Public FormStartPosition As New MyItems
-        Public FormLoadMethod As New MyItems
-
-        Public Sub Clear()
-            ObjFormPrefixes.clear()
-
-            ObjButton.clear()
-            ObjLabel.clear()
-            ObjActiveLabel.clear()
-            ObjNonactiveLabel.clear()
-            ObjTextbox.clear()
-            ObjListbox.clear()
-            ObjCombobox.clear()
-            ObjRadioButton.clear()
-            ObjCheckbox.clear()
-            ObjGroupBox.clear()
-            ObjPanel.clear()
-            ObjWebBrowser.clear()
-            '  ObjWebClient.clear()
-
-            ObjOpenFileDialog.clear()
-            ObjSaveFileDialog.clear()
-
-            FormName.clear()
-            FormText.clear()
-            FormBackColor.clear()
-            FormAcceptButton.clear()
-            FormCancelButton.clear()
-            FormStartPosition.clear()
-            FormLoadMethod.clear()
-        End Sub
-    End Class
-    ' ========================================================================
-
-
-    ' ========================================================================
-    ' Logic variables - one each of these per code file (class, module, and VB code files)
-
-    Public Class AppSummary
-        '      Public AppTitle As myitems
-
-        Public TotalScore As Decimal
-
-
-        ' dgvDevEnvironment
-        Public OptionStrict As New MyItems
-        Public OptionExplicit As New MyItems
-        Public hasSLN As New MyItems
-        Public hasvbProj As New MyItems
-        Public hasSplashScreen As New MyItems
-        Public hasAboutBox As New MyItems
-
-        ' dgvAppInfo
-        Public InfoAppTitle As New MyItems
-        Public InfoDescription As New MyItems
-        Public InfoCompany As New MyItems
-        Public InfoProduct As New MyItems
-        Public InfoTrademark As New MyItems
-        Public InfoCopyright As New MyItems
-        Public InfoGUID As New MyItems
-
-        ' dgvCompileOptions
-
-        ' .dgvComments
-        Public CommentGeneral As New MyItems
-        Public CommentSub As New MyItems
-        Public CommentIF As New MyItems
-        Public CommentFor As New MyItems
-        Public CommentDo As New MyItems
-        Public CommentWhile As New MyItems
-        Public CommentSelect As New MyItems
-
+        CommentGeneral = 14
+        CommentSub = 15
+        CommentIF = 16
+        CommentFor = 17
+        CommentDo = 18
+        CommentWhile = 19
+        CommentSelect = 20
 
         'dgvFormDesign
-        Public RenameObjects As New MyItems
-        Public IncludeFrmInFormName As New MyItems
-        Public ChangeFormText As New MyItems
-        Public ChangeFormColor As New MyItems
-        Public SetFormAcceptButton As New MyItems
-        Public SetFormCancelButton As New MyItems
-        Public ModifyStartPosition As New MyItems
-
+        RenameObjects = 21
+        IncludeFrmInFormName = 22
+        ChangeFormText = 23
+        ChangeFormColor = 24
+        SetFormAcceptButton = 25
+        SetFormCancelButton = 26
+        ModifyStartPosition = 27
 
         ' dgvImports
-        Public SystemIO As New MyItems
-        Public SystemNet As New MyItems
-        Public SystemDB As New MyItems
+        SystemIO = 28
+        SystemNet = 29
+        SystemDB = 30
 
-        ' DataStructures
+        VarArrays = 31
+        VarLists = 32
+        VarStructures = 33
 
-        Public VarArrays As New MyItems
-        Public VarLists As New MyItems
-        Public VarStructures As New MyItems
+        VarBoolean = 34
+        VarInteger = 35
+        VarDecimal = 36
+        VarDate = 37
+        VarString = 38
+        VarPrefixes = 39
 
-        ' DataTypes
-        Public VarBoolean As New MyItems
-        Public VarInteger As New MyItems
-        Public VarDecimal As New MyItems
-        Public VarDate As New MyItems
-        Public VarString As New MyItems
-        Public VariablePrefixes As New MyItems
+        LogicIF = 40
+        LogicFor = 41
+        LogicDo = 42
+        LogicWhile = 43
+        LogicElse = 44
+        LogicElseIF = 45
+        LogicMessageBox = 46
+        LogicNestedIF = 47
+        LogicNestedFor = 48
+        LogicSelectCase = 49
+        LogicConcatination = 50
+        LogicConvertToString = 51
+        LogicToStringFormat = 52
+        LogicStringFormat = 53
+        LogicStringFormatParameters = 54
+        LogicComplexConditions = 55
+        LogicCaseInsensitive = 56
+        LogicTryCatch = 57
+        LogicStreamReader = 58
+        LogicStreamWriter = 59
+        LogicStreamReaderClose = 60
+        LogicStreamWriterClose = 61
 
-        ' Coding
-        Public LogicIF As New MyItems
-        Public LogicFor As New MyItems
-        Public LogicDo As New MyItems
-        Public LogicWhile As New MyItems
-        Public LogicElse As New MyItems
-        Public LogicElseIF As New MyItems
-        Public LogicMessageBox As New MyItems     ' ??????????????? need to handle this. Add to config
-        Public LogicNestedIF As New MyItems
-        Public LogicNestedFOR As New MyItems
-        Public LogicSelectCase As New MyItems
-        Public LogicConcatination As New MyItems
-        Public LogicConvertToString As New MyItems
-        Public LogicToStringFormat As New MyItems
-        Public LogicStringFormat As New MyItems
-        Public LogicStringFormatParameters As New MyItems
-        Public LogicComplexConditions As New MyItems
-        Public LogicCaseInsensitive As New MyItems
-        Public LogicTryCatch As New MyItems
-        Public LogicStreamReader As New MyItems
-        Public LogicStreamWriter As New MyItems
-        Public LogicStreamReaderClose As New MyItems
-        Public LogicStreamWriterClose As New MyItems
+        LogicCStr = 62
+        LogicToString = 63
 
-        Public LogicCStr As New MyItems
-        Public LogicToString As New MyItems
+        LogicSub = 64
+        LogicFunction = 65
+        LogicOptional = 66
+        LogicByRef = 67
+        LogicMultipleForms = 68
+        LogicModule = 69
+        LogicFormLoad = 70
 
+        LogicVarPrefixes = 71
+        LogicFlowControl = 72
+        TotalScore = 73
+    End Enum
 
+    Public Const NSummary As Integer = 73
 
-        ' Subs
-        Public LogicSub As New MyItems
-        Public LogicFunction As New MyItems
-        Public LogicOptional As New MyItems
-        Public LogicByRef As New MyItems
-        Public LogicMultipleForms As New MyItems
-        Public LogicModule As New MyItems
-        Public LogicFormLoad As New MyItems
+    Public EnSummaryName() As String = {"StudentID", "OptionStrict", "OptionExplicit", "hasSLN", "hasVBproj", "hasSplashScreen", "hasAboutBox", "InfoAppTitle", "InfoDescription", "InfoCompany", "InfoProduct", "InfoTrademark", "InfoCopyright", "InfoGUID", "CommentGeneral", "CommentSub", "CommentIF", "CommentFor", "CommentDo", "CommentWhile", "CommentSelect", "RenameObjects", "IncludeFrmInFormName", "ChangeFormText", "ChangeFormColor", "SetFormAcceptButton", "SetFormCancelButton", "ModifyStartPosition", "SystemIO", "SystemNet", "SystemDBv", "VarArrays", "VarLists", "VarStructures", "VarBoolean", "VarInteger", "VarDecimal", "VarDate", "VarString", "VarPrefixes", "LogicIF", "LogicFor", "LogicDo", "LogicWhile", "LogicElse", "LogicElseIF", "LogicMessageBox", "LogicNestedIF", "LogicNestedFor", "LogicSelectCase", "LogicConcatination", "LogicConvertToString", "LogicToStringFormat", "LogicStringFormat", "LogicStringFormatParameters", "LogicComplexConditions", "LogicCaseInsensitive", "LogicTryCatch", "LogicStreamReader", "LogicStreamWriter", "LogicStreamReaderClose", "LogicStreamWriterClose", "LogicCStr", "LogicToString", "LogicSub", "LogicFunction", "LogicOptional", "LogicByRef", "LogicMultipleForms", "LogicModule", "LogicFormLoad", "LogicVarPrefixes", "LogicFlowControl", "TotalScore"}
 
 
-        Public varPrefixes As New MyItems
-        Public LogicVarPrefixes As New MyItems
+    ' ========================================================================
+    Public Structure MyItems
+        ' each assessment item has a MyItems structure. Req, PtsperError, and PossiblePts are set by instructor to determine
+        ' the grading for each assessment item per assignment.
+        Dim req As Boolean
+        Dim showVar As Boolean  ' if we want this, need to bring it in on the datagridview.
+        Dim PtsPerError As Decimal
+        Dim PossiblePts As Decimal
 
-        Public LogicFlowControl As New MyItems
+        Dim Status As String          ' holds the main strings associated with the item
+        Dim cnt As Integer
+        Dim n As Integer              ' number of instances found
+        Dim cssClass As String
+        Dim cssNonChk As String       ' can be either hidden, gray or white(none)
+        Dim bad As String
+        Dim good As String
+
+        Dim BlockID As Integer
+        Dim YourPts As Decimal
+        Dim Comments As String
+        Dim isBad As Boolean
+        Dim ID As String
+    End Structure
+    ' ========================================================================
+
+    Public Structure AssignmentInfo
+        Dim StudentID As String
+        Dim AppTitle As String
+        Dim AssignRoot As String
+        Dim AssignPath As String    ' This is specific to the student
+        Dim CompileDate As String
+        ' --------------------------
+        Dim TotalScore As Decimal
+        Dim strTotalScore As String
+        ' --------------------------
+        Dim OptionStrict As MyItems
+        Dim OptionExplicit As MyItems
+
+        Dim hasSLN As MyItems
+        Dim VBVersion As MyItems
+        Dim hasVBproj As MyItems
+        Dim hasSplashScreen As MyItems
+        Dim hasAboutBox As MyItems
+        Dim Modules As MyItems    ' ????????????????????
+    End Structure
+
+    Structure MyItems1
+        Dim ID As Integer
+        Dim Name As String
+        Dim dgv As Integer
+    End Structure
+
+
+    '    Public Items1 As New List(Of MyItems)
  
-        ' ========================================================================
 
-        Public Sub New()   ' AppSummary
-
-            Dim nc As String = ""                       ' Non-checked property
-            Dim c As String = "ncWhite"    ' Checked property
-            Dim item As New MySettings
-
-            ' ----------------------------------------------------------
-
-            If HideGray = "Gray" Then
-                nc = "ncGray"
-            ElseIf HideGray = "Hide" Then
-                nc = "ncHide"
-            Else
-                nc = "ncWhite"
-            End If
-
-            setchecked(Find_Setting("InfoAppTitle", "new2").Req, InfoAppTitle, nc, c)
-            setchecked(Find_Setting("InfoDescription", "new2").Req, InfoDescription, nc, c)
-            setchecked(Find_Setting("InfoCompany", "new2").Req, InfoCompany, nc, c)
-            setchecked(Find_Setting("InfoProduct", "new2").Req, InfoProduct, nc, c)
-            setchecked(Find_Setting("InfoTrademark", "new2").Req, InfoTrademark, nc, c)
-            setchecked(Find_Setting("InfoCopyright", "new2").Req, InfoCopyright, nc, c)
-            setchecked(Find_Setting("", "new2").Req, InfoGUID, nc, c)
+    '    Public myindex As Integer
 
 
-            setchecked(Find_Setting("CommentGeneral", "new2").Req, CommentGeneral, nc, c)
-            setchecked(Find_Setting("CommentSubs", "new2").Req, CommentSub, nc, c)
-            setchecked(Find_Setting("CommentIF", "new2").Req, CommentIF, nc, c)
-            setchecked(Find_Setting("CommentFOR", "new2").Req, CommentFor, nc, c)
-            setchecked(Find_Setting("CommentDO", "new2").Req, CommentDo, nc, c)
-            setchecked(Find_Setting("CommentWHILE", "new2").Req, CommentWhile, nc, c)
-            setchecked(Find_Setting("CommentSELECT", "new2").Req, CommentSelect, nc, c)
+    Public Structure MyErrorComments
+        Dim topic As String
+        Dim Comment As String
+    End Structure
 
-            setchecked(Find_Setting("VarString", "new2").Req, VarString, nc, c)
-            setchecked(Find_Setting("VarBoolean", "new2").Req, VarBoolean, nc, c)
-            setchecked(Find_Setting("VarInteger", "new2").Req, VarInteger, nc, c)
-            setchecked(Find_Setting("VarDecimal", "new2").Req, VarDecimal, nc, c)
-            setchecked(Find_Setting("VarDate", "new2").Req, VarDate, nc, c)
 
-            setchecked(Find_Setting("VarArrays", "new2").Req, VarArrays, nc, c)
-            setchecked(Find_Setting("VarLists", "new2").Req, VarLists, nc, c)
-            setchecked(Find_Setting("VarStructures", "new2").Req, VarStructures, nc, c)
+    Public strStudentID As String
+    Public strAssignmentSummary As String = ""
+    '    Public EarliestPostDate As Date
+    '    Public OutputFile As String = ""
 
-            setchecked(Find_Setting("VariablePrefixes", "new2").Req, varPrefixes, nc, c)
+    Public TotalLinesOfCode As Integer
+    Public FileLinesOfCode As Integer
+    Public TotalPossiblePts As Decimal
+    Public TotalScore As Decimal
+    Public SubmissionCompileTime As String = ""
+    Public SubmissionCompileDate As String = ""
 
-            ' setchecked(Find_Setting("","new2").req, LogicFlowControl, nc, c)
-            setchecked(Find_Setting("LogicIF", "new2").Req, LogicIF, nc, c)
-            setchecked(Find_Setting("LogicFOR", "new2").Req, LogicFor, nc, c)
-            setchecked(Find_Setting("LogicDO", "new2").Req, LogicDo, nc, c)
-            setchecked(Find_Setting("LogicWHILE", "new2").Req, LogicWhile, nc, c)
-            setchecked(Find_Setting("LogicSelectCase", "new2").Req, LogicSelectCase, nc, c)
-            setchecked(Find_Setting("LogicElse", "new2").Req, LogicElse, nc, c)
-            setchecked(Find_Setting("LogicElseIF", "new2").Req, LogicElseIF, nc, c)
-            setchecked(Find_Setting("LogicTryCatch", "new2").Req, LogicTryCatch, nc, c)
-            setchecked(Find_Setting("LogicStreamReader", "new2").Req, LogicStreamReader, nc, c)
-            setchecked(Find_Setting("LogicStreamWriter", "new2").Req, LogicStreamWriter, nc, c)
-            setchecked(Find_Setting("LogicStreamReaderClose", "new2").Req, LogicStreamReaderClose, nc, c)
-            setchecked(Find_Setting("LogicStreamWriterClose", "new2").Req, LogicStreamWriterClose, nc, c)
-            setchecked(Find_Setting("LogicSub", "new2").Req, LogicSub, nc, c)
-            '  setchecked(Find_Setting("","new2").req, LogicFunction, nc, c)
-            setchecked(Find_Setting("LogicOptional", "new2").Req, LogicOptional, nc, c)
-            setchecked(Find_Setting("LogicByRef", "new2").Req, LogicByRef, nc, c)
-            setchecked(Find_Setting("LogicConvertToString", "new2").Req, LogicCStr, nc, c)
-            '   setchecked(Find_Setting("","new2").req, LogicToString, nc, c)
-            setchecked(Find_Setting("LogicStringFormat", "new2").Req, LogicStringFormat, nc, c)
-            setchecked(Find_Setting("LogicConcatination", "new2").Req, LogicConcatination, nc, c)
+    Public bullet As String = Chr(149) & " "
 
-            'If Not chkMultiForm,  MultiForm.cssHideNonChk = nchide
-            'If Not chkLineNbr,  OptionStrict.cssHideNonChk = nchide 
-            'If Not chkWordWrap,  OptionStrict.cssHideNonChk = nchide
-            ' ----------------------------------------------------------
-            'setchecked(Find_Setting("hasSLN").Req, Assign.hasSLN, nc, c)
-            'setchecked(Find_Setting("hasvbProj").Req, Assign.hasVBproj, nc, c)
-            'setchecked(Find_Setting("hasSplashScreen").Req, Assign.hasSplashScreen, nc, c)
-            'setchecked(Find_Setting("hasAboutBox").Req, Assign.hasAboutBox, nc, c)
-            'setchecked(Find_Setting("Include Module").Req, Assign.Modules, nc, c)
-            'setchecked(Find_Setting("OptionStrict").Req, Assign.OptionStrict, nc, c)
-            'setchecked(Find_Setting("OptionExplicit").Req, Assign.OptionExplicit, nc, c)
-            'setchecked(Find_Setting("Include a Form LOAD Method").Req, LogicFormLoad, nc, c)
-            ' ----------------------------------------------------------
-        End Sub
 
-        Public Sub setchecked(chk As Boolean, ByRef obj As MyItems, nc As String, c As String)
-            If Not chk Then
-                obj.cssNonChk = nc
-                obj.req = False
-            Else
-                obj.cssNonChk = c
-                obj.req = True
-            End If
-        End Sub
+    ' Config Settings
+    '    Public CfgLanguage As String = "VB"
+    Public cfgAssignmentTitle As String = ""
 
-        Public Sub Clear()
-            InfoAppTitle.clear()
-            InfoDescription.clear()
-            InfoCompany.clear()
-            InfoProduct.clear()
-            InfoTrademark.clear()
-            InfoCopyright.clear()
-            InfoGUID.clear()
+    '    Public CfgPath1 As String = "MyDocuments"
+    Public AllowOverwrite As Boolean = False
+    Public strOutputPath As String = ""     ' this is the root for the whole assignment 
+    Public strStudentRoot As String = ""
+    Public strStudentPath As String = ""
+    '    Public strProjectFile As String = ""
+    '    Public strProjectName As String = ""
+
+    ' ==========================================================
+
+    Public ErrorComments As New List(Of ErrComments)
+    Public GuidIssues As Boolean = False
+    Public CRCIssues As Boolean = False
+
+    Public StudentReportPath As String = ""
+
+    '  Public chkCommentAllVars As Boolean = True
+    Public pbar3max As Integer = 100
+    Public HideGray As String = "Hide"
+    ' ===========================================================================================
+
+    '  Public AppSummary(80) As MyItems  ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    '  Public AppForm(80) As MyItems
 
 
 
-            CommentGeneral.clear()
-            CommentSub.clear()
-            CommentIF.clear()
-            CommentFor.clear()
-            CommentDo.clear()
-            CommentWhile.clear()
-            CommentSelect.clear()
+    ' Application variables - there is only one of each of these per app.
+    '     Dim BreakPoints As myitems
+    '     Dim WatchVariables As myitems
+    ' =========================================================================================================
 
-            VarBoolean.clear()
-            VarInteger.clear()
-            VarDecimal.clear()
-            VarDate.clear()
-            VarString.clear()
+    Public Sub ClearMyItems(a As MyItems)
+        a.req = False
+        a.showVar = False            ' if we want this, need to bring it in on the datagridview.
+        a.PtsPerError = 0
+        a.PossiblePts = 0
 
-            VarArrays.clear()
-            VarLists.clear()
-            VarStructures.clear()
+        a.Status = Nothing          ' holds the main strings associated with the item
+        a.cnt = 0
+        a.n = 0                     ' number of instances found
+        a.cssClass = Nothing
+        a.cssNonChk = Nothing       ' can be either hidden, gray or white(none)
+        a.bad = Nothing
+        a.good = Nothing
 
-            varPrefixes.clear()
+        a.BlockID = 0
+        a.YourPts = 0
+        a.Comments = Nothing
+        a.isBad = False
+        a.ID = Nothing
 
-            LogicFlowControl.clear()
-            LogicIF.clear()
-            LogicFor.clear()
-            LogicDo.clear()
-            LogicWhile.clear()
-            LogicSelectCase.clear()
-            LogicElse.clear()
-            LogicElseIF.clear()
-            LogicTryCatch.clear()
-            LogicSub.clear()
-            LogicFunction.clear()
-            LogicOptional.clear()
-            LogicByRef.clear()
-            LogicModule.clear()
-            LogicMultipleForms.clear()
-            LogicFormLoad.clear()
-            LogicCStr.clear()
-            LogicToString.clear()
-            LogicToStringFormat.clear()
-            LogicConvertToString.clear()
-            LogicStringFormatParameters.clear()
-            LogicCaseInsensitive.clear()
-            LogicComplexConditions.clear()
+    End Sub
 
-            LogicVarPrefixes.clear()
-            LogicNestedIF.clear()
-            LogicNestedFor.clear()
+    'Public Sub ClearAssignmentInfo(a As AssignmentInfo)
+    '    a.StudentID = Nothing
+    '    a.AppTitle = Nothing
+    '    a.AssignRoot = Nothing
+    '    a.AssignPath = Nothing    ' This is specific to the student
+    '    a.CompileDate = Nothing
+    '    ' --------------------------
+    '    a.TotalScore = 0
+    '    a.strTotalScore = Nothing
+    '    ' --------------------------
+    '    ClearMyItems(a.OptionStrict)
+    '    ClearMyItems(a.OptionExplicit)
 
-            '       LogicStringFormatting= nothing
-            LogicComplexConditions.clear()
-            LogicCaseInsensitive.clear()
-            LogicStringFormat.clear()
-            LogicConcatination.clear()
+    '    ClearMyItems(a.hasSLN)
+    '    ClearMyItems(a.VBVersion)
+    '    ClearMyItems(a.hasVBproj)
+    '    ClearMyItems(a.hasSplashScreen)
+    '    ClearMyItems(a.hasAboutBox)
+    '    ClearMyItems(a.Modules)    ' ????????????????????
+    'End Sub
 
-            LogicStreamReader.clear()
-            LogicStreamReaderClose.clear()
-            LogicStreamWriter.clear()
-            LogicStreamWriterClose.clear()
+    Public Sub ClearAppArray(a() As MyItems)
+        Dim i As Integer
+        For i = 0 To a.GetUpperBound(0)
+            ClearMyItems(a(i))
+        Next i
+    End Sub
 
-            SystemIO.clear()
-            SystemNet.clear()
-            SystemDB.clear()
+    'Public Sub NewApplication(ByRef a As AssignmentInfo)
+    '    Dim nc As String = ""                       ' Non-checked property
+    '    Dim c As String = "ncWhite"    ' Checked property
+    '    ' ----------------------------------------------------------
+    '    If HideGray = "Gray" Then
+    '        nc = "ncGray"
+    '    ElseIf HideGray = "Hide" Then
+    '        nc = "ncHide"
+    '    Else
+    '        nc = "ncWhite"
+    '    End If
 
-        End Sub
-    End Class     ' AppSummary
+    '    ' ----------------------------------------------------------
+    '    setchecked(Find_Setting("OptionStrict", "new").Req, a.OptionStrict, nc, c)
+    '    setchecked(Find_Setting("OptionExplicit", "new").Req, a.OptionExplicit, nc, c)
+    '    ' ----------------------------------------------------------
+    '    setchecked(Find_Setting("hasSLN", "new").Req, a.hasSLN, nc, c)
+    '    setchecked(Find_Setting("hasvbProj", "new").Req, a.hasVBproj, nc, c)
+    '    setchecked(Find_Setting("hasSplashScreen", "new").Req, a.hasSplashScreen, nc, c)
+    '    setchecked(Find_Setting("hasAboutBox", "new").Req, a.hasAboutBox, nc, c)
+    '    '       setchecked(Find_Setting("Module","new").req, Modules, nc, c)
 
-End Class
+    'End Sub
+
+
+    'Public Sub StuffAppData(ByRef a As AssignmentInfo, StudID As String, ApplicationName As String, AssignmentRoot As String, AssignmentPath As String, CompDate As Date, OptStrict As Boolean, optExplicit As Boolean, has_SLN As Boolean, VB_Version As String, has_VBProj As Boolean, has_SplashScreen As Boolean, has_AboutBox As Boolean, N_Modules As Integer)
+
+    '    Try
+    '        a.StudentID = StudID
+    '        a.AppTitle = ApplicationName
+    '        a.AssignRoot = AssignmentRoot
+    '        a.AssignPath = AssignmentPath
+    '        a.CompileDate = CompDate.ToString
+
+    '        a.OptionStrict.Status = OptStrict.ToString
+    '        a.OptionExplicit.Status = optExplicit.ToString
+
+    '        a.hasSLN.Status = has_SLN.ToString
+    '        a.VBVersion.Status = VB_Version
+    '        a.hasVBproj.Status = has_VBProj.ToString
+    '        a.hasSplashScreen.Status = has_SplashScreen.ToString
+    '        a.hasAboutBox.Status = has_AboutBox.ToString
+    '        a.Modules.Status = N_Modules.ToString
+    '    Catch ex As Exception
+    '        MessageBox.Show(ex.Message)
+    '    End Try
+    'End Sub
+
+    ' ========================================================================
+
+    'Public Sub NewMyItems(a() As MyItems)   ' AppSummary
+
+    '    Dim i As Integer
+    '    Dim nc As String = ""                       ' Non-checked property
+    '    Dim c As String = "ncWhite"    ' Checked property
+
+    '    ' ----------------------------------------------------------
+
+    '    If HideGray = "Gray" Then
+    '        nc = "ncGray"
+    '    ElseIf HideGray = "Hide" Then
+    '        nc = "ncHide"
+    '    Else
+    '        nc = "ncWhite"
+    '    End If
+
+    '    For i = 0 To a.GetUpperBound(0)
+    '        setchecked(Find_Setting(EnSummaryName(i), "NewMyItems").Req, a(i), nc, c)
+    '    Next i
+
+
+
+    '    'If Not chkMultiForm,  MultiForm.cssHideNonChk = nchide
+    '    'If Not chkLineNbr,  OptionStrict.cssHideNonChk = nchide 
+    '    'If Not chkWordWrap,  OptionStrict.cssHideNonChk = nchide
+    '    ' ----------------------------------------------------------
+    '    'setchecked(Find_Setting("hasSLN").Req, Assign.hasSLN, nc, c)
+    '    'setchecked(Find_Setting("hasvbProj").Req, Assign.hasVBproj, nc, c)
+    '    'setchecked(Find_Setting("hasSplashScreen").Req, Assign.hasSplashScreen, nc, c)
+    '    'setchecked(Find_Setting("hasAboutBox").Req, Assign.hasAboutBox, nc, c)
+    '    'setchecked(Find_Setting("Include Module").Req, Assign.Modules, nc, c)
+    '    'setchecked(Find_Setting("OptionStrict").Req, Assign.OptionStrict, nc, c)
+    '    'setchecked(Find_Setting("OptionExplicit").Req, Assign.OptionExplicit, nc, c)
+    '    'setchecked(Find_Setting("Include a Form LOAD Method").Req, LogicFormLoad, nc, c)
+    '    ' ----------------------------------------------------------
+    'End Sub
+
+    'Public Sub setchecked(chk As Boolean, ByRef obj As MyItems, nc As String, c As String)
+    '    If Not chk Then
+    '        obj.cssNonChk = nc
+    '        obj.req = False
+    '    Else
+    '        obj.cssNonChk = c
+    '        obj.req = True
+    '    End If
+    'End Sub
+
+
+    Sub integrateSSummary(AppSummary() As MyItems, IntegratedStudentAssignment() As MyItems, filename As String, first As Boolean)
+        Dim i As Integer
+        If first Then
+            For i = 0 To AppSummary.GetUpperBound(0)
+                IntegratedStudentAssignment(i) = AppSummary(i)
+                IntegratedStudentAssignment(i).Status &= filename & " - " & AppSummary(i).n.ToString & vbCrLf
+            Next
+        Else
+            For i = 0 To AppSummary.GetUpperBound(0)
+                IntegratedStudentAssignment(i).n += AppSummary(i).n
+            Next
+        End If
+
+    End Sub
+
+End Module

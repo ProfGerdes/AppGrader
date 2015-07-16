@@ -6,7 +6,6 @@ Public Class frmConfig
     Dim loadphase As Boolean
 
     Private Sub frmConfig_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Dim s As String = ""
 
         ' ------------------------------------------------------------------------------------------
         ' Acknowledgement
@@ -33,7 +32,7 @@ Public Class frmConfig
 
         StuffAlldgvs()
 
-        '    LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+
 
 
 
@@ -285,15 +284,15 @@ Public Class frmConfig
     End Sub
 
 
-    Private Sub btnC_Click(sender As Object, e As EventArgs)
-        Dim ans As Integer
-        ans = MessageBox.Show("This information was not saved. Are you sure you want to return without saving your settings?", "Exit without Saving", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+    'Private Sub btnC_Click(sender As Object, e As EventArgs)
+    '    Dim ans As Integer
+    '    ans = MessageBox.Show("This information was not saved. Are you sure you want to return without saving your settings?", "Exit without Saving", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
 
-        If ans = vbYes Then
-            Me.Close()
-            frmMain.Show()
-        End If
-    End Sub
+    '    If ans = vbYes Then
+    '        Me.Close()
+    '        frmMain.Show()
+    '    End If
+    'End Sub
 
     Private Sub btnSetAsDefault_Click(sender As Object, e As EventArgs)
 
@@ -918,6 +917,7 @@ Public Class frmConfig
                     End Try
                 Loop
             End If
+            sr.Close()
         End If
 
     End Sub
@@ -953,6 +953,8 @@ Public Class frmConfig
 
         '       sw.WriteLine(ns.DVG & vbTab & ns.Name & vbTab & ns.ShowVar & vbTab & ns.Req & vbTab & ns.PtsPerError & vbTab & ns.MaxPts & vbTab & ns.Feedback)
     End Sub
+
+
     Private Sub LoadDefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LoadDefaultToolStripMenuItem.Click
         ' loads in the default config file. It stuffs the app settings, and also the dgvs
 

@@ -3,7 +3,7 @@ Imports System.ComponentModel.Design
 Imports System.Runtime.InteropServices
 
 <Designer(GetType(ExpandableGroupboxDesigner))> _
-Public Class ExpandableGroupbox
+Public Class ExpandableGroupBox
     Inherits System.Windows.Forms.UserControl
 
 #Region " Designer Generated (do not edit) "
@@ -312,14 +312,14 @@ End Class
 ''' Designer class that enables the user to expand/collapse the <see cref="ExpandableGroupbox" /> control during Design-Time.
 ''' </summary>
 ''' <remarks></remarks>
-Public Class ExpandableGroupboxDesigner
+Public Class ExpandableGroupBoxDesigner
     Inherits System.Windows.Forms.Design.ParentControlDesigner
 
     Public Overrides Sub Initialize(ByVal component As System.ComponentModel.IComponent)
         MyBase.Initialize(component)
 
         'Add an event handler for the button click event so we can update the control
-        Dim btnExpand As Button = CType(Me.Control, ExpandableGroupbox).ExpandButton
+        Dim btnExpand As Button = CType(Me.Control, ExpandableGroupBox).ExpandButton
         AddHandler btnExpand.Click, AddressOf ExpandButtonClicked
     End Sub
 
@@ -331,7 +331,7 @@ Public Class ExpandableGroupboxDesigner
 
     'This function enables us to click the button during design-time
     Protected Overrides Function GetHitTest(ByVal point As System.Drawing.Point) As Boolean
-        Dim btnExpand As Button = CType(Me.Control, ExpandableGroupbox).ExpandButton
+        Dim btnExpand As Button = CType(Me.Control, ExpandableGroupBox).ExpandButton
         If (btnExpand.Bounds.Contains(Me.Control.PointToClient(point))) Then
             Return True
         End If
