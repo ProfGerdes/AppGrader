@@ -1785,7 +1785,7 @@ Module ValidateVB
             With SSummary(i)
                 If setting.Req And setting.MaxPts <> 0 Then        '    And .cssClass = "itemred" Then
                     If EnSummaryName(i).StartsWith("Comment") Then
-                        .YourPts = Math.Min(setting.MaxPts - setting.PtsPerError * .n, setting.MaxPts)  ' this awards points for having instances 
+                        .YourPts = Math.Min(setting.MaxPts - setting.PtsPerError * Math.Min(setting.MaxPts, .n), setting.MaxPts)  ' this awards points for having instances 
                     Else
                         .YourPts = Math.Min(setting.PtsPerError * Math.Max(0, .n), setting.MaxPts)
                     End If
@@ -1910,7 +1910,7 @@ Module ValidateVB
                 'End If
 
                 If Setting.Req And Setting.MaxPts <> 0 And .cssClass = "itemred" Then
-                    .YourPts = Setting.MaxPts - Math.Min(Setting.PtsPerError * Math.Max(0, .n), Setting.MaxPts)
+                    .YourPts = Math.Min(Setting.PtsPerError * Math.Max(0, .n), Setting.MaxPts)
                     total += .YourPts
                 Else
                     .YourPts = 0

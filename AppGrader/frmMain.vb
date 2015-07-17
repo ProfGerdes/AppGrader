@@ -656,9 +656,9 @@ Public Class frmMain
                         ' jhg score is not calculated properly    *****
 
                         If first Then
-                            strFacReport &= "<tr class=""newstudent""><td class=""newstudent"">" & strStudentID & "</td><td class=""newstudent"">" & ReturnLastField(filename, "\") & "</td><td class=""newstudent"">" & FileLinesOfCode.ToString("n0") & "</td><td class=""newstudent"">" & " - " & "</td></tr>" & vbCrLf
+                            strFacReport &= "<tr class=""newstudent""><td class=""newstudent"">" & strStudentID & "</td><td class=""newstudent"">" & ReturnLastField(filename, "\") & "</td><td class=""newstudent, tdright"">" & FileLinesOfCode.ToString("n0") & "</td><td class=""newstudent, tdcenter"">" & " - " & "</td></tr>" & vbCrLf
                         Else
-                            strFacReport &= "<tr><td>" & "" & "</td><td>" & ReturnLastField(filename, "\") & "</td><td>" & FileLinesOfCode.ToString("n0") & "</td><td>" & " - " & "</td></tr>" & vbCrLf
+                            strFacReport &= "<tr><td>" & "" & "</td><td>" & ReturnLastField(filename, "\") & "</td><td class=""tdright"">" & FileLinesOfCode.ToString("n0") & "</td><td  class=""tdcenter"">" & " - " & "</td></tr>" & vbCrLf
                         End If
 
                         integrateSSummary(StudentAppSummary, IntegratedStudentAssignment, filename, first)
@@ -675,7 +675,7 @@ Public Class frmMain
                         s = TotalScore.ToString("n0") & " out of " & TotalPossiblePts.ToString("n0")
                     End If
 
-                    strFacReport &= "<tr><td>" & "" & "</td><td>" & "Overall Assessment" & "</td><td>" & TotalLinesOfCode.ToString("n0") & "</td><td>" & s & "</td></tr>" & vbCrLf
+                    strFacReport &= "<tr><td>" & "" & "</td><td class=""boldtext"">" & "Overall Assessment" & "</td><td  class=""tdcenter, boldtext"">" & TotalLinesOfCode.ToString("n0") & "</td><td class=""tdcenter, boldtext"">" & s & "</td></tr>" & vbCrLf
 
 
                     sr = File.OpenText((Application.StartupPath & "\templates\rptStudentFooter.html"))
