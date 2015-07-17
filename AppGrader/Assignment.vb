@@ -401,16 +401,40 @@
     'End Sub
 
 
-    Sub integrateSSummary(AppSummary() As MyItems, IntegratedStudentAssignment() As MyItems, filename As String, first As Boolean)
+    Sub integrateSSummary(AppSummary() As MyItems, ByRef IntegratedStudentAssignment() As MyItems, filename As String, first As Boolean)
         Dim i As Integer
+
         If first Then
             For i = 0 To AppSummary.GetUpperBound(0)
+
                 IntegratedStudentAssignment(i) = AppSummary(i)
-                IntegratedStudentAssignment(i).Status &= filename & " - " & AppSummary(i).n.ToString & vbCrLf
+                'IntegratedStudentAssignment(i).n += AppSummary(i).n
+                IntegratedStudentAssignment(i).Status = ReturnLastField(filename, "\") & " - " & AppSummary(i).Status & vbCrLf
             Next
         Else
             For i = 0 To AppSummary.GetUpperBound(0)
                 IntegratedStudentAssignment(i).n += AppSummary(i).n
+                IntegratedStudentAssignment(i).Status &= ReturnLastField(filename, "\") & " - " & AppSummary(i).Status & vbCrLf
+            Next
+        End If
+
+    End Sub
+
+
+    Sub integrateForm(AppForm() As MyItems, ByRef IntegratedForm() As MyItems, filename As String, first As Boolean)
+        Dim i As Integer
+
+        If first Then
+            For i = 0 To AppForm.GetUpperBound(0)
+
+                IntegratedForm(i) = AppForm(i)
+                'IntegratedStudentAssignment(i).n += AppSummary(i).n
+                IntegratedForm(i).Status = ReturnLastField(filename, "\") & " - " & AppForm(i).Status & vbCrLf
+            Next
+        Else
+            For i = 0 To AppForm.GetUpperBound(0)
+                IntegratedForm(i).n += AppForm(i).n
+                IntegratedForm(i).Status &= ReturnLastField(filename, "\") & " - " & AppForm(i).Status & vbCrLf
             Next
         End If
 

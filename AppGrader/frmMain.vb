@@ -67,7 +67,7 @@ Public Class frmMain
             Dim sr As StreamReader = File.OpenText(Application.StartupPath & "\demodir.txt")
             lblDemoDir.Text = sr.ReadLine
             sr.Close()
-'        End If
+        End If
 
 
         ' ----------------------------------------------------------------------
@@ -350,6 +350,7 @@ Public Class frmMain
             Dim StudentAssignment As AssignmentInfo
 
             Dim IntegratedStudentAssignment(NSummary) As MyItems
+            Dim IntegratedForm(nForm) As MyItems
             Dim StudentAppSummary(NSummary) As MyItems
             Dim StudentAppForm(nForm) As MyItems
 
@@ -655,16 +656,27 @@ Public Class frmMain
                         ' jhg score is not calculated properly    *****
 
                         If first Then
-                            strFacReport &= "<tr class=""newstudent""><td class=""newstudent"">" & strStudentID & "</td><td class=""newstudent"">" & ReturnLastField(filename, "\") & "</td><td class=""newstudent"">" & FileLinesOfCode.ToString("n0") & "</td><td class=""newstudent"">" & TotalScore & "</td></tr>" & vbCrLf
+                            strFacReport &= "<tr class=""newstudent""><td class=""newstudent"">" & strStudentID & "</td><td class=""newstudent"">" & ReturnLastField(filename, "\") & "</td><td class=""newstudent"">" & FileLinesOfCode.ToString("n0") & "</td><td class=""newstudent"">" & " - " & "</td></tr>" & vbCrLf
                         Else
-                            strFacReport &= "<tr><td>" & "" & "</td><td>" & ReturnLastField(filename, "\") & "</td><td>" & FileLinesOfCode.ToString("n0") & "</td><td>" & TotalScore & "</td></tr>" & vbCrLf
+                            strFacReport &= "<tr><td>" & "" & "</td><td>" & ReturnLastField(filename, "\") & "</td><td>" & FileLinesOfCode.ToString("n0") & "</td><td>" & " - " & "</td></tr>" & vbCrLf
                         End If
 
                         integrateSSummary(StudentAppSummary, IntegratedStudentAssignment, filename, first)
+                        integrateForm(StudentAppForm, IntegratedForm, filename, first)
                         first = False
 
                     Next filename      ' end of Filename loop
                     ' ---------------------------------------------------------------------------------------------------------
+
+                    TotalScore = FindIntegratedScore(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
+                    If TotalPossiblePts <> 0 Then
+                        s = TotalScore.ToString("n0") & " out of " & TotalPossiblePts.ToString("n0") & " = " & (TotalScore / TotalPossiblePts).ToString("p1")
+                    Else
+                        s = TotalScore.ToString("n0") & " out of " & TotalPossiblePts.ToString("n0")
+                    End If
+
+                    strFacReport &= "<tr><td>" & "" & "</td><td>" & "Overall Assessment" & "</td><td>" & TotalLinesOfCode.ToString("n0") & "</td><td>" & s & "</td></tr>" & vbCrLf
+
 
                     sr = File.OpenText((Application.StartupPath & "\templates\rptStudentFooter.html"))
                     strStudentReport &= sr.ReadToEnd

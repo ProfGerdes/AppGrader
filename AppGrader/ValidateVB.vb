@@ -572,6 +572,7 @@ Module ValidateVB
                                 .bad &= ", (" & lineno(i).ToString & ")"
                             End If
                             .cssClass = "itemred"
+                            .n += 1   ' counts up bad comments for FOR statements
                         End If
                     End With
 
@@ -612,6 +613,7 @@ Module ValidateVB
                                 .bad &= ", (" & lineno(i).ToString & ")"
                             End If
                             .cssClass = "itemred"
+                            .n += 1   ' counts up bad comments for IF statements
                         End If
                     End With
 
@@ -694,6 +696,7 @@ Module ValidateVB
                                 .bad &= ", (" & lineno(i).ToString & ")"
                             End If
                             .cssClass = "itemred"
+                            .n += 1
                         End If
                     End With
 
@@ -711,6 +714,7 @@ Module ValidateVB
                             If (ss(i - 1).StartsWith("'") Or ss(i + 1).StartsWith("'")) Then
                                 .bad &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
                                 .cssClass = "itemred"
+                                .n += 1
                             Else
                                 .good &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
                             End If
@@ -764,6 +768,7 @@ Module ValidateVB
                                 .bad &= ", (" & lineno(i).ToString & ")"
                             End If
                             .cssClass = "itemred"
+                            .n += 1
                         End If
                     End With
 
@@ -1769,6 +1774,45 @@ Module ValidateVB
         End With
     End Sub
 
+    Public Function FindIntegratedScore(SAssignment As AssignmentInfo, AppForm() As MyItems, SSummary() As MyItems) As Decimal
+
+        Dim T As Decimal = 0
+        Dim i As Integer
+        Dim setting As MySettings
+
+        For i = 0 To SSummary.GetUpperBound(0)
+            setting = Find_Setting(EnSummaryName(i), "FindIntegratedScore")
+            With SSummary(i)
+                If setting.Req And setting.MaxPts <> 0 Then        '    And .cssClass = "itemred" Then
+                    If EnSummaryName(i).StartsWith("Comment") Then
+                        .YourPts = Math.Min(setting.MaxPts - setting.PtsPerError * .n, setting.MaxPts)  ' this awards points for having instances 
+                    Else
+                        .YourPts = Math.Min(setting.PtsPerError * Math.Max(0, .n), setting.MaxPts)
+                    End If
+                    T += .YourPts
+                Else
+                    .YourPts = 0
+                End If
+            End With
+        Next
+
+        For i = 0 To AppForm.GetUpperBound(0)
+            setting = Find_Setting(EnFormNames(i), "FindIntegratedScore")
+            With AppForm(i)
+                If setting.Req And setting.MaxPts <> 0 Then        '    And .cssClass = "itemred" Then
+                    .YourPts = Math.Min(setting.PtsPerError * Math.Max(0, .n), setting.MaxPts)
+                    T += .YourPts
+                Else
+                    .YourPts = 0
+                End If
+            End With
+        Next
+
+
+        Return T
+    End Function
+
+
     Function SomeVarDisplayed(a() As String) As Boolean
         ' This checks an array of strings to see if any of them have settings which are either required or show var. If so, it returns true, else it returns false.
         '      Dim Flag As Boolean
@@ -1866,7 +1910,7 @@ Module ValidateVB
                 'End If
 
                 If Setting.Req And Setting.MaxPts <> 0 And .cssClass = "itemred" Then
-                    .YourPts = Setting.MaxPts - Math.Min(Setting.PtsPerError * Math.Max(1, .n), Setting.MaxPts)
+                    .YourPts = Setting.MaxPts - Math.Min(Setting.PtsPerError * Math.Max(0, .n), Setting.MaxPts)
                     total += .YourPts
                 Else
                     .YourPts = 0
