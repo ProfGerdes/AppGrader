@@ -341,16 +341,16 @@ Public Class frmMain
         nstudents = strDir.GetUpperBound(0)
 
         strFacReport = InitializeFacultyReport()
-
         For ii = 0 To nstudents   ' This cycles through all student folders
             ' ===================================================================================
             TotalLinesOfCode = 0
 
             ' create variables to hold data
             Dim StudentAssignment As AssignmentInfo
-
             Dim IntegratedStudentAssignment(NSummary) As MyItems
             Dim IntegratedForm(nForm) As MyItems
+
+
             Dim StudentAppSummary(NSummary) As MyItems
             Dim StudentAppForm(nForm) As MyItems
 
@@ -564,7 +564,7 @@ Public Class frmMain
                     worker.ReportProgress(9, "Individual Work")
 
                     ' -------------------------------------------------------------------------------------------------
-                    BuildReport("Application Level", StudentAssignment, StudentAppForm, StudentAppSummary, "")
+                    BuildReport("Application Level", StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
                     '    BuildReport("Debugging", Appform(0), ssummary, "")       ' Don't have logic to cature breakpoints, line numbers, etc.
 
                     worker.ReportProgress(10, "Individual Work")
@@ -610,7 +610,7 @@ Public Class frmMain
                         PopulateNonCheckCSS_Form2(StudentAppForm)
 
 
-                        BuildReport("New Project File", StudentAssignment, StudentAppForm, StudentAppSummary, filename) ' the AppForm(0) is just a placeholder
+                        BuildReport("New Project File", StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport) ' the AppForm(0) is just a placeholder
 
                         AppDir = IO.Path.GetDirectoryName(filename)
 
@@ -621,7 +621,7 @@ Public Class frmMain
                         sr.Close()
 
                         ' ---- check for form  -------
-                        BuildReport("Assessment Results for " & ReturnLastField(filename, "\"), StudentAssignment, StudentAppForm, StudentAppSummary, "")
+                        BuildReport("Assessment Results for " & ReturnLastField(filename, "\"), StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
 
                         ' Assess the form properties & objects
                         If hasForm Then
@@ -633,7 +633,7 @@ Public Class frmMain
                             ProcessReq(StudentAppSummary(EnSummary.LogicFormLoad), "Form Load Method not found", "Form Load Method found", "LogicFormLoad")
 
 
-                            BuildReport("Form Objects", StudentAssignment, StudentAppForm, StudentAppSummary, "")
+                            BuildReport("Form Objects", StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
                         End If
 
                         x = x + 1
@@ -648,7 +648,7 @@ Public Class frmMain
                         ' -------------------------------- count number of comments ----------------------------------------
                         CheckForComments2(filesource, StudentAppSummary, StudentAppForm, BackgroundWorker1)
 
-                        BuildReport("Coding Standards", StudentAssignment, StudentAppForm, StudentAppSummary, "")
+                        BuildReport("Coding Standards", StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
                         x = x + 1
                         worker.ReportProgress(x, "Individual Work")
 
@@ -721,229 +721,237 @@ Public Class frmMain
 
         ' -------------------------------------Create Faculty file. ----------------------------------------------
 
-        If Not cbxJustUnzip.Checked Then CloseFacReport(path)
+        If Not cbxJustUnzip.Checked Then CloseFacReport(path, "\FacultySummaryReport.html")
 
-            ' ############################################################################################
+        If True Then
+            Beep()
+            '        BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
+            '        CloseFacReport("", "\FacultySummaryDetailReport.html")
+        End If
 
-            ExtractGUID(strOutputPath)
+        ' ############################################################################################
+
+        ExtractGUID(strOutputPath)
 
 
 
-            ' ----------------------- Save CRC Data --------------------------------------
-            If Not cbxJustUnzip.Checked Then
-                Dim fname As String
-                '   Dim sw As StreamWriter
+        ' ----------------------- Save CRC Data --------------------------------------
+        If Not cbxJustUnzip.Checked Then
+            Dim fname As String
+            '   Dim sw As StreamWriter
             '   Dim lastUser As String = ""
-                Dim lastCRC As String = ""
-                Dim ShortFilename As String = ""
-                Dim DupFlag As Boolean
+            Dim lastCRC As String = ""
+            Dim ShortFilename As String = ""
+            Dim DupFlag As Boolean
             '      Dim NoDesignerVB As Boolean = True
 
-                fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt"
-                sw = File.CreateText(fname)
-                sw.WriteLine("Dup" & vbTab & "CRC" & vbTab & "Filename" & vbTab & "User Name" & vbTab & "Full Filename")
-                Sort_Submissions()
+            fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt"
+            sw = File.CreateText(fname)
+            sw.WriteLine("Dup" & vbTab & "CRC" & vbTab & "Filename" & vbTab & "User Name" & vbTab & "Full Filename")
+            Sort_Submissions()
 
-                DupFlag = False
-                For i = 0 To Submissions.Count - 2
-                    With Submissions(i)
-                        If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
-                            ShortFilename = ReturnLastField(.Filename, "\")
-                            If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Or DupFlag = True Then
-                                sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
-                                DupFlag = False
-                            Else
-                                sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+            DupFlag = False
+            For i = 0 To Submissions.Count - 2
+                With Submissions(i)
+                    If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
+                        ShortFilename = ReturnLastField(.Filename, "\")
+                        If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Or DupFlag = True Then
+                            sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                            DupFlag = False
+                        Else
+                            sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
 
-                            End If
-                            If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Then DupFlag = True
                         End If
-                    End With
-                Next
+                        If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Then DupFlag = True
+                    End If
+                End With
+            Next
 
-                ' Print the last line
-                If Submissions.Count > 2 Then
-                    With Submissions(Submissions.Count - 1)
-                        If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
+            ' Print the last line
+            If Submissions.Count > 2 Then
+                With Submissions(Submissions.Count - 1)
+                    If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
 
-                            ShortFilename = ReturnLastField(.Filename, "\")
+                        ShortFilename = ReturnLastField(.Filename, "\")
 
-                            If Submissions(Submissions.Count - 2).vbCRC = Submissions(Submissions.Count - 1).vbCRC Then
-                                sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
-                            Else
-                                sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
-                            End If
+                        If Submissions(Submissions.Count - 2).vbCRC = Submissions(Submissions.Count - 1).vbCRC Then
+                            sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                        Else
+                            sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
                         End If
-                    End With
+                    End If
+                End With
+            End If
+
+
+            sw.Close()
+            ' ------------------------------------Web page with dups ------------------------------------------------------
+
+            fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html"
+            sw = File.AppendText(fname)
+            'Dim sr1 As StreamReader
+            'Dim s As String
+
+            'sw.Write(sr1.ReadToEnd)
+            'sr1.Close()
+
+            sw.WriteLine("<h2>Identical Student File CRCs</h2>" & vbCrLf)
+
+            ' ---------------------------------------------------------------------------------------------------
+            sw.WriteLine("<p><em>A CRC (Cyclical Redundancy Check) is a compressed 'hash' of the contents of the file. Two files with identical CRC values have identical content. If the file has even a single extra space, or a single letter changes its case, the CRC values will not match. Thus indentical CRC values indicate the files are identical. Note, Some files that VB creates may not require modification, and therefore two separate applications will tend to have identical CRC values for these files. Example include SplashScreens and AboutBoxes. This check only looks at files ending in .vb.</em></p> <hr />" & vbCrLf)
+
+            sr1 = File.OpenText(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt")
+            s = sr1.ReadLine
+
+
+            Dim last As String = ""
+            Dim ss() As String
+            Dim instructordemo As Boolean
+            Dim needtoclose As Boolean = False
+            Dim allInstructorDemo As Boolean = False
+            Dim tmp As String = ""
+
+            ' ==================================================================================================
+            Do While sr1.Peek > -1
+                s = sr1.ReadLine
+                ss = s.Split(CChar(vbTab))
+                If ss(1) = last Then
+                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                        instructordemo = True
+                        If needtoclose Then
+                            sw.WriteLine("</ul>" & vbCrLf)
+                            CRCIssues = True
+                        End If
+                        needtoclose = False
+
+                        ' bypass this record
+                    ElseIf instructordemo Then
+                        If needtoclose Then
+                            sw.WriteLine("</ul>" & vbCrLf)
+                            CRCIssues = True
+                        End If
+                        needtoclose = False
+
+                        ' bypass this record
+                    Else
+                        ' need to show this record.
+                        sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
+                        needtoclose = True
+                    End If
+                Else
+                    last = ss(1)
+                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                        instructordemo = True
+                        If needtoclose Then
+                            sw.WriteLine("</ul>" & vbCrLf)
+                            CRCIssues = True
+                        End If
+                        needtoclose = False
+                        ' bypass this record
+                    Else
+                        instructordemo = False
+                        If needtoclose Then
+                            sw.WriteLine("</ul>" & vbCrLf)
+                            CRCIssues = True
+                        End If
+
+                        ' need to show this record.
+                        If ss(0) = "*" Then
+                            sw.WriteLine("<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>")
+                            sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
+                            CRCIssues = True
+                            needtoclose = True
+                        End If
+                    End If
+
                 End If
 
 
-                sw.Close()
-                ' ------------------------------------Web page with dups ------------------------------------------------------
+            Loop
+            sr1.Close()
+            ' ==================================================================================================
+            sr1 = File.OpenText(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt")
+            s = sr1.ReadLine
+            sw.WriteLine("<h2>Student File CRC's identical to Instructor Demo Files</h2>" & vbCrLf)
+            ' ---------------------------------------------------------------------------------------------------
+            sw.WriteLine("<p><em>This section lists files with identical CRC values that match those from Instructor Demo files. Since all students would have access to these files, identical CRC values do not necessarily indicate unauthorized collusion.</em></p> <hr />" & vbCrLf)
 
-                fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html"
-                sw = File.AppendText(fname)
-                'Dim sr1 As StreamReader
-                'Dim s As String
-
-                'sw.Write(sr1.ReadToEnd)
-                'sr1.Close()
-
-                sw.WriteLine("<h2>Identical Student File CRCs</h2>" & vbCrLf)
-
-                ' ---------------------------------------------------------------------------------------------------
-                sw.WriteLine("<p><em>A CRC (Cyclical Redundancy Check) is a compressed 'hash' of the contents of the file. Two files with identical CRC values have identical content. If the file has even a single extra space, or a single letter changes its case, the CRC values will not match. Thus indentical CRC values indicate the files are identical. Note, Some files that VB creates may not require modification, and therefore two separate applications will tend to have identical CRC values for these files. Example include SplashScreens and AboutBoxes. This check only looks at files ending in .vb.</em></p> <hr />" & vbCrLf)
-
-                sr1 = File.OpenText(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt")
+            ' display record the are identical to Instructor files
+            Do While sr1.Peek > -1
                 s = sr1.ReadLine
-
-
-                Dim last As String = ""
-                Dim ss() As String
-                Dim instructordemo As Boolean
-                Dim needtoclose As Boolean = False
-                Dim allInstructorDemo As Boolean = False
-                Dim tmp As String = ""
-
-                ' ==================================================================================================
-                Do While sr1.Peek > -1
-                    s = sr1.ReadLine
-                    ss = s.Split(CChar(vbTab))
-                    If ss(1) = last Then
-                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                ss = s.Split(CChar(vbTab))
+                If ss(1) = last Then
+                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                        If ss(0) = "*" Then
                             instructordemo = True
-                            If needtoclose Then
-                                sw.WriteLine("</ul>" & vbCrLf)
-                                CRCIssues = True
-                            End If
-                            needtoclose = False
-
-                            ' bypass this record
-                        ElseIf instructordemo Then
-                            If needtoclose Then
-                                sw.WriteLine("</ul>" & vbCrLf)
-                                CRCIssues = True
-                            End If
-                            needtoclose = False
-
-                            ' bypass this record
-                        Else
-                            ' need to show this record.
-                            sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                            needtoclose = True
+                            allInstructorDemo = True
+                            tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
+                        End If
+                    ElseIf instructordemo Then
+                        If ss(0) = "*" Then
+                            allInstructorDemo = False
+                            tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
                         End If
                     Else
-                        last = ss(1)
-                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                            instructordemo = True
-                            If needtoclose Then
-                                sw.WriteLine("</ul>" & vbCrLf)
-                                CRCIssues = True
-                            End If
-                            needtoclose = False
-                            ' bypass this record
-                        Else
-                            instructordemo = False
-                            If needtoclose Then
-                                sw.WriteLine("</ul>" & vbCrLf)
-                                CRCIssues = True
-                            End If
-
-                            ' need to show this record.
-                            If ss(0) = "*" Then
-                                sw.WriteLine("<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>")
-                                sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                                CRCIssues = True
-                                needtoclose = True
-                            End If
-                        End If
+                        'If needtoclose Then
+                        '    If Not allInstructorDemo Then
+                        '        tmp &= "</ul>" & vbCrLf
+                        '        sw.WriteLine(tmp)
+                        '        tmp = ""
+                        '    End If
+                        'End If
+                        'needtoclose = False
 
                     End If
+                Else    ' new CRC
+                    last = ss(1)
+                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                        instructordemo = True
 
-
-                Loop
-                sr1.Close()
-                ' ==================================================================================================
-                sr1 = File.OpenText(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt")
-                s = sr1.ReadLine
-                sw.WriteLine("<h2>Student File CRC's identical to Instructor Demo Files</h2>" & vbCrLf)
-                ' ---------------------------------------------------------------------------------------------------
-                sw.WriteLine("<p><em>This section lists files with identical CRC values that match those from Instructor Demo files. Since all students would have access to these files, identical CRC values do not necessarily indicate unauthorized collusion.</em></p> <hr />" & vbCrLf)
-
-                ' display record the are identical to Instructor files
-                Do While sr1.Peek > -1
-                    s = sr1.ReadLine
-                    ss = s.Split(CChar(vbTab))
-                    If ss(1) = last Then
-                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                            If ss(0) = "*" Then
-                                instructordemo = True
-                                allInstructorDemo = True
-                                tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                            End If
-                        ElseIf instructordemo Then
-                            If ss(0) = "*" Then
-                                allInstructorDemo = False
-                                tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                            End If
+                        If needtoclose And Not allInstructorDemo Then
+                            tmp &= "</ul>" & vbCrLf
+                            sw.WriteLine(tmp)
+                            tmp = ""
                         Else
-                            'If needtoclose Then
-                            '    If Not allInstructorDemo Then
-                            '        tmp &= "</ul>" & vbCrLf
-                            '        sw.WriteLine(tmp)
-                            '        tmp = ""
-                            '    End If
-                            'End If
-                            'needtoclose = False
-
-                        End If
-                    Else    ' new CRC
-                        last = ss(1)
-                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                            instructordemo = True
-
-                            If needtoclose And Not allInstructorDemo Then
-                                tmp &= "</ul>" & vbCrLf
-                                sw.WriteLine(tmp)
-                                tmp = ""
-                            Else
-                                tmp = ""
-                            End If
-
-                            allInstructorDemo = True                        ' need to show this record.
-                            If ss(0) = "*" Then
-                                tmp = "<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>"
-                                tmp &= "<li>" & ss(3) & " - " & ss(4) & "</li>"
-                                needtoclose = True
-                            End If
-                        Else   ' student file - not based on instructor demo
-                            If needtoclose And Not allInstructorDemo Then
-                                tmp &= "</ul>" & vbCrLf
-                                sw.WriteLine(tmp)
-                                tmp = ""
-                            Else
-                                tmp = ""
-                            End If
-
-                            allInstructorDemo = False
-                            instructordemo = False ' do not show this
-                            ' bypass this record
+                            tmp = ""
                         End If
 
+                        allInstructorDemo = True                        ' need to show this record.
+                        If ss(0) = "*" Then
+                            tmp = "<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>"
+                            tmp &= "<li>" & ss(3) & " - " & ss(4) & "</li>"
+                            needtoclose = True
+                        End If
+                    Else   ' student file - not based on instructor demo
+                        If needtoclose And Not allInstructorDemo Then
+                            tmp &= "</ul>" & vbCrLf
+                            sw.WriteLine(tmp)
+                            tmp = ""
+                        Else
+                            tmp = ""
+                        End If
+
+                        allInstructorDemo = False
+                        instructordemo = False ' do not show this
+                        ' bypass this record
                     End If
-                Loop
 
-                If needtoclose And Not allInstructorDemo Then sw.WriteLine("</ul>" & vbCrLf)
-                needtoclose = False
+                End If
+            Loop
 
-                sw.WriteLine("</body> </html>")
-                sw.Close()
+            If needtoclose And Not allInstructorDemo Then sw.WriteLine("</ul>" & vbCrLf)
+            needtoclose = False
 
-            End If '  If Not cbxJustUnzip.Checked
-            ' --------------------------------------------------------------------------------
+            sw.WriteLine("</body> </html>")
+            sw.Close()
+
+        End If '  If Not cbxJustUnzip.Checked
+        ' --------------------------------------------------------------------------------
 
     End Sub
 
+
+ 
     Function AddStudentDataToSummary(sn As String, ct As String, cd As String, tloc As String, sc As String) As String
         Dim tmp As String
 
@@ -952,30 +960,6 @@ Public Class frmMain
     End Function
 
  
-
-    'Private Function PrefixString(ByVal s1 As String, ByVal s2 As String) As String
-    '    ' finds the common prefix applied to all submission by Blackboard.
-    '    Dim i As Integer
-    '    Dim n As Integer
-    '    Try
-    '        n = s1.Length
-
-    '        If s2.Length < n Then n = s2.Length
-    '        PrefixString = ""
-    '        For i = 1 To n
-    '            If s1.Substring(0, i) = s2.Substring(0, i) Then
-    '                PrefixString = s1.Substring(0, i)
-    '            Else
-    '                Exit For
-    '            End If
-    '        Next
-    '    Catch
-    '        PrefixString = ""
-    '    End Try
-
-
-    'End Function
-
 
     Sub LoadConfig()
         ' This is designed to process the Config file. The Config file must be in the same directory as the executable file. If found, it opens it up and processing the file line by line. Each line should have a Key Variable followed by a Property. Some Keys can only take a certain set of properties.  The code parses the Key/Property pair and sets the assocaited config value, which is defined in the JHGModule. This allows the user to modify the operation of the application.
@@ -988,8 +972,6 @@ Public Class frmMain
 
             frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
         End If
-
-
     End Sub
 
 
@@ -1001,17 +983,10 @@ Public Class frmMain
     End Function
 
 
-    'Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-    '    ' Exit application.
-    '    Me.Close()
-    '    Application.Exit()
-    'End Sub
-
 
     Private Sub btnOutput_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnOutput.Click, ViewOutputToolStripMenuItem.Click
         If rbnBlackboardZip.Checked Then
             frmPickStudentReport.Show()
-
         Else
             Dim url As New Uri("file:\\\" & StudentReportPath)
 
@@ -1420,6 +1395,7 @@ Public Class frmMain
             Dim url As New Uri("file:\\\" & strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html")
 
             frmOutput.WebBrowser1.Url = url
+            '   frmOutput.Close()
             frmOutput.Show()
         End If
     End Sub
@@ -1454,6 +1430,17 @@ Public Class frmMain
             Dim url As New Uri("file:\\\" & strOutputPath & "\FacultySummaryReport.html")
 
             frmOutput.WebBrowser1.Url = url
+            '      frmOutput.Close()
+            frmOutput.Show()
+        End If
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        If File.Exists(strOutputPath & "\FacultySummaryDetailReport.html") Then
+            Dim url As New Uri("file:\\\" & strOutputPath & "\FacultySummaryDetailReport.html")
+
+            frmOutput.WebBrowser1.Url = url
+            '   frmOutput.Close()
             frmOutput.Show()
         End If
     End Sub

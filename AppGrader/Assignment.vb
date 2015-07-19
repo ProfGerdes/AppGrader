@@ -275,130 +275,13 @@
 
     End Sub
 
-    'Public Sub ClearAssignmentInfo(a As AssignmentInfo)
-    '    a.StudentID = Nothing
-    '    a.AppTitle = Nothing
-    '    a.AssignRoot = Nothing
-    '    a.AssignPath = Nothing    ' This is specific to the student
-    '    a.CompileDate = Nothing
-    '    ' --------------------------
-    '    a.TotalScore = 0
-    '    a.strTotalScore = Nothing
-    '    ' --------------------------
-    '    ClearMyItems(a.OptionStrict)
-    '    ClearMyItems(a.OptionExplicit)
-
-    '    ClearMyItems(a.hasSLN)
-    '    ClearMyItems(a.VBVersion)
-    '    ClearMyItems(a.hasVBproj)
-    '    ClearMyItems(a.hasSplashScreen)
-    '    ClearMyItems(a.hasAboutBox)
-    '    ClearMyItems(a.Modules)    ' ????????????????????
-    'End Sub
-
+  
     Public Sub ClearAppArray(a() As MyItems)
         Dim i As Integer
         For i = 0 To a.GetUpperBound(0)
             ClearMyItems(a(i))
         Next i
     End Sub
-
-    'Public Sub NewApplication(ByRef a As AssignmentInfo)
-    '    Dim nc As String = ""                       ' Non-checked property
-    '    Dim c As String = "ncWhite"    ' Checked property
-    '    ' ----------------------------------------------------------
-    '    If HideGray = "Gray" Then
-    '        nc = "ncGray"
-    '    ElseIf HideGray = "Hide" Then
-    '        nc = "ncHide"
-    '    Else
-    '        nc = "ncWhite"
-    '    End If
-
-    '    ' ----------------------------------------------------------
-    '    setchecked(Find_Setting("OptionStrict", "new").Req, a.OptionStrict, nc, c)
-    '    setchecked(Find_Setting("OptionExplicit", "new").Req, a.OptionExplicit, nc, c)
-    '    ' ----------------------------------------------------------
-    '    setchecked(Find_Setting("hasSLN", "new").Req, a.hasSLN, nc, c)
-    '    setchecked(Find_Setting("hasvbProj", "new").Req, a.hasVBproj, nc, c)
-    '    setchecked(Find_Setting("hasSplashScreen", "new").Req, a.hasSplashScreen, nc, c)
-    '    setchecked(Find_Setting("hasAboutBox", "new").Req, a.hasAboutBox, nc, c)
-    '    '       setchecked(Find_Setting("Module","new").req, Modules, nc, c)
-
-    'End Sub
-
-
-    'Public Sub StuffAppData(ByRef a As AssignmentInfo, StudID As String, ApplicationName As String, AssignmentRoot As String, AssignmentPath As String, CompDate As Date, OptStrict As Boolean, optExplicit As Boolean, has_SLN As Boolean, VB_Version As String, has_VBProj As Boolean, has_SplashScreen As Boolean, has_AboutBox As Boolean, N_Modules As Integer)
-
-    '    Try
-    '        a.StudentID = StudID
-    '        a.AppTitle = ApplicationName
-    '        a.AssignRoot = AssignmentRoot
-    '        a.AssignPath = AssignmentPath
-    '        a.CompileDate = CompDate.ToString
-
-    '        a.OptionStrict.Status = OptStrict.ToString
-    '        a.OptionExplicit.Status = optExplicit.ToString
-
-    '        a.hasSLN.Status = has_SLN.ToString
-    '        a.VBVersion.Status = VB_Version
-    '        a.hasVBproj.Status = has_VBProj.ToString
-    '        a.hasSplashScreen.Status = has_SplashScreen.ToString
-    '        a.hasAboutBox.Status = has_AboutBox.ToString
-    '        a.Modules.Status = N_Modules.ToString
-    '    Catch ex As Exception
-    '        MessageBox.Show(ex.Message)
-    '    End Try
-    'End Sub
-
-    ' ========================================================================
-
-    'Public Sub NewMyItems(a() As MyItems)   ' AppSummary
-
-    '    Dim i As Integer
-    '    Dim nc As String = ""                       ' Non-checked property
-    '    Dim c As String = "ncWhite"    ' Checked property
-
-    '    ' ----------------------------------------------------------
-
-    '    If HideGray = "Gray" Then
-    '        nc = "ncGray"
-    '    ElseIf HideGray = "Hide" Then
-    '        nc = "ncHide"
-    '    Else
-    '        nc = "ncWhite"
-    '    End If
-
-    '    For i = 0 To a.GetUpperBound(0)
-    '        setchecked(Find_Setting(EnSummaryName(i), "NewMyItems").Req, a(i), nc, c)
-    '    Next i
-
-
-
-    '    'If Not chkMultiForm,  MultiForm.cssHideNonChk = nchide
-    '    'If Not chkLineNbr,  OptionStrict.cssHideNonChk = nchide 
-    '    'If Not chkWordWrap,  OptionStrict.cssHideNonChk = nchide
-    '    ' ----------------------------------------------------------
-    '    'setchecked(Find_Setting("hasSLN").Req, Assign.hasSLN, nc, c)
-    '    'setchecked(Find_Setting("hasvbProj").Req, Assign.hasVBproj, nc, c)
-    '    'setchecked(Find_Setting("hasSplashScreen").Req, Assign.hasSplashScreen, nc, c)
-    '    'setchecked(Find_Setting("hasAboutBox").Req, Assign.hasAboutBox, nc, c)
-    '    'setchecked(Find_Setting("Include Module").Req, Assign.Modules, nc, c)
-    '    'setchecked(Find_Setting("OptionStrict").Req, Assign.OptionStrict, nc, c)
-    '    'setchecked(Find_Setting("OptionExplicit").Req, Assign.OptionExplicit, nc, c)
-    '    'setchecked(Find_Setting("Include a Form LOAD Method").Req, LogicFormLoad, nc, c)
-    '    ' ----------------------------------------------------------
-    'End Sub
-
-    'Public Sub setchecked(chk As Boolean, ByRef obj As MyItems, nc As String, c As String)
-    '    If Not chk Then
-    '        obj.cssNonChk = nc
-    '        obj.req = False
-    '    Else
-    '        obj.cssNonChk = c
-    '        obj.req = True
-    '    End If
-    'End Sub
 
 
     Sub integrateSSummary(AppSummary() As MyItems, ByRef IntegratedStudentAssignment() As MyItems, filename As String, first As Boolean)

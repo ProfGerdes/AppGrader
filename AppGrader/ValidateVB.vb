@@ -76,7 +76,7 @@ Module ValidateVB
     End Function
 
 
-    Public Sub CloseFacReport(path As String)
+    Public Sub CloseFacReport(path As String, fn As String)
         Dim sr As StreamReader
         Dim sw As StreamWriter
 
@@ -84,7 +84,7 @@ Module ValidateVB
         strFacReport &= sr.ReadToEnd
         sr.Close()
 
-        sw = File.CreateText((strOutputPath & "\FacultySummaryReport.html"))
+        sw = File.CreateText((strOutputPath & fn))
         sw.Write(strFacReport)
         sw.Close()
     End Sub
@@ -165,6 +165,7 @@ Module ValidateVB
         hasSLNfile = IO.Directory.GetFiles(AppInfo.AssignPath, "*.sln", SearchOption.AllDirectories).GetLength(0) > 0
         If hasSLNfile Then
             AppInfo.hasSLN.Status = vbTrue.ToString
+            AppInfo.hasSLN.n += 1
             AppInfo.hasSLN.cssClass = "itemgreen"
         Else
             AppInfo.hasSLN.Status = vbFalse.ToString
@@ -192,6 +193,7 @@ Module ValidateVB
         If hasVBProjFile Then
             AppInfo.hasVBproj.Status = vbTrue.ToString
             AppInfo.hasVBproj.cssClass = "itemgreen"
+            AppInfo.hasVBproj.n += 1
         Else
             AppInfo.hasVBproj.Status = vbFalse.ToString
             AppInfo.hasVBproj.cssClass = "itemred"
@@ -271,6 +273,7 @@ Module ValidateVB
                     ElseIf source.Contains("Option " & optiontype & " On") Then
                         .Status = "On"
                         .cssClass = "itemgreen"
+                        .n += 1
                     End If
                 End If
             End If
@@ -285,6 +288,7 @@ Module ValidateVB
                     ElseIf source.Contains("Option " & optiontype & " On") Then
                         .Status = "On"
                         .cssClass = "itemgreen"
+                        .n += 1
                         Exit For
                     End If
                 End If
@@ -1008,6 +1012,7 @@ Module ValidateVB
         Else
             type.Status = "<span class=""boldtext"">" & Found & "</span><br /><br />" & vbCrLf & type.Status & " <br />" & vbCrLf
             type.cssClass = "itemgreen"
+            type.n += 1
         End If
 
         ' nm = type.ToString.Substring(1)
@@ -1055,15 +1060,13 @@ Module ValidateVB
                 If s.Contains("splash screen") Or s.Contains("SplashScreen") Then
                     ' has a splash screen
                     .Status = vbTrue.ToString
+                    .n += 1
                     If RemoveFromList Then filesinbuild.Remove(filename)
                     Exit For
                 End If
             Next
         End With
     End Function
-
-
-
 
 
     Sub CheckFormProperties2(filename As String, ByRef AppForm() As MyItems)
@@ -1088,6 +1091,7 @@ Module ValidateVB
                     If s.Contains("System.Drawing.SystemColors.") Then
                         AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form color = " & TrimUpTo(ss, "System.Drawing.SystemColors. </span>")
                         AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
+                        AppForm(EnForm.FormBackColor).n += 1
                     ElseIf s.Contains("System.Drawing.Color.FromArgb(") Then
 
                         ss = returnBetween(s, "Me.BackColor =", vbCrLf)
@@ -1095,12 +1099,14 @@ Module ValidateVB
                         Try
                             AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form color is nongray (#" & ReturnHexEquivalent(TrimAfter(cArray(1), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(2), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(3), ",", True)) & ") </span>"
                             AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
+                            AppForm(EnForm.FormBackColor).n += 1
                         Catch
                             AppForm(EnForm.FormBackColor).Status = "Form color = " & ss
                         End Try
                     ElseIf s.Contains("System.Drawing.Color.") Then
                         AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form color = " & returnBetween(s, "Me.BackColor = System.Drawing.Color.", vbCrLf) & "</span>"
                         AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
+                        AppForm(EnForm.FormBackColor).n += 1
                     End If
                 Else
                     AppForm(EnForm.FormBackColor).Status = "<span class=""boldtext"">Form Color was not changed at design time (still gray) </span>"
@@ -1111,6 +1117,7 @@ Module ValidateVB
                 If s.Contains("Me.Text") Then
                     AppForm(EnForm.FormText).Status = "<span class=""boldtext"">" & returnBetween(s, "Me.Text = """, """") & "</span>"
                     AppForm(EnForm.FormText).cssClass = "itemgreen"
+                    AppForm(EnForm.FormText).n += 1
                 Else
                     AppForm(EnForm.FormText).Status = "<span class=""boldtext"">The form text was not changed.</span>"
                     AppForm(EnForm.FormText).cssClass = "itemred"
@@ -1120,6 +1127,7 @@ Module ValidateVB
                 If s.Contains("Me.StartPosition") Then
                     AppForm(EnForm.FormStartPosition).Status = "<span class=""boldtext"">Set to: " & returnBetween(s, "Me.StartPosition = System.Windows.Forms.FormStartPosition.", vbCrLf) & "</span>"
                     AppForm(EnForm.FormStartPosition).cssClass = "itemgreen"
+                    AppForm(EnForm.FormStartPosition).n += 1
                 Else
                     AppForm(EnForm.FormStartPosition).Status = "<span class=""boldtext"">Form StartPosition not Modified. </span>"
                     AppForm(EnForm.FormStartPosition).cssClass = "itemred"
@@ -1133,6 +1141,7 @@ Module ValidateVB
                 If s.Contains("Me.AcceptButton") Then
                     AppForm(EnForm.FormAcceptButton).Status = "<span class=""boldtext"">" & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</span>"
                     AppForm(EnForm.FormAcceptButton).cssClass = "itemgreen"
+                    AppForm(EnForm.FormAcceptButton).n += 1
                 Else
                     AppForm(EnForm.FormAcceptButton).Status = "<span class=""boldtext"">Accept Button Property not set at design time.</span>"
                     AppForm(EnForm.FormAcceptButton).cssClass = "itemred"
@@ -1141,6 +1150,7 @@ Module ValidateVB
                 If s.Contains("Me.CancelButton") Then
                     AppForm(EnForm.FormCancelButton).Status = "<span class=""boldtext"">" & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</span>"
                     AppForm(EnForm.FormCancelButton).cssClass = "itemgreen"
+                    AppForm(EnForm.FormCancelButton).n += 1
                 Else
                     AppForm(EnForm.FormCancelButton).Status = "<span class=""boldtext"">Cancel Button Property not set at design time.</span>"
                     AppForm(EnForm.FormCancelButton).cssClass = "itemred"
@@ -1180,27 +1190,6 @@ Module ValidateVB
         End With
     End Sub
 
-
-
-    'Sub CheckForfrmPrefix2(filesinbuild As List(Of String), ByRef Item As MyItems)
-    '    Dim fn As String
-
-
-    '    With Item
-    '        .Status = "All files start with frm prefix"
-
-    '        For Each filename As String In filesinbuild
-
-    '            filename = filename.Replace("/", "\")
-    '            fn = ReturnLastField(filename, "\")
-    '            ' ------------------------------------------------
-    '            If Not fn.ToLower.StartsWith("frm") Then
-    '                ' .Status = vbFalse.ToString
-    '                .Status = filename & " does not start with frm prefix." & vbCrLf
-    '            End If
-    '        Next
-    '    End With
-    'End Sub
 
 
     Sub CheckForModules2(filesinbuild As List(Of String), ByRef item As MyItems)
@@ -1480,7 +1469,7 @@ Module ValidateVB
     End Function
     ' ============================================ End of Checks ===================================================
 
-    Sub BuildReport(key As String, ByRef SAssignment As AssignmentInfo, ByRef AppForm() As MyItems, ByRef SSummary() As MyItems, Var1 As String)
+    Sub BuildReport(key As String, ByRef SAssignment As AssignmentInfo, ByRef AppForm() As MyItems, ByRef SSummary() As MyItems, ByRef strReport As String)
         Dim dummyItem As New Assignment.MyItems
         Dim varlist() As String
 
@@ -1500,15 +1489,15 @@ Module ValidateVB
                 Case "Application Level"
 
 
-                    strStudentReport &= String.Format(h3, "Application Level Information") & vbCrLf & vbCrLf
+                    strReport &= String.Format(h3, "Application Level Information") & vbCrLf & vbCrLf
 
-                    strStudentReport &= starttable
-                    strStudentReport &= th
-                    strStudentReport = AppendToReport(strStudentReport, 3, "Development Environment", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - SLN File", SAssignment.hasSLN, errcnt, errComment, "hasSLN", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - vbProj File", SAssignment.hasVBproj, errcnt, errComment, "hasvbProj", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - VB Version", SAssignment.VBVersion, errcnt, errComment, "hasVBVersion", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 10, "General Help", SAssignment.VBVersion, errcnt, errComment, "", SAssignment.TotalScore)
+                    strReport &= starttable
+                    strReport &= th
+                    strReport = AppendToReport(strReport, 3, "Development Environment", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 2, " - SLN File", SAssignment.hasSLN, errcnt, errComment, "hasSLN", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 2, " - vbProj File", SAssignment.hasVBproj, errcnt, errComment, "hasvbProj", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 2, " - VB Version", SAssignment.VBVersion, errcnt, errComment, "hasVBVersion", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 10, "General Help", SAssignment.VBVersion, errcnt, errComment, "", SAssignment.TotalScore)
                     errcnt = 0
                     errComment = ""
 
@@ -1517,17 +1506,17 @@ Module ValidateVB
 
                     If SomeVarDisplayed(varlist) Then
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Application Info", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Application Info", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
 
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Splash Screen", SAssignment.hasSplashScreen, errcnt, errComment, "hasSplashScreen", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - About Box", SAssignment.hasAboutBox, errcnt, errComment, "hasAboutBox", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Application Title", SSummary(EnSummary.InfoAppTitle), errcnt, errComment, "InfoAppTitle", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Description", SSummary(EnSummary.InfoDescription), errcnt, errComment, "InfoDescription", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Company", SSummary(EnSummary.InfoCompany), errcnt, errComment, "InfoCompany", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Product", SSummary(EnSummary.InfoProduct), errcnt, errComment, "InfoProduct", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Trademark", SSummary(EnSummary.InfoTrademark), errcnt, errComment, "InfoTrademark", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Copyright", SSummary(EnSummary.InfoCopyright), errcnt, errComment, "InfoCopyright", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, " Application Info", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Splash Screen", SAssignment.hasSplashScreen, errcnt, errComment, "hasSplashScreen", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - About Box", SAssignment.hasAboutBox, errcnt, errComment, "hasAboutBox", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Application Title", SSummary(EnSummary.InfoAppTitle), errcnt, errComment, "InfoAppTitle", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Description", SSummary(EnSummary.InfoDescription), errcnt, errComment, "InfoDescription", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Company", SSummary(EnSummary.InfoCompany), errcnt, errComment, "InfoCompany", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Product", SSummary(EnSummary.InfoProduct), errcnt, errComment, "InfoProduct", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Trademark", SSummary(EnSummary.InfoTrademark), errcnt, errComment, "InfoTrademark", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Copyright", SSummary(EnSummary.InfoCopyright), errcnt, errComment, "InfoCopyright", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 10, " Application Info", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
                     End If
@@ -1537,55 +1526,55 @@ Module ValidateVB
 
                     If SomeVarDisplayed(varlist) Then
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Compile Options", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Option Strict", SAssignment.OptionStrict, errcnt, errComment, "OptionStrict", SAssignment.TotalScore)   ' ????????????????????????????/ jhg
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Option Explicit", SAssignment.OptionExplicit, errcnt, errComment, "OptionExplicit", SAssignment.TotalScore) ' ????????????????????????????/ jhg
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Options", SSummary(EnSummary.InfoCopyright), errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Compile Options", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Option Strict", SAssignment.OptionStrict, errcnt, errComment, "OptionStrict", SAssignment.TotalScore)   ' ????????????????????????????/ jhg
+                        strReport = AppendToReport(strReport, 2, " - Option Explicit", SAssignment.OptionExplicit, errcnt, errComment, "OptionExplicit", SAssignment.TotalScore) ' ????????????????????????????/ jhg
+                        strReport = AppendToReport(strReport, 10, "Options", SSummary(EnSummary.InfoCopyright), errcnt, errComment, "", SAssignment.TotalScore)
 
                     End If
-                    strStudentReport &= "</table>" & vbCrLf & vbCrLf
+                    strReport &= "</table>" & vbCrLf & vbCrLf
 
                 Case "Debugging"
                     ' This has not been implemented. I am not sure if it is possible, and if so how to determine if these features have been set within the student's environment.
-                    strStudentReport &= String.Format(h3, "Debugging")
+                    strReport &= String.Format(h3, "Debugging")
 
-                    strStudentReport &= starttable
-                    strStudentReport &= th
-                    strStudentReport = AppendToReport(strStudentReport, 3, "Debugging", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - BreakPoints", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 2, " - Watch Variables", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                    strStudentReport = AppendToReport(strStudentReport, 10, "Debugging", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strReport &= starttable
+                    strReport &= th
+                    strReport = AppendToReport(strReport, 3, "Debugging", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 2, " - BreakPoints", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 2, " - Watch Variables", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                    strReport = AppendToReport(strReport, 10, "Debugging", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                     errcnt = 0
                     errComment = ""
 
-                    strStudentReport &= "</table>" & vbCrLf & vbCrLf
+                    strReport &= "</table>" & vbCrLf & vbCrLf
 
 
                 Case "New Project File"
-                    '                strStudentReport &= String.Format(h2, "Comments Related to <span class=""boldtext"">" & Var1 & "</span>", errcnt, errComment, "", SAssignment.TotalScore)
+                    '                strReport &= String.Format(h2, "Comments Related to <span class=""boldtext"">" & Var1 & "</span>", errcnt, errComment, "", SAssignment.TotalScore)
 
                 Case "Form Objects"
                     With AppForm
-                        strStudentReport &= String.Format(h3, "Form Objects")
+                        strReport &= String.Format(h3, "Form Objects")
 
-                        strStudentReport &= starttable
-                        strStudentReport &= th
+                        strReport &= starttable
+                        strReport &= th
 
                         ReDim varlist(5)
                         varlist = {"ChangeFormText", "SetFormAcceptButton", "SetFormCancelButton", "ModifyStartPosition", "ChangeFormColor"}
 
                         If SomeVarDisplayed(varlist) Then
 
-                            strStudentReport = AppendToReport(strStudentReport, 3, "Design Time Form Properties", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 3, "Design Time Form Properties", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
 
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Form Text Property", AppForm(EnForm.FormText), errcnt, errComment, "ChangeFormText", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Accept Button", AppForm(EnForm.FormAcceptButton), errcnt, errComment, "SetFormAcceptButton", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Cancel Button", AppForm(EnForm.FormCancelButton), errcnt, errComment, "SetFormCancelButton", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Start Position", AppForm(EnForm.FormStartPosition), errcnt, errComment, "ModifyStartPosition", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Non-Gray Form Color", AppForm(EnForm.FormBackColor), errcnt, errComment, "ChangeFormColor", SAssignment.TotalScore)
-                            '         strStudentReport = AppendToReport(strStudentReport, 2, " - Form Load Method", AppForm(enForm.FormLoadMethod, errcnt, errComment, "UtilizeFormLoadMethod", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Form Text Property", AppForm(EnForm.FormText), errcnt, errComment, "ChangeFormText", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Accept Button", AppForm(EnForm.FormAcceptButton), errcnt, errComment, "SetFormAcceptButton", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Cancel Button", AppForm(EnForm.FormCancelButton), errcnt, errComment, "SetFormCancelButton", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Start Position", AppForm(EnForm.FormStartPosition), errcnt, errComment, "ModifyStartPosition", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Non-Gray Form Color", AppForm(EnForm.FormBackColor), errcnt, errComment, "ChangeFormColor", SAssignment.TotalScore)
+                            '         strReport = AppendToReport(strReport, 2, " - Form Load Method", AppForm(enForm.FormLoadMethod, errcnt, errComment, "UtilizeFormLoadMethod", SAssignment.TotalScore)
 
-                            strStudentReport = AppendToReport(strStudentReport, 10, "", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 10, "", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                             errcnt = 0
                             errComment = ""
                         End If
@@ -1594,56 +1583,56 @@ Module ValidateVB
                         varlist = {"IncludeFrmInFormName", "ButtonObj", "ObjTextbox", "ActiveLabel", "NonactiveLabel", "ObjCombobox", "ObjListbox", "ObjRadioButton", "ObjCheckbox", "ObjGroupBox", "ObjOpenFileDialog", "ObjSaveFileDialog", "ObjWebBrowser"}
 
                         If SomeVarDisplayed(varlist) Then
-                            strStudentReport = AppendToReport(strStudentReport, 3, "Form Object Names Incorporate Object Prefix", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 3, "Form Object Names Incorporate Object Prefix", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
 
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Form (frm)", AppForm(EnForm.FormName), errcnt, errComment, "IncludeFrmInFormName", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Buttons (btn)", AppForm(EnForm.ObjButton), errcnt, errComment, "ButtonObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Textboxes (txt)", AppForm(EnForm.ObjTextbox), errcnt, errComment, "TextboxObj", SAssignment.TotalScore)
-                            '  strStudentReport = AppendToReport(strStudentReport, 2, " - Labels (lbl)", AppForm(enForm.objLabel), errcnt, errComment, "", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Active Labels (lbl)", AppForm(EnForm.ObjActiveLabel), errcnt, errComment, "ActiveLabels", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - NonActive Labels (no prefix needed)", AppForm(EnForm.ObjNonactiveLabel), errcnt, errComment, "NonActiveLabels", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Combobox (cbx)", AppForm(EnForm.ObjCombobox), errcnt, errComment, "ComboBoxObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Listbox (lbx)", AppForm(EnForm.ObjListbox), errcnt, errComment, "ListBoxObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Radiobutton (rbn)", AppForm(EnForm.ObjRadioButton), errcnt, errComment, "RadioButtonObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Checkbox (cbx)", AppForm(EnForm.ObjCheckbox), errcnt, errComment, "CheckBoxObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - Groupbox (gbx)", AppForm(EnForm.ObjGroupBox), errcnt, errComment, "GroupBoxObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - OpenFileDialog (ofd)", AppForm(EnForm.ObjOpenFileDialog), errcnt, errComment, "ObjOpenFileDialog", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - SaveFileDialog (sfd)", AppForm(EnForm.ObjSaveFileDialog), errcnt, errComment, "ObjSaveFileDialog", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 2, " - WebBrowser (wb)", AppForm(EnForm.ObjWebBrowser), errcnt, errComment, "WebBrowserObj", SAssignment.TotalScore)
-                            strStudentReport = AppendToReport(strStudentReport, 10, "Form Objects", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Form (frm)", AppForm(EnForm.FormName), errcnt, errComment, "IncludeFrmInFormName", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Buttons (btn)", AppForm(EnForm.ObjButton), errcnt, errComment, "ButtonObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Textboxes (txt)", AppForm(EnForm.ObjTextbox), errcnt, errComment, "TextboxObj", SAssignment.TotalScore)
+                            '  strReport = AppendToReport(strReport, 2, " - Labels (lbl)", AppForm(enForm.objLabel), errcnt, errComment, "", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Active Labels (lbl)", AppForm(EnForm.ObjActiveLabel), errcnt, errComment, "ActiveLabels", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - NonActive Labels (no prefix needed)", AppForm(EnForm.ObjNonactiveLabel), errcnt, errComment, "NonActiveLabels", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Combobox (cbx)", AppForm(EnForm.ObjCombobox), errcnt, errComment, "ComboBoxObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Listbox (lbx)", AppForm(EnForm.ObjListbox), errcnt, errComment, "ListBoxObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Radiobutton (rbn)", AppForm(EnForm.ObjRadioButton), errcnt, errComment, "RadioButtonObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Checkbox (cbx)", AppForm(EnForm.ObjCheckbox), errcnt, errComment, "CheckBoxObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - Groupbox (gbx)", AppForm(EnForm.ObjGroupBox), errcnt, errComment, "GroupBoxObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - OpenFileDialog (ofd)", AppForm(EnForm.ObjOpenFileDialog), errcnt, errComment, "ObjOpenFileDialog", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - SaveFileDialog (sfd)", AppForm(EnForm.ObjSaveFileDialog), errcnt, errComment, "ObjSaveFileDialog", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 2, " - WebBrowser (wb)", AppForm(EnForm.ObjWebBrowser), errcnt, errComment, "WebBrowserObj", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 10, "Form Objects", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                             errcnt = 0
                             errComment = ""
                         End If
 
-                        strStudentReport &= "</table>" & vbCrLf & vbCrLf
+                        strReport &= "</table>" & vbCrLf & vbCrLf
                     End With
 
                 Case "Coding Standards"
 
-                    strStudentReport &= String.Format(h3, "Coding Standards")
+                    strReport &= String.Format(h3, "Coding Standards")
 
-                    strStudentReport &= starttable
-                    strStudentReport &= th
+                    strReport &= starttable
+                    strReport &= th
 
 
                     ReDim varlist(5)
                     varlist = {"CommentSubs", "CommentIF", "CommentFOR", "CommentDO", "CommentWHILE", "CommentSELECT"}
 
                     If SomeVarDisplayed(varlist) Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Use of Comments", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - First Line of Sub/Function", SSummary(EnSummary.CommentSub), errcnt, errComment, "CommentSubs", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to IF", SSummary(EnSummary.CommentIF), errcnt, errComment, "CommentIF", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to For", SSummary(EnSummary.CommentFor), errcnt, errComment, "CommentFOR", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to Do", SSummary(EnSummary.CommentDo), errcnt, errComment, "CommentDO", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to While", SSummary(EnSummary.CommentWhile), errcnt, errComment, "CommentWHILE", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Prior to Select Case", SSummary(EnSummary.CommentSelect), errcnt, errComment, "CommentSELECT", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Use of Comments", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - First Line of Sub/Function", SSummary(EnSummary.CommentSub), errcnt, errComment, "CommentSubs", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Prior to IF", SSummary(EnSummary.CommentIF), errcnt, errComment, "CommentIF", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Prior to For", SSummary(EnSummary.CommentFor), errcnt, errComment, "CommentFOR", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Prior to Do", SSummary(EnSummary.CommentDo), errcnt, errComment, "CommentDO", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Prior to While", SSummary(EnSummary.CommentWhile), errcnt, errComment, "CommentWHILE", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Prior to Select Case", SSummary(EnSummary.CommentSelect), errcnt, errComment, "CommentSELECT", SAssignment.TotalScore)
 
                         If errComment.Length > 0 Then
                             '  errComment = ""
                             dummyItem.cssClass = "itemred"
-                            strStudentReport = AppendToReport(strStudentReport, 10, "General Comments on Comments", dummyItem, errcnt, errComment, "CommentGeneral", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 10, "General Comments on Comments", dummyItem, errcnt, errComment, "CommentGeneral", SAssignment.TotalScore)
                         Else
-                            strStudentReport = AppendToReport(strStudentReport, 10, "Use of Comments", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                            strReport = AppendToReport(strReport, 10, "Use of Comments", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         End If
 
                         errcnt = 0
@@ -1657,11 +1646,11 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
                         '     If .VarArrays.showVar OrElse .VarLists.showVar OrElse .VarStructures.showVar Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Data Structures", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Arrays", SSummary(EnSummary.VarArrays), errcnt, errComment, "VarArrays", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Lists", SSummary(EnSummary.VarLists), errcnt, errComment, "VarLists", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Structures", SSummary(EnSummary.VarStructures), errcnt, errComment, "VarStructures", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Data Structures", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Data Structures", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Arrays", SSummary(EnSummary.VarArrays), errcnt, errComment, "VarArrays", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Lists", SSummary(EnSummary.VarLists), errcnt, errComment, "VarLists", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Structures", SSummary(EnSummary.VarStructures), errcnt, errComment, "VarStructures", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 10, "Data Structures", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
                     End If
@@ -1672,13 +1661,13 @@ Module ValidateVB
 
                     If SomeVarDisplayed(varlist) Then
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Variable Data Types - Checking to see which data types are used ", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - String", SSummary(EnSummary.VarString), errcnt, errComment, "VarString", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Integer", SSummary(EnSummary.VarInteger), errcnt, errComment, "VarInteger", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Decimal/Double", SSummary(EnSummary.VarDecimal), errcnt, errComment, "VarDecimal", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Date", SSummary(EnSummary.VarDate), errcnt, errComment, "VarDate", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Boolean", SSummary(EnSummary.VarBoolean), errcnt, errComment, "VarBoolean", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Variable Data Types", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Variable Data Types - Checking to see which data types are used ", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - String", SSummary(EnSummary.VarString), errcnt, errComment, "VarString", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Integer", SSummary(EnSummary.VarInteger), errcnt, errComment, "VarInteger", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Decimal/Double", SSummary(EnSummary.VarDecimal), errcnt, errComment, "VarDecimal", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Date", SSummary(EnSummary.VarDate), errcnt, errComment, "VarDate", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Boolean", SSummary(EnSummary.VarBoolean), errcnt, errComment, "VarBoolean", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 10, "Variable Data Types", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
                     End If
@@ -1690,25 +1679,25 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
 
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Program Logic - Checking to see if each Programming Control Stucture is used or not", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Else", SSummary(EnSummary.LogicElse), errcnt, errComment, "LogicElse", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - ElseIF", SSummary(EnSummary.LogicElseIF), errcnt, errComment, "LogicElseIF", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Nested IF", SSummary(EnSummary.LogicNestedIF), errcnt, errComment, "LogicNestedIF", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Nested For/Do", SSummary(EnSummary.LogicNestedFor), errcnt, errComment, "LogicNestedFOR", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Convert to String (cStr or .toString)", SSummary(EnSummary.LogicConvertToString), errcnt, errComment, "LogicConvertToString", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Format String (.toString() or String.Format())", SSummary(EnSummary.LogicStringFormat), errcnt, errComment, "LogicStringFormat", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Template Parameters", SSummary(EnSummary.LogicStringFormatParameters), errcnt, errComment, "LogicStringFormatParameters", SAssignment.TotalScore)
-                        '   strStudentReport = AppendToReport(strStudentReport, 2, " - ByRef Parameters", ssummary(ensummary.LogicByRef), errcnt, errComment, "LogicByRef", SAssignment.TotalScore)
-                        '   strStudentReport = AppendToReport(strStudentReport, 2, " - Optional Parameters", ssummary(ensummary.LogicOptional), errcnt, errComment, "LogicOptional", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Concatenation", SSummary(EnSummary.LogicConcatination), errcnt, errComment, "LogicConcatination", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Case Insensitve ", SSummary(EnSummary.LogicCaseInsensitive), errcnt, errComment, "LogicCaseInsensitive", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Try ... Catch", SSummary(EnSummary.LogicTryCatch), errcnt, errComment, "LogicTryCatch", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Complex Conditions", SSummary(EnSummary.LogicComplexConditions), errcnt, errComment, "LogicComplexConditions", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req Use of a StreamReader", SSummary(EnSummary.LogicStreamReader), errcnt, errComment, "LogicStreamReader", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req matching StreamReader.Close", SSummary(EnSummary.LogicStreamReaderClose), errcnt, errComment, "LogicStreamReaderClose", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req Use of a StreamWriter", SSummary(EnSummary.LogicStreamWriter), errcnt, errComment, "LogicStreamWriter", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Req matching StreamWriter.Close", SSummary(EnSummary.LogicStreamWriterClose), errcnt, errComment, "LogicStreamWriterClose", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Program Logic", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Program Logic - Checking to see if each Programming Control Stucture is used or not", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Else", SSummary(EnSummary.LogicElse), errcnt, errComment, "LogicElse", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - ElseIF", SSummary(EnSummary.LogicElseIF), errcnt, errComment, "LogicElseIF", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Nested IF", SSummary(EnSummary.LogicNestedIF), errcnt, errComment, "LogicNestedIF", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Nested For/Do", SSummary(EnSummary.LogicNestedFor), errcnt, errComment, "LogicNestedFOR", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Convert to String (cStr or .toString)", SSummary(EnSummary.LogicConvertToString), errcnt, errComment, "LogicConvertToString", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Format String (.toString() or String.Format())", SSummary(EnSummary.LogicStringFormat), errcnt, errComment, "LogicStringFormat", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Template Parameters", SSummary(EnSummary.LogicStringFormatParameters), errcnt, errComment, "LogicStringFormatParameters", SAssignment.TotalScore)
+                        '   strReport = AppendToReport(strReport, 2, " - ByRef Parameters", ssummary(ensummary.LogicByRef), errcnt, errComment, "LogicByRef", SAssignment.TotalScore)
+                        '   strReport = AppendToReport(strReport, 2, " - Optional Parameters", ssummary(ensummary.LogicOptional), errcnt, errComment, "LogicOptional", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Concatenation", SSummary(EnSummary.LogicConcatination), errcnt, errComment, "LogicConcatination", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Case Insensitve ", SSummary(EnSummary.LogicCaseInsensitive), errcnt, errComment, "LogicCaseInsensitive", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Try ... Catch", SSummary(EnSummary.LogicTryCatch), errcnt, errComment, "LogicTryCatch", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Complex Conditions", SSummary(EnSummary.LogicComplexConditions), errcnt, errComment, "LogicComplexConditions", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Req Use of a StreamReader", SSummary(EnSummary.LogicStreamReader), errcnt, errComment, "LogicStreamReader", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Req matching StreamReader.Close", SSummary(EnSummary.LogicStreamReaderClose), errcnt, errComment, "LogicStreamReaderClose", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Req Use of a StreamWriter", SSummary(EnSummary.LogicStreamWriter), errcnt, errComment, "LogicStreamWriter", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Req matching StreamWriter.Close", SSummary(EnSummary.LogicStreamWriterClose), errcnt, errComment, "LogicStreamWriterClose", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 10, "Program Logic", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
 
@@ -1722,11 +1711,11 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
                         '    If .SystemIO.showVar OrElse .SystemNet.showVar OrElse .SystemDB.showVar Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Imports", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.IO", SSummary(EnSummary.SystemIO), errcnt, errComment, "SystemIO", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.Net", SSummary(EnSummary.SystemNet), errcnt, errComment, "SystemNet", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - System.DB", SSummary(EnSummary.SystemDB), errcnt, errComment, "SystemDB", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Imports", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Imports", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - System.IO", SSummary(EnSummary.SystemIO), errcnt, errComment, "SystemIO", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - System.Net", SSummary(EnSummary.SystemNet), errcnt, errComment, "SystemNet", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - System.DB", SSummary(EnSummary.SystemDB), errcnt, errComment, "SystemDB", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 10, "Imports", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
 
@@ -1739,40 +1728,56 @@ Module ValidateVB
                     If SomeVarDisplayed(varlist) Then
 
                         '    If .SystemIO.showVar OrElse .SystemNet.showVar OrElse .SystemDB.showVar Then
-                        strStudentReport = AppendToReport(strStudentReport, 3, "Subs / Functions", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Subs", SSummary(EnSummary.LogicSub), errcnt, errComment, "LogicSub", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Optional Variables", SSummary(EnSummary.LogicOptional), errcnt, errComment, "LogicOptional", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - ByRef Variables", SSummary(EnSummary.LogicByRef), errcnt, errComment, "LogicByRef", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Multiple Forms", SSummary(EnSummary.LogicMultipleForms), errcnt, errComment, "LogicMultipleForms", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Include Module", SSummary(EnSummary.LogicModule), errcnt, errComment, "LogicModule", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 2, " - Form Load Method", SSummary(EnSummary.LogicFormLoad), errcnt, errComment, "LogicFormLoad", SAssignment.TotalScore)
-                        strStudentReport = AppendToReport(strStudentReport, 10, "Subs / Functions", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 3, "Subs / Functions", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Subs", SSummary(EnSummary.LogicSub), errcnt, errComment, "LogicSub", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Optional Variables", SSummary(EnSummary.LogicOptional), errcnt, errComment, "LogicOptional", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - ByRef Variables", SSummary(EnSummary.LogicByRef), errcnt, errComment, "LogicByRef", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Multiple Forms", SSummary(EnSummary.LogicMultipleForms), errcnt, errComment, "LogicMultipleForms", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Include Module", SSummary(EnSummary.LogicModule), errcnt, errComment, "LogicModule", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 2, " - Form Load Method", SSummary(EnSummary.LogicFormLoad), errcnt, errComment, "LogicFormLoad", SAssignment.TotalScore)
+                        strReport = AppendToReport(strReport, 10, "Subs / Functions", dummyItem, errcnt, errComment, "", SAssignment.TotalScore)
                         errcnt = 0
                         errComment = ""
 
                     End If
 
 
-                    strStudentReport &= "</table>" & vbCrLf & vbCrLf
+                    strReport &= "</table>" & vbCrLf & vbCrLf
 
 
-                    strStudentReport = strStudentReport.Replace("[TLOC]", TotalLinesOfCode.ToString("n0") & " Lines of Code (not including comments)")
+                    strReport = strReport.Replace("[TLOC]", TotalLinesOfCode.ToString("n0") & " Lines of Code (not including comments)")
 
                     '  TotalScore = (SAssignment.TotalScore / TotalPossiblePts).ToString("p1")
                     SAssignment.strTotalScore = SAssignment.TotalScore.ToString("n1") & " deduction out of " & TotalPossiblePts.ToString("n1") & " possible points = " & (SAssignment.TotalScore / TotalPossiblePts).ToString("p1")
 
-                    strStudentReport = strStudentReport.Replace("[SCORE]", SAssignment.strTotalScore & vbCrLf)
+                    strReport = strReport.Replace("[SCORE]", SAssignment.strTotalScore & vbCrLf)
 
 
                 Case Else
                     If key.StartsWith("Assessment Results for") Then
-                        strStudentReport &= "<h2>" & key & "</h2>" & vbCrLf
+                        strReport &= "<h2>" & key & "</h2>" & vbCrLf
                     Else
+                        '  BuildSummaryDetail()
                         MessageBox.Show("BuildReport received an unknown key = " & key)
                     End If
             End Select
         End With
     End Sub
+
+
+    Sub BuildSummaryDetail(Assign As AssignmentInfo, AppForm() As MyItems, AppSummary() As MyItems)
+
+        strFacReport = InitializeFacultyReport()
+
+        BuildReport("Application Level", Assign, AppForm, AppSummary, strFacReport)
+        BuildReport("New Project File", Assign, AppForm, AppSummary, strFacReport) ' the AppForm(0) is just a placeholder
+        BuildReport("Assessment Results for " & ReturnLastField("", "\"), Assign, AppForm, AppSummary, strFacReport)
+        BuildReport("Form Objects", Assign, AppForm, AppSummary, strFacReport)
+        BuildReport("Coding Standards", Assign, AppForm, AppSummary, strFacReport)
+
+    End Sub
+
+
 
     Public Function FindIntegratedScore(SAssignment As AssignmentInfo, AppForm() As MyItems, SSummary() As MyItems) As Decimal
 
@@ -1783,6 +1788,11 @@ Module ValidateVB
         For i = 0 To SSummary.GetUpperBound(0)
             setting = Find_Setting(EnSummaryName(i), "FindIntegratedScore")
             With SSummary(i)
+
+                If setting.Req And (setting.PtsPerError = 0 Or .n = 0) Then
+                    '         Beep()
+                End If
+
                 If setting.Req And setting.MaxPts <> 0 Then        '    And .cssClass = "itemred" Then
                     If EnSummaryName(i).StartsWith("Comment") Then
                         .YourPts = Math.Min(setting.MaxPts - setting.PtsPerError * Math.Min(setting.MaxPts, .n), setting.MaxPts)  ' this awards points for having instances 
@@ -1909,11 +1919,11 @@ Module ValidateVB
                 '    Beep()
                 'End If
 
-                If Setting.Req And Setting.MaxPts <> 0 And .cssClass = "itemred" Then
+                If Setting.Req And Setting.MaxPts <> 0 Then
                     .YourPts = Math.Min(Setting.PtsPerError * Math.Max(0, .n), Setting.MaxPts)
                     total += .YourPts
                 Else
-                    .YourPts = 0
+                    .YourPts = -1
                 End If
 
 

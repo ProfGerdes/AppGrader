@@ -56,6 +56,7 @@ Partial Class frmMain
         Me.btnBrowseTemplate = New System.Windows.Forms.Button()
         Me.lblSelectedTemplate = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.btnAssignSummary = New System.Windows.Forms.Button()
         Me.btnExit = New System.Windows.Forms.Button()
         Me.btnViewPlagiarism = New System.Windows.Forms.Button()
         Me.Button1 = New System.Windows.Forms.Button()
@@ -76,7 +77,7 @@ Partial Class frmMain
         Me.rbnCheckGray = New System.Windows.Forms.RadioButton()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.SaveFileDialog1 = New System.Windows.Forms.SaveFileDialog()
-        Me.btnAssignSummary = New System.Windows.Forms.Button()
+        Me.Button2 = New System.Windows.Forms.Button()
         Me.MenuStrip1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -356,6 +357,7 @@ Partial Class frmMain
         '
         'Panel1
         '
+        Me.Panel1.Controls.Add(Me.Button2)
         Me.Panel1.Controls.Add(Me.btnAssignSummary)
         Me.Panel1.Controls.Add(Me.btnExit)
         Me.Panel1.Controls.Add(Me.btnViewPlagiarism)
@@ -368,6 +370,16 @@ Partial Class frmMain
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(678, 80)
         Me.Panel1.TabIndex = 44
+        '
+        'btnAssignSummary
+        '
+        Me.btnAssignSummary.BackColor = System.Drawing.SystemColors.InactiveCaption
+        Me.btnAssignSummary.Location = New System.Drawing.Point(363, 43)
+        Me.btnAssignSummary.Name = "btnAssignSummary"
+        Me.btnAssignSummary.Size = New System.Drawing.Size(154, 33)
+        Me.btnAssignSummary.TabIndex = 40
+        Me.btnAssignSummary.Text = "Assignment Summary"
+        Me.btnAssignSummary.UseVisualStyleBackColor = False
         '
         'btnExit
         '
@@ -575,15 +587,15 @@ Partial Class frmMain
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Assignment Detail"
         '
-        'btnAssignSummary
+        'Button2
         '
-        Me.btnAssignSummary.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnAssignSummary.Location = New System.Drawing.Point(363, 43)
-        Me.btnAssignSummary.Name = "btnAssignSummary"
-        Me.btnAssignSummary.Size = New System.Drawing.Size(154, 33)
-        Me.btnAssignSummary.TabIndex = 40
-        Me.btnAssignSummary.Text = "Assignment Summary"
-        Me.btnAssignSummary.UseVisualStyleBackColor = False
+        Me.Button2.BackColor = System.Drawing.SystemColors.InactiveCaption
+        Me.Button2.Location = New System.Drawing.Point(523, 44)
+        Me.Button2.Name = "Button2"
+        Me.Button2.Size = New System.Drawing.Size(47, 33)
+        Me.Button2.TabIndex = 41
+        Me.Button2.Text = "Sum"
+        Me.Button2.UseVisualStyleBackColor = False
         '
         'frmMain
         '
@@ -677,5 +689,6 @@ Partial Class frmMain
     Friend WithEvents cbxNoDemoFiles As System.Windows.Forms.CheckBox
     Friend WithEvents Button1 As System.Windows.Forms.Button
     Friend WithEvents btnAssignSummary As System.Windows.Forms.Button
+    Friend WithEvents Button2 As System.Windows.Forms.Button
 
 End Class
