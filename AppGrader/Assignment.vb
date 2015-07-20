@@ -133,6 +133,8 @@
         TotalScore = 73
     End Enum
 
+
+
     Public Const NSummary As Integer = 73
 
     Public EnSummaryName() As String = {"StudentID", "OptionStrict", "OptionExplicit", "hasSLN", "hasVBproj", "hasSplashScreen", "hasAboutBox", "InfoAppTitle", "InfoDescription", "InfoCompany", "InfoProduct", "InfoTrademark", "InfoCopyright", "InfoGUID", "CommentGeneral", "CommentSub", "CommentIF", "CommentFor", "CommentDo", "CommentWhile", "CommentSelect", "RenameObjects", "IncludeFrmInFormName", "ChangeFormText", "ChangeFormColor", "SetFormAcceptButton", "SetFormCancelButton", "ModifyStartPosition", "SystemIO", "SystemNet", "SystemDBv", "VarArrays", "VarLists", "VarStructures", "VarBoolean", "VarInteger", "VarDecimal", "VarDate", "VarString", "VarPrefixes", "LogicIF", "LogicFor", "LogicDo", "LogicWhile", "LogicElse", "LogicElseIF", "LogicMessageBox", "LogicNestedIF", "LogicNestedFor", "LogicSelectCase", "LogicConcatination", "LogicConvertToString", "LogicToStringFormat", "LogicStringFormat", "LogicStringFormatParameters", "LogicComplexConditions", "LogicCaseInsensitive", "LogicTryCatch", "LogicStreamReader", "LogicStreamWriter", "LogicStreamReaderClose", "LogicStreamWriterClose", "LogicCStr", "LogicToString", "LogicSub", "LogicFunction", "LogicOptional", "LogicByRef", "LogicMultipleForms", "LogicModule", "LogicFormLoad", "LogicVarPrefixes", "LogicFlowControl", "TotalScore"}
@@ -149,7 +151,7 @@
 
         Dim Status As String          ' holds the main strings associated with the item
         Dim cnt As Integer
-        Dim n As Integer              ' number of instances found
+        Dim n As Integer              ' number of instances found, if negative, it shows nubmer of bad items found
         Dim cssClass As String
         Dim cssNonChk As String       ' can be either hidden, gray or white(none)
         Dim bad As String
@@ -160,6 +162,7 @@
         Dim Comments As String
         Dim isBad As Boolean
         Dim ID As String
+
     End Structure
     ' ========================================================================
 

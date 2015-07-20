@@ -1125,7 +1125,7 @@ Module ValidateVB
                 End If
 
                 If s.Contains("Me.StartPosition") Then
-                    AppForm(EnForm.FormStartPosition).Status = "<span class=""boldtext"">Set to: " & returnBetween(s, "Me.StartPosition = System.Windows.Forms.FormStartPosition.", vbCrLf) & "</span>"
+                    AppForm(EnForm.FormStartPosition).Status = "<span class=""boldtext"">Form Startup Position set to: [" & returnBetween(s, "Me.StartPosition = System.Windows.Forms.FormStartPosition.", vbCrLf) & "] </span>"
                     AppForm(EnForm.FormStartPosition).cssClass = "itemgreen"
                     AppForm(EnForm.FormStartPosition).n += 1
                 Else
@@ -1239,24 +1239,30 @@ Module ValidateVB
         Dim tmpObj As String = ""
 
         Dim delim() As String = {"        Me."}
-        Dim strObjects() As String = {"Form", "LabelActive", "LabelNonactive", "Button", "Textbox", "Listbox", "Combobox", "OpenFileDialog", "SaveFileDialog", "RadioButton", "CheckBox", "GroupBox", "WebBrowser", "WebClient", "OpenFileDialog", "SaveFileDialog"}
+        ' here are all the objects I am interested in
+        Dim strObjects() As String = {"LabelActive", "LabelNonactive", "Button", "Textbox", "Listbox", "Combobox", "OpenFileDialog", "SaveFileDialog", "RadioButton", "CheckBox", "GroupBox", "WebBrowser", "WebClient", "MaskedTextBox", "PictureBox", "TabControl", "Timer"}
+
+        ' Prefixes based on http://www.vbprogramming.org/vbbook.php?sect=se7ss1&ch=ch03&PHPSESSID=3f8ae98f461e2db49db57bd6f014e3c5
+        ' Note, many sources don't refer to a RadioButton, but rather OptionButton
+        Dim strObjPrefix() As String = {"lbl", "-", "btn", "txt", "lst", "cbo", "ofd", "sfd", "rbn", "chk", "grp", "wb", "wc", "msk", "pic", "tab", "tmr"}
+        Dim objNbr As Integer
 
         Dim filesourceVB As String
         Dim filesource As String
         Dim IsActiveLabel As Boolean
         Dim tmp As String = ""
-        ' ------------------------------------------------------------------------------------------------------------------
+        Dim nObjSeen As Integer
+        ' ================================================================================================
 
-        '    ' read the source of the vb file to check to see if any of the objects not renamed are used in the source file
+        ' read the source of the vb file to check to see if any of the objects not renamed are used in the source file
         Dim sr As New StreamReader(filename)
-        'filesourceVB = sr.ReadToEnd
-        'sr.Close()
 
         ' Now read the source of the designer file to extract the definition of the objects.
         sr = New StreamReader(filename)
         filesourceVB = sr.ReadToEnd
         sr.Close()
 
+        ' We now open the form design file to look at the objects
         Dim fn As String = filename.Replace(".vb", ".designer.vb")
 
         ' Check to see if the file exists. This avoids processing Modules and Classes.
@@ -1267,8 +1273,10 @@ Module ValidateVB
 
             Dim strLayout As String = returnBetween(filesource, "Private Sub InitializeComponent()", "Me.SuspendLayout()")
             Dim strObjOnForm() As String = Nothing
+            Dim strobj As String = ""
             Dim css As String = ""
 
+            ' extract out all the objects on the form
             Try
                 strObjOnForm = strLayout.Split(delim, StringSplitOptions.None)
                 strObjOnForm.DropFirstElement()
@@ -1278,7 +1286,7 @@ Module ValidateVB
             End Try
 
             ' ----------------------------------------------------------------------------------------------------------------
-            ' the code below is wrong. it looks at the file name, not the FormText
+            ' the code below is wrong. it looks at the file name, not the FormText  <<<<<< jhg
             tmp = ReturnLastField(filename, "\")
 
             With AppForm(EnForm.FormName)
@@ -1286,6 +1294,7 @@ Module ValidateVB
                     .Status = tmp & " starts with frm prefix"
                     .cssClass = "itemgreen"
                     .cnt = 0
+                    .n -= 1
                 Else
                     .Status = tmp & " does not start with the frm prefix"
                     .cssClass = "itemred"
@@ -1293,69 +1302,81 @@ Module ValidateVB
                 End If
             End With
             ' ----------------------------------------------------------------------------------------------------------------
-            For Each strObj As String In strObjects  ' list of the types of objects we are interested in
+            For j As Integer = 0 To strObjects.GetUpperBound(0) ' Look through the list of object types we are interested in
+                strobj = strObjects(j)
+                foundflag = False ' indicates if the object on the form is in the list of interesting objects
+
+                If strobj = "Button" Then
+                    Beep()
+                End If
+
+
                 statgood = ""
                 statbad = ""
                 cnt = -1  ' indicates no instances yet
-                foundflag = False
-                tmpObj = strObj
+                tmpObj = strobj
 
-                If strObj.StartsWith("Label") Then ' We are doing this to handle Active and Nonactive labels
-                    strObj = "Label"
+                If strobj.StartsWith("Label") Then ' We are doing this to handle Active and Nonactive labels
+                    strobj = "Label"
                 End If
 
+                ' Not look through all the objects on the form and process them if they match the current object in outer loop
+                nobjseen = 0
                 For Each obj As String In strObjOnForm   ' list of objects on the form
 
-                    If obj.Contains("= New System.Windows.Forms.") Then
+                    If obj.Contains("= New System.Windows.Forms.") Then  ' this is an object, so precees it.
                         Try
                             s1 = TrimUpTo(obj, "= New System.Windows.Forms.")
                             If s1.Contains("(") Then s1 = s1.Substring(0, s1.IndexOf("("))
 
-                            If s1.Trim.ToUpper = strObj.ToUpper Then                       ' type of object we are looking at
+                            ' compare with current object, and process if the same.
+                            If s1.Trim.ToUpper = strobj.ToUpper Then
+                                foundflag = True
+                                nObjSeen += 1
+
                                 s2 = obj    ' not sure if this is correct. I added it so s2 had an initial value.
                                 If s2.Contains(" = ") Then s2 = obj.Substring(0, obj.IndexOf(" = "))
 
+                                ' Extracts out any text associated with the object. This text is displayed in the output
                                 If filesource.IndexOf("Me." & s2 & ".Text = ") > -1 Then
                                     s3 = returnBetween(filesource, "Me." & s2 & ".Text = ", vbCrLf)                   ' Text Value
+                                    If s3.Length > 30 Then s3 = s3.Substring(0, 30) & " ..."
                                 Else
                                     s3 = ""
                                 End If
                                 ' -----------------------------------------------------------------------------------------------
+                                If cnt = -1 Then cnt = 0 ' reset it so we count those without proper prefixes. cnt = 0 means no errors
 
-                                If s1 = "Label" Then    ' check to see if it is active
+                                ' Handle Labels specially. Needed to distinguish Active and NonActive labels
+                                If s1 = "Label" Then    ' special check to see if it is active
                                     If filesourceVB.IndexOf(s2) > -1 Then
                                         IsActiveLabel = True
                                     Else
                                         IsActiveLabel = False
                                     End If
                                 End If
-
                                 ' --------------------------------------------------------------------------------------------------
-                                If cnt = -1 Then cnt = 0 ' reset it so we count those without proper prefixes. cnt = 0 means no errors
-
-                                foundflag = True
-                                '       If Not s1.Trim = "Button" Then s3 = ""
-                                If s3.Length > 30 Then s3 = s3.Substring(0, 30) & " ..."
 
                                 If IsActiveLabel And tmpObj = "LabelActive" Then
-                                    If s2.StartsWith(s1) Then                  ' Name of the object
+                                    If Not s2.StartsWith(strObjPrefix(j)) Then                  ' Name of the object
                                         ' this is a problem - object not renamed
-                                        statbad &= arrow & s2 & " [" & s3 & "] <br />" & vbCrLf
+                                        statbad &= arrow & s2 & " <br />" & vbCrLf
                                         cnt = cnt + 1
                                     Else
-                                        statgood &= bullet & s2 & " [" & s3 & "] <br />" & vbCrLf
+                                        statgood &= bullet & s2 & " <br />" & vbCrLf
                                     End If
-                                End If
-
-                                If tmpObj <> "LabelActive" Then
-                                    If s2.StartsWith(s1) And tmpObj <> "LabelNonactive" Then                  ' Name of the object
+                                ElseIf Not IsActiveLabel And tmpObj = "LabelNonActive" Then
+                                    statgood &= arrow & s2 & " <br />" & vbCrLf
+                                ElseIf s1 <> "Label" Then
+                                    If Not s2.StartsWith(strObjPrefix(j)) And (tmpObj <> "LabelNonactive") Then                  ' Name of the object
                                         ' this is a problem - object not renamed
-                                        statbad &= arrow & s2 & " [" & s3 & "] <br />" & vbCrLf
-                                        cnt = cnt + 1
-                                    ElseIf Not IsActiveLabel Then  ' Nonactive labels need not be renamed.
-                                        statgood &= bullet & s2 & " [" & s3 & "] <br />" & vbCrLf
-                                    End If
+                                        statbad &= arrow & s2 & " <br />" & vbCrLf
+                                        cnt = cnt + 1    ' counting number of bad instances
 
+                                    ElseIf Not IsActiveLabel Then  ' Nonactive labels need not be renamed.
+                                        statgood &= bullet & s2 & " <br />" & vbCrLf
+                                        cnt = cnt + 1
+                                    End If
                                 End If
                             End If
 
@@ -1364,85 +1385,83 @@ Module ValidateVB
                             MessageBox.Show("Error occured in Check Object Naming - " & ex.Message)
                         End Try
                     End If
+
+                    If s1.Trim.ToUpper = strobj.ToUpper Then
+                        Exit For  ' since we found a match, no need to check the other items in the list
+                    End If
                 Next obj
 
                 If Not foundflag Then statgood = "None Found"
 
+                objNbr = -1     ' 
                 Select Case tmpObj
                     Case "Button"
-                        AppForm(EnForm.ObjButton).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjButton).cssClass = css
-                        AppForm(EnForm.ObjButton).cnt = cnt
+                        objNbr = EnForm.ObjButton
+                    Case "Textbox"
+                        objNbr = EnForm.ObjTextbox
+                    Case "Listbox"
+                        objNbr = EnForm.ObjListbox
+                    Case "Combobox"
+                        objNbr = EnForm.ObjCombobox
+                    Case "RadioButton"
+                        objNbr = EnForm.ObjRadioButton
+                    Case "CheckBox"
+                        objNbr = EnForm.ObjCheckbox
+                    Case "GroupBox"
+                        objNbr = EnForm.ObjGroupBox
+                    Case "OpenFileDialog"
+                        objNbr = EnForm.ObjOpenFileDialog
+                    Case "SaveFileDialog"
+                        objNbr = EnForm.ObjSaveFileDialog
+                    Case "WebBrowser"
+                        objNbr = EnForm.ObjWebBrowser
                     Case "Label"
-                        AppForm(EnForm.objLabel).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
+                        objNbr = -1
+                        AppForm(EnForm.objLabel).Status = buildObjSummary(strobj, cnt, nObjSeen, statgood, statbad, css)
                         AppForm(EnForm.objLabel).cssClass = css
                         AppForm(EnForm.objLabel).cnt = cnt
+                        AppForm(EnForm.objLabel).n = cnt
                     Case "LabelActive"
-                        AppForm(EnForm.ObjActiveLabel).Status = buildObjSummary("Active Label", cnt, statgood, statbad, css)
+                        objNbr = -1
                         AppForm(EnForm.ObjActiveLabel).cssClass = css
                         AppForm(EnForm.ObjActiveLabel).cnt = cnt
+                        AppForm(EnForm.ObjActiveLabel).n += 1
+                        AppForm(EnForm.ObjActiveLabel).Status = buildObjSummary("Active Label", cnt, nObjSeen, statgood, statbad, css)
                     Case "LabelNonactive"
-                        AppForm(EnForm.ObjNonactiveLabel).Status = buildObjSummary("Nonactive Label", cnt, statgood, statbad, css)
+                        objNbr = -1
+                        nObjSeen += 1
                         AppForm(EnForm.ObjNonactiveLabel).cssClass = css
                         AppForm(EnForm.ObjNonactiveLabel).cnt = cnt
-                    Case "Textbox"
-                        AppForm(EnForm.ObjTextbox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjTextbox).cssClass = css
-                        AppForm(EnForm.ObjTextbox).cnt = cnt
-                    Case "Listbox"
-                        AppForm(EnForm.ObjListbox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjListbox).cssClass = css
-                        AppForm(EnForm.ObjListbox).cnt = cnt
-                    Case "Combobox"
-                        AppForm(EnForm.ObjCombobox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjCombobox).cssClass = css
-                        AppForm(EnForm.ObjCombobox).cnt = cnt
-                    Case "RadioButton"
-                        AppForm(EnForm.ObjRadioButton).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjRadioButton).cssClass = css
-                        AppForm(EnForm.ObjRadioButton).cnt = cnt
-                    Case "CheckBox"
-                        AppForm(EnForm.ObjCheckbox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjCheckbox).cssClass = css
-                        AppForm(EnForm.ObjCheckbox).cnt = cnt
-                    Case "GroupBox"
-                        AppForm(EnForm.ObjGroupBox).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjGroupBox).cssClass = css
-                        AppForm(EnForm.ObjGroupBox).cnt = cnt
-                    Case "OpenFileDialog"
-                        AppForm(EnForm.ObjOpenFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjOpenFileDialog).cssClass = css
-                        AppForm(EnForm.ObjOpenFileDialog).cnt = cnt
-                    Case "SaveFileDialog"
-                        AppForm(EnForm.ObjSaveFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjSaveFileDialog).cssClass = css
-                        AppForm(EnForm.ObjSaveFileDialog).cnt = cnt
-                    Case "WebBrowser"
-                        AppForm(EnForm.ObjWebBrowser).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjWebBrowser).cssClass = css
-                        AppForm(EnForm.ObjWebBrowser).cnt = cnt
-                    Case "OpenFileDialog"
-                        AppForm(EnForm.ObjOpenFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjOpenFileDialog).cssClass = css
-                        AppForm(EnForm.ObjOpenFileDialog).cnt = cnt
-                    Case "SaveFileDialog"
-                        AppForm(EnForm.ObjSaveFileDialog).Status = buildObjSummary(strObj, cnt, statgood, statbad, css)
-                        AppForm(EnForm.ObjSaveFileDialog).cssClass = css
-                        AppForm(EnForm.ObjSaveFileDialog).cnt = cnt
+                        AppForm(EnForm.ObjNonactiveLabel).n -= 1
+                        AppForm(EnForm.ObjNonactiveLabel).Status = buildObjSummary("Nonactive Label", cnt, nObjSeen, statgood, statbad, css)
                 End Select
+
+                If objNbr > -1 Then   ' if not a Label
+                    AppForm(objNbr).Status = buildObjSummary(strobj, cnt, nObjSeen, statgood, statbad, css)
+                    If AppForm(objNbr).cssClass <> "itemred" Then AppForm(objNbr).cssClass = "itemgreen" ' should likely check the req status 
+                    AppForm(objNbr).cnt = cnt
+
+                    ' Check to see if the proper prefix was used
+                    If Not s2.StartsWith(strObjPrefix(j)) And strObjPrefix(j) <> "-" Then
+                        AppForm(objNbr).n -= 1
+                        AppForm(objNbr).cssClass = "itemred"
+                    End If
+
+                    ' AppForm(objNbr).Status &= "<br>" & bullet & "None Found" & vbCrLf
+                End If
 
                 cnt = 0
                 foundflag = False
                 statgood = ""
                 statbad = ""
-
-            Next strObj
+                nObjSeen = 0
+            Next j
 
         End If
 
     End Sub
 
-    Function buildObjSummary(strobj As String, cnt As Integer, statgood As String, statbad As String, ByRef css As String) As String
+    Function buildObjSummary(strobj As String, cnt As Integer, nobjseen As Integer, statgood As String, statbad As String, ByRef css As String) As String
 
         ' if the count = -1, color is set to clear, count = 0, the color is set to green. IF count > 0 the color is red
         Dim txt As String
@@ -1452,15 +1471,15 @@ Module ValidateVB
             css = ""       ' "itemclear"
 
         ElseIf cnt = 0 Then
-            txt = String.Format("<span class=""boldtext"">{0} objects with proper prefix</span>", strobj) & "<br />" & vbCrLf & statgood
+            txt = String.Format("<span class=""boldtext"">({0}) objects with proper prefix</span>", nobjseen) & "<br />" & vbCrLf & statgood
             css = "itemgreen"
         Else
-            txt = String.Format("<span class=""boldtext"">{0} {1} without proper prefix</span>", cnt, strobj) & "<br />" & vbCrLf
+            txt = String.Format("<span class=""boldtext"">({0}) without proper prefix</span>", cnt, strobj) & "<br />" & vbCrLf
             txt &= statbad
             css = "itemred"
 
             If statgood.Trim.Length > 0 Then
-                txt &= String.Format("<span class=""boldtext"">{0} objects with proper prefix</span>", strobj) & "<br />" & vbCrLf
+                txt &= String.Format("<span class=""boldtext"">({0}) objects with proper prefix</span>", nobjseen) & "<br />" & vbCrLf
                 txt &= statgood
 
             End If
@@ -1795,14 +1814,18 @@ Module ValidateVB
 
                 If setting.Req And setting.MaxPts <> 0 Then        '    And .cssClass = "itemred" Then
                     If EnSummaryName(i).StartsWith("Comment") Then
-                        .YourPts = Math.Min(setting.MaxPts - setting.PtsPerError * Math.Min(setting.MaxPts, .n), setting.MaxPts)  ' this awards points for having instances 
+                        If .n >= 0 Then
+                            .YourPts = Math.Min(setting.MaxPts - setting.PtsPerError * Math.Min(setting.MaxPts, .n), setting.MaxPts)  ' this awards points for having instances 
+                        Else
+                            .YourPts = Math.Min(setting.PtsPerError * Math.Min(setting.MaxPts, -.n) - setting.MaxPts, setting.MaxPts)  ' this awards points for having instances 
+                        End If
                     Else
                         .YourPts = Math.Min(setting.PtsPerError * Math.Max(0, .n), setting.MaxPts)
                     End If
-                    T += .YourPts
-                Else
-                    .YourPts = 0
-                End If
+                        T += .YourPts
+                    Else
+                        .YourPts = 0
+                    End If
             End With
         Next
 
@@ -1915,15 +1938,16 @@ Module ValidateVB
             With topic
 
                 ' Calculate the grade
-                'If Setting.Req Then
-                '    Beep()
-                'End If
 
                 If Setting.Req And Setting.MaxPts <> 0 Then
-                    .YourPts = Math.Min(Setting.PtsPerError * Math.Max(0, .n), Setting.MaxPts)
+                    If .n >= 0 Then
+                        .YourPts = Math.Min(Setting.PtsPerError * Math.Max(0, .n), Setting.MaxPts)
+                    Else
+                        .YourPts = Setting.MaxPts - Math.Min(Setting.PtsPerError * Math.Max(0, -.n), Setting.MaxPts)
+                    End If
                     total += .YourPts
                 Else
-                    .YourPts = -1
+                    .YourPts = 0
                 End If
 
 

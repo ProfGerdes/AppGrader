@@ -60,6 +60,7 @@ Public Class frmMain
         btnViewPlagiarism.Visible = False
         btnOutput.Visible = False
         btnAssignSummary.Visible = False
+        Button2.Visible = False
 
         rbnCheckGray.Checked = True
 
@@ -724,7 +725,7 @@ Public Class frmMain
         If Not cbxJustUnzip.Checked Then CloseFacReport(path, "\FacultySummaryReport.html")
 
         If True Then
-            Beep()
+            '       Beep()
             '        BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
             '        CloseFacReport("", "\FacultySummaryDetailReport.html")
         End If
@@ -1062,6 +1063,7 @@ Public Class frmMain
 
         btnOutput.Visible = True
         btnAssignSummary.Visible = True
+        Button2.Visible = True
     End Sub
 
     Private Sub Sort_Submissions()
