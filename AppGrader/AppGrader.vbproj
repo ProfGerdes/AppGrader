@@ -114,7 +114,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ApplicationEvents.vb" />
-    <Compile Include="CRC.vb" />
     <Compile Include="ExpandableGroupbox.vb">
       <SubType>UserControl</SubType>
     </Compile>
@@ -163,7 +162,6 @@
     </Compile>
     <Compile Include="GUIDClass.vb" />
     <Compile Include="JHGModule1.vb" />
-    <Compile Include="ModuleCRC.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>

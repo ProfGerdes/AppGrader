@@ -39,5 +39,13 @@ Public Class Submission
             _vbCRC = value
         End Set
     End Property
+    'Public Property vbMD5() As String
+    '    Get
+    '        Return _vbMD5
+    '    End Get
+    '    Set(ByVal value As String)
+    '        _vbMD5 = value
+    '    End Set
+    'End Property
 End Class
 

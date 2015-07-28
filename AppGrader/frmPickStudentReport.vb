@@ -23,11 +23,17 @@ Public Class frmPickStudentReport
         'When you want to add an item to the list box, you add it to the table like this
         '   myTable.Rows.Add("New Item", 1000)
 
-        For Each filename In IO.Directory.GetFiles(strOutputPath, "*GradeReport.html", SearchOption.AllDirectories)
-            tmp = ReturnLastField(filename, "\")
-            myTable.Rows.Add(tmp, filename)
-        Next
-
+        If ReportType = "Integrated" Then
+            For Each filename In IO.Directory.GetFiles(strOutputPath, "*IntegratedReport.html", SearchOption.AllDirectories)
+                tmp = ReturnLastField(filename, "\")
+                myTable.Rows.Add(tmp, filename)
+            Next
+        Else
+            For Each filename In IO.Directory.GetFiles(strOutputPath, "*GradeReport.html", SearchOption.AllDirectories)
+                tmp = ReturnLastField(filename, "\")
+                myTable.Rows.Add(tmp, filename)
+            Next
+        End If
 
     End Sub
 

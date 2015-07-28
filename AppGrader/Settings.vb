@@ -97,12 +97,14 @@ Module Settings
         p = Settings.Find(Function(item As MySettings) item.nm = nm)
         If p Is Nothing Then
             '  MessageBox.Show("Find_Setting could not find <" & nm & ">")
-            sw = File.AppendText(Application.StartupPath & "/CantFind.txt")
+            sw = File.CreateText(Application.StartupPath & "/CantFind.txt")
 
             sw.WriteLine("Find_Setting could not find <" & nm & "> called from " & calledfrom)
             sw.Close()
 
-            p2.ShowVar = True
+            p2.ShowVar = False
+            p2.Req = False
+
             p2.MaxPts = 0
             Return p2
         Else

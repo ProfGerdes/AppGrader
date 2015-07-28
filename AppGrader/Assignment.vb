@@ -1,4 +1,6 @@
-﻿Module Assignment
+﻿Imports System.IO
+
+Module Assignment
 
     Public Enum dgvs
         ApplicationSettings = 1
@@ -162,7 +164,6 @@
         Dim Comments As String
         Dim isBad As Boolean
         Dim ID As String
-
     End Structure
     ' ========================================================================
 
@@ -194,12 +195,6 @@
     End Structure
 
 
-    '    Public Items1 As New List(Of MyItems)
- 
-
-    '    Public myindex As Integer
-
-
     Public Structure MyErrorComments
         Dim topic As String
         Dim Comment As String
@@ -220,6 +215,8 @@
 
     Public bullet As String = Chr(149) & " "
 
+    Public AssScore As Decimal        ' I am declaring this as public so I don't need to pass it. It will hold the students score
+    Public AssPossible As Decimal
 
     ' Config Settings
     '    Public CfgLanguage As String = "VB"
@@ -237,13 +234,28 @@
 
     Public ErrorComments As New List(Of ErrComments)
     Public GuidIssues As Boolean = False
-    Public CRCIssues As Boolean = False
+    Public MD5Issues As Boolean = False
 
     Public StudentReportPath As String = ""
 
     '  Public chkCommentAllVars As Boolean = True
     Public pbar3max As Integer = 100
     Public HideGray As String = "Hide"
+
+    Public timeStart As Date
+    Public timeUnzipStart As Date
+    Public timeLoadInstructorFiles As Date
+    Public timeProcess As Date
+    Public timeLoadInstructorFiles2 As Date
+
+    Public timeMD5 As Date
+    Public timeend As Date
+    Public nstudentfiles As Integer
+    Public ninstructorfiles As Integer
+    Public ninstructorapps As Integer
+    Public averageLOC As Decimal
+
+    Public ReportType As String = ""
     ' ===========================================================================================
 
     '  Public AppSummary(80) As MyItems  ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -256,7 +268,7 @@
     '     Dim WatchVariables As myitems
     ' =========================================================================================================
 
-    Public Sub ClearMyItems(a As MyItems)
+    Public Sub ClearMyItems(ByRef a As MyItems)
         a.req = False
         a.showVar = False            ' if we want this, need to bring it in on the datagridview.
         a.PtsPerError = 0
@@ -278,8 +290,8 @@
 
     End Sub
 
-  
-    Public Sub ClearAppArray(a() As MyItems)
+
+    Public Sub ClearAppArray(ByRef a() As MyItems)
         Dim i As Integer
         For i = 0 To a.GetUpperBound(0)
             ClearMyItems(a(i))
@@ -289,18 +301,23 @@
 
     Sub integrateSSummary(AppSummary() As MyItems, ByRef IntegratedStudentAssignment() As MyItems, filename As String, first As Boolean)
         Dim i As Integer
+        Dim setting As MySettings
 
         If first Then
             For i = 0 To AppSummary.GetUpperBound(0)
-
                 IntegratedStudentAssignment(i) = AppSummary(i)
-                'IntegratedStudentAssignment(i).n += AppSummary(i).n
-                IntegratedStudentAssignment(i).Status = ReturnLastField(filename, "\") & " - " & AppSummary(i).Status & vbCrLf
+
+                IntegratedStudentAssignment(i).Status = AppSummary(i).Status & vbCrLf
             Next
         Else
             For i = 0 To AppSummary.GetUpperBound(0)
+                setting = Find_Setting(EnSummaryName(i), "IntegrateSSummary")
+
+                IntegratedStudentAssignment(i).req = setting.Req
+
                 IntegratedStudentAssignment(i).n += AppSummary(i).n
-                IntegratedStudentAssignment(i).Status &= ReturnLastField(filename, "\") & " - " & AppSummary(i).Status & vbCrLf
+                IntegratedStudentAssignment(i).cnt += AppSummary(i).cnt
+                IntegratedStudentAssignment(i).Status &= AppSummary(i).Status & vbCrLf
             Next
         End If
 
@@ -309,21 +326,38 @@
 
     Sub integrateForm(AppForm() As MyItems, ByRef IntegratedForm() As MyItems, filename As String, first As Boolean)
         Dim i As Integer
+        Dim setting As MySettings
+        Dim tmp As String
 
-        If first Then
-            For i = 0 To AppForm.GetUpperBound(0)
+        tmp = filename.Replace(".vb", ".designer.vb")
 
-                IntegratedForm(i) = AppForm(i)
-                'IntegratedStudentAssignment(i).n += AppSummary(i).n
-                IntegratedForm(i).Status = ReturnLastField(filename, "\") & " - " & AppForm(i).Status & vbCrLf
-            Next
-        Else
-            For i = 0 To AppForm.GetUpperBound(0)
-                IntegratedForm(i).n += AppForm(i).n
-                IntegratedForm(i).Status &= ReturnLastField(filename, "\") & " - " & AppForm(i).Status & vbCrLf
-            Next
+        ' Do not process unless it has a .designer.vb file. This eliminates processing Modules and classes
+        If file.Exists(tmp) Then
+
+            If first Then
+                For i = 0 To AppForm.GetUpperBound(0)
+                    setting = Find_Setting(EnFormNames(i), " integrateForm")
+
+
+                    IntegratedForm(i) = AppForm(i)
+                    IntegratedForm(i).req = setting.Req
+                    'IntegratedStudentAssignment(i).n += AppSummary(i).n
+                    IntegratedForm(i).Status = AppForm(i).Status & vbCrLf
+                Next
+            Else
+                For i = 0 To AppForm.GetUpperBound(0)
+                    setting = Find_Setting(EnFormNames(i), " integrateForm")
+
+                    IntegratedForm(i).req = setting.Req
+
+                    IntegratedForm(i).n += AppForm(i).n
+                    IntegratedForm(i).cnt += AppForm(i).cnt
+
+                    IntegratedForm(i).Status &= AppForm(i).Status & vbCrLf
+                Next
+            End If
+       
         End If
-
     End Sub
 
 End Module

@@ -22,6 +22,7 @@ Partial Class frmMain
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
         Me.btnProcessApps = New System.Windows.Forms.Button()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -56,6 +57,7 @@ Partial Class frmMain
         Me.btnBrowseTemplate = New System.Windows.Forms.Button()
         Me.lblSelectedTemplate = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.btnDetail = New System.Windows.Forms.Button()
         Me.btnAssignSummary = New System.Windows.Forms.Button()
         Me.btnExit = New System.Windows.Forms.Button()
         Me.btnViewPlagiarism = New System.Windows.Forms.Button()
@@ -77,7 +79,7 @@ Partial Class frmMain
         Me.rbnCheckGray = New System.Windows.Forms.RadioButton()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.SaveFileDialog1 = New System.Windows.Forms.SaveFileDialog()
-        Me.Button2 = New System.Windows.Forms.Button()
+        Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.MenuStrip1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -134,7 +136,7 @@ Partial Class frmMain
         Me.btnOutput.BackColor = System.Drawing.SystemColors.InactiveCaption
         Me.btnOutput.Location = New System.Drawing.Point(9, 42)
         Me.btnOutput.Name = "btnOutput"
-        Me.btnOutput.Size = New System.Drawing.Size(158, 34)
+        Me.btnOutput.Size = New System.Drawing.Size(134, 34)
         Me.btnOutput.TabIndex = 8
         Me.btnOutput.Text = "View Assessment"
         Me.btnOutput.UseVisualStyleBackColor = False
@@ -357,7 +359,7 @@ Partial Class frmMain
         '
         'Panel1
         '
-        Me.Panel1.Controls.Add(Me.Button2)
+        Me.Panel1.Controls.Add(Me.btnDetail)
         Me.Panel1.Controls.Add(Me.btnAssignSummary)
         Me.Panel1.Controls.Add(Me.btnExit)
         Me.Panel1.Controls.Add(Me.btnViewPlagiarism)
@@ -371,10 +373,20 @@ Partial Class frmMain
         Me.Panel1.Size = New System.Drawing.Size(678, 80)
         Me.Panel1.TabIndex = 44
         '
+        'btnDetail
+        '
+        Me.btnDetail.BackColor = System.Drawing.SystemColors.InactiveCaption
+        Me.btnDetail.Location = New System.Drawing.Point(309, 42)
+        Me.btnDetail.Name = "btnDetail"
+        Me.btnDetail.Size = New System.Drawing.Size(129, 32)
+        Me.btnDetail.TabIndex = 41
+        Me.btnDetail.Text = "Summary Detail"
+        Me.btnDetail.UseVisualStyleBackColor = False
+        '
         'btnAssignSummary
         '
         Me.btnAssignSummary.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnAssignSummary.Location = New System.Drawing.Point(363, 43)
+        Me.btnAssignSummary.Location = New System.Drawing.Point(149, 42)
         Me.btnAssignSummary.Name = "btnAssignSummary"
         Me.btnAssignSummary.Size = New System.Drawing.Size(154, 33)
         Me.btnAssignSummary.TabIndex = 40
@@ -383,7 +395,7 @@ Partial Class frmMain
         '
         'btnExit
         '
-        Me.btnExit.Location = New System.Drawing.Point(576, 42)
+        Me.btnExit.Location = New System.Drawing.Point(595, 45)
         Me.btnExit.Name = "btnExit"
         Me.btnExit.Size = New System.Drawing.Size(71, 26)
         Me.btnExit.TabIndex = 39
@@ -393,9 +405,9 @@ Partial Class frmMain
         'btnViewPlagiarism
         '
         Me.btnViewPlagiarism.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnViewPlagiarism.Location = New System.Drawing.Point(188, 42)
+        Me.btnViewPlagiarism.Location = New System.Drawing.Point(444, 42)
         Me.btnViewPlagiarism.Name = "btnViewPlagiarism"
-        Me.btnViewPlagiarism.Size = New System.Drawing.Size(154, 33)
+        Me.btnViewPlagiarism.Size = New System.Drawing.Size(145, 33)
         Me.btnViewPlagiarism.TabIndex = 23
         Me.btnViewPlagiarism.Text = "Plagiarism Summary"
         Me.btnViewPlagiarism.UseVisualStyleBackColor = False
@@ -587,16 +599,6 @@ Partial Class frmMain
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Assignment Detail"
         '
-        'Button2
-        '
-        Me.Button2.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.Button2.Location = New System.Drawing.Point(523, 44)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(47, 33)
-        Me.Button2.TabIndex = 41
-        Me.Button2.Text = "Sum"
-        Me.Button2.UseVisualStyleBackColor = False
-        '
         'frmMain
         '
         Me.AcceptButton = Me.btnSelectFile
@@ -689,6 +691,7 @@ Partial Class frmMain
     Friend WithEvents cbxNoDemoFiles As System.Windows.Forms.CheckBox
     Friend WithEvents Button1 As System.Windows.Forms.Button
     Friend WithEvents btnAssignSummary As System.Windows.Forms.Button
-    Friend WithEvents Button2 As System.Windows.Forms.Button
+    Friend WithEvents btnDetail As System.Windows.Forms.Button
+    Friend WithEvents Timer1 As System.Windows.Forms.Timer
 
 End Class

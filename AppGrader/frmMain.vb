@@ -2,7 +2,8 @@
 Imports System.IO.Compression
 ' Imports Ionic.Zip
 Imports SharpCompress.Reader
-
+Imports System.Security
+Imports System.Security.Cryptography
 
 ' Uses http://sharpcompress.codeplex.com/documentation for unzipping
 
@@ -14,12 +15,17 @@ Public Class frmMain
     Dim strPrefix As String = ""
     '    Dim files_Compressed(200) As String
 
+    ' create variables to hold data
+    Dim StudentAssignment As AssignmentInfo
+    Dim IntegratedStudentAssignment(NSummary) As MyItems
+    Dim IntegratedForm(nForm) As MyItems
+
 
 
     Structure crcdatum
         Dim UserID As String
         Dim Filename As String
-        Dim vbCRC As String
+        Dim vbMD5 As String
     End Structure
 
     '  Dim VBProjects(200) As MyVBProjects
@@ -60,7 +66,7 @@ Public Class frmMain
         btnViewPlagiarism.Visible = False
         btnOutput.Visible = False
         btnAssignSummary.Visible = False
-        Button2.Visible = False
+        btnDetail.Visible = False
 
         rbnCheckGray.Checked = True
 
@@ -121,6 +127,7 @@ Public Class frmMain
 
 
     Private Sub btnProcessApps_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnProcessApps.Click, StartProcessingToolStripMenuItem.Click
+        timeStart = Now
         '  Dim path As String = lblDemoDir.Text
         '        Dim hasvbfile As Boolean
 
@@ -151,7 +158,7 @@ Public Class frmMain
 
 
         GuidIssues = False
-        CRCIssues = False
+        MD5Issues = False
 
         If rbnBlackboardZip.Checked Then
             frmProgressBar.lblExtractStudentFiles.Visible = True
@@ -183,6 +190,8 @@ Public Class frmMain
         Dim HasVBProjFile As Boolean = False
         Dim HasSLNFile As Boolean = False
         Dim hasVBFile As Boolean
+        Dim strFacReportDetail As String = ""
+        Dim nfiles As Integer
 
         '   Dim vbVersion As String = ""
 
@@ -194,7 +203,7 @@ Public Class frmMain
 
         Dim sr1 As StreamReader
         Dim s As String = ""
-
+        Dim s2 As String = ""
 
         ' This assumes that the selected archive contains a set of compressed files with student work.\' -------------------------------------------------------------------------------------------------
         Dim n As Integer
@@ -202,6 +211,8 @@ Public Class frmMain
         Dim filelist() As String
 
         '  lblMessage.Text = ""
+
+        timeLoadInstructorFiles = Now
 
         ' load in CRC of the instructor demo files
         x = 0
@@ -221,7 +232,10 @@ Public Class frmMain
 
                         With hw
                             .UserID = "Instructor Demo"
-                            .vbCRC = GetCRC32(filename)
+                            '                            .vbCRC = GetCRC32(filename)
+                            '  .vbCRC = GetCRC32(filename) ' actually this is the MD5 hash
+
+                            .vbCRC = md5_hash(filename)    ' this is executed
                             .Filename = filename
                         End With
 
@@ -234,6 +248,8 @@ Public Class frmMain
         Catch ex As Exception
             MessageBox.Show(ex.Message, "Error when setting up Preliminaries")
         End Try
+        ninstructorfiles = n
+
         n = 0
         path = ""
 
@@ -258,6 +274,7 @@ Public Class frmMain
 
         ' Should likely pick a specific blackboard zip file, not just a folder
 
+        timeUnzipStart = Now
 
         'Dim di As New IO.DirectoryInfo(FolderBrowserDialog1.SelectedPath)
         'Dim aryFi As IO.FileInfo() = di.GetFiles("*.zip")
@@ -312,7 +329,7 @@ Public Class frmMain
             fileext = IO.Path.GetExtension(OpenFileDialog1.FileName)
         End If
 
- 
+        timeProcess = Now
 
         ' ================================================================================================
         ' ========================================== Main Processing of Files ====================================================
@@ -332,24 +349,23 @@ Public Class frmMain
         ' Determine the total possible pts
         ' ===================================================================================
         TotalPossiblePts = 0
+        ii = 0
         For Each p As MySettings In Settings.Settings
             If p.Req Then TotalPossiblePts += p.MaxPts
+            If p.Req Then ii += 1
         Next
 
 
-
+        InitializeStudentReport()
         ' ===================================================================================
         nstudents = strDir.GetUpperBound(0)
 
         strFacReport = InitializeFacultyReport()
+        nstudentfiles = nstudents + 1
+
         For ii = 0 To nstudents   ' This cycles through all student folders
             ' ===================================================================================
             TotalLinesOfCode = 0
-
-            ' create variables to hold data
-            Dim StudentAssignment As AssignmentInfo
-            Dim IntegratedStudentAssignment(NSummary) As MyItems
-            Dim IntegratedForm(nForm) As MyItems
 
 
             Dim StudentAppSummary(NSummary) As MyItems
@@ -366,7 +382,7 @@ Public Class frmMain
                 StudentAssignment.AssignPath = strDir(ii)
 
                 strStudentID = StudentAssignment.StudentID
-                InitializeStudentReport()
+                strStudentReport = InitializeStudentReport() & strStudentReport
 
                 ' load file into list so we can check CRC
                 Try
@@ -379,8 +395,10 @@ Public Class frmMain
 
                                 With hw
                                     .UserID = StudentAssignment.StudentID
-                                    .vbCRC = GetCRC32(filename)
-                                    .Filename = filename
+                                    '  .vbCRC = GetCRC32(filename)
+                                    '  .vbCRC = GetCRC32(filename)     
+                                    .vbCRC = md5_hash(filename)        ' actually this is the MD5 hash
+                                    .Filename = filename               ' this is also executed, but later
                                 End With
 
                                 Submissions.AddRange({hw})
@@ -572,29 +590,26 @@ Public Class frmMain
                     x = 10
 
 
-                    '  StudentAssignment.StuffAppData(StudentAssignment.StudentID, txtAssignmentName.Text, "", path, #1/1/2015#,  True, True, True, "", True, True, True,  2) ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
                     ' ===================================================================================================
                     ' now process each file in the build
                     ' =================================================================================================== 
                     first = True
                     For Each filename As String In Filesinbuild
+                        AssScore = 0
+                        AssPossible = 0
+                        nfiles = Filesinbuild.Count
+
                         StudentAssignment.TotalScore = 0
                         FileLinesOfCode = 0
 
-                        '      If StudentAppSummary.Status.Length > 0 Then
+                        ' Clear all the data so there is no double counting
                         ClearAppArray(StudentAppSummary)
-                        '      End If
-
-                        '   Dim AppSummary As New MyAppSummary    ' ??????????jhg?????????? Need a new appsummary to avoid double counting - This throws away all previous info.
-                        ' could do an array or clear it. ??????????????????????????????????????????????????????
+                        ClearAppArray(StudentAppForm)
 
                         ' display the filename being processed if working with a single app
                         If rbnSingleProject.Checked Then
                             worker.ReportProgress(-4, "Processing " & ReturnLastField(filename, "\"))
                         End If
-
-                        ' creates a new AppForm structure for each new Form File. Avoids Classes and Modules
 
                         ' creates a new AppForm structure for each new Form File. Avoids Classes and Modules
                         hasForm = False
@@ -631,7 +646,7 @@ Public Class frmMain
                             CheckFormProperties2(filename, StudentAppForm)
                             CheckObjectNaming2(filename, StudentAppForm)
                             '    CheckFormLoad(StudentAppSummary, filesource)
-                            ProcessReq(StudentAppSummary(EnSummary.LogicFormLoad), "Form Load Method not found", "Form Load Method found", "LogicFormLoad")
+                            ProcessReq(ReturnLastField(filename, "\"), StudentAppSummary(EnSummary.LogicFormLoad), "Form Load Method not found", "Form Load Method found", "LogicFormLoad")
 
 
                             BuildReport("Form Objects", StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
@@ -647,14 +662,13 @@ Public Class frmMain
 
 
                         ' -------------------------------- count number of comments ----------------------------------------
-                        CheckForComments2(filesource, StudentAppSummary, StudentAppForm, BackgroundWorker1)
+                        CheckForComments2(ReturnLastField(filename, "\"), filesource, StudentAppSummary, StudentAppForm, BackgroundWorker1)
 
                         BuildReport("Coding Standards", StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
                         x = x + 1
                         worker.ReportProgress(x, "Individual Work")
 
                         ' ---------------------------------Record summary data for Faculty Summary ------------------------
-                        ' jhg score is not calculated properly    *****
 
                         If first Then
                             strFacReport &= "<tr class=""newstudent""><td class=""newstudent"">" & strStudentID & "</td><td class=""newstudent"">" & ReturnLastField(filename, "\") & "</td><td class=""newstudent, tdright"">" & FileLinesOfCode.ToString("n0") & "</td><td class=""newstudent, tdcenter"">" & " - " & "</td></tr>" & vbCrLf
@@ -668,16 +682,25 @@ Public Class frmMain
 
                     Next filename      ' end of Filename loop
                     ' ---------------------------------------------------------------------------------------------------------
+                    strFacReportDetail = BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
 
-                    TotalScore = FindIntegratedScore(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
+                    ' FindIntegratedScore(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
+
                     If TotalPossiblePts <> 0 Then
-                        s = TotalScore.ToString("n0") & " out of " & TotalPossiblePts.ToString("n0") & " = " & (TotalScore / TotalPossiblePts).ToString("p1")
+                        s = AssScore.ToString("n0") & " out of " & AssPossible.ToString("n0") & " = " & (AssScore / AssPossible).ToString("p1")
                     Else
-                        s = TotalScore.ToString("n0") & " out of " & TotalPossiblePts.ToString("n0")
+
+
+                        s = AssScore.ToString("n0") & " out of " & AssPossible.ToString("n0")
                     End If
 
                     strFacReport &= "<tr><td>" & "" & "</td><td class=""boldtext"">" & "Overall Assessment" & "</td><td  class=""tdcenter, boldtext"">" & TotalLinesOfCode.ToString("n0") & "</td><td class=""tdcenter, boldtext"">" & s & "</td></tr>" & vbCrLf
 
+                    Do While strStudentReport.Contains("<br>" & vbCrLf & " <br>")
+                        strStudentReport = strStudentReport.Replace("<br>" & vbCrLf & " <br>", "<br>")
+                    Loop
+
+                    strStudentReport = strStudentReport.Replace("[SCORE]", AssScore.ToString("n1") & " deduction out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1"))
 
                     sr = File.OpenText((Application.StartupPath & "\templates\rptStudentFooter.html"))
                     strStudentReport &= sr.ReadToEnd
@@ -688,7 +711,7 @@ Public Class frmMain
                     sw.Write(strStudentReport)
                     sw.Close()
                     strStudentReport = ""
-
+                    averageLOC += TotalLinesOfCode
 
                     ' ############################################################################################
                 End If
@@ -718,17 +741,22 @@ Public Class frmMain
             strAssignmentSummary &= AddStudentDataToSummary(strStudentID, SubmissionCompileTime, SubmissionCompileDate, TotalLinesOfCode.ToString, TotalScore.ToString)
 
             ' jhg - may need to total submission info if the student submitted multiple files.
+
+            If nfiles > 1 Then       ' no need to process an integrated application if it only has a single file
+                BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
+                s = AssScore.ToString("n1") & " out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1")
+                s2 = "\" & strStudentID & "\Reports\" & strStudentID & "_IntegratedReport.html"
+                CloseFacReport(strFacReportDetail, s2, s)
+            End If
         Next ii    ' End of student loop
 
         ' -------------------------------------Create Faculty file. ----------------------------------------------
 
-        If Not cbxJustUnzip.Checked Then CloseFacReport(path, "\FacultySummaryReport.html")
+        '  strFacReport = strAssignmentSummary
 
-        If True Then
-            '       Beep()
-            '        BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
-            '        CloseFacReport("", "\FacultySummaryDetailReport.html")
-        End If
+        If Not cbxJustUnzip.Checked Then CloseFacReport(strFacReport, "\FacultySummaryReport.html", s)
+        strFacReport = ""
+
 
         ' ############################################################################################
 
@@ -736,19 +764,19 @@ Public Class frmMain
 
 
 
-        ' ----------------------- Save CRC Data --------------------------------------
+        ' ----------------------- Save MD5 Data --------------------------------------
         If Not cbxJustUnzip.Checked Then
             Dim fname As String
             '   Dim sw As StreamWriter
             '   Dim lastUser As String = ""
-            Dim lastCRC As String = ""
+            Dim lastMD5 As String = ""
             Dim ShortFilename As String = ""
             Dim DupFlag As Boolean
             '      Dim NoDesignerVB As Boolean = True
 
-            fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt"
+            fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt"
             sw = File.CreateText(fname)
-            sw.WriteLine("Dup" & vbTab & "CRC" & vbTab & "Filename" & vbTab & "User Name" & vbTab & "Full Filename")
+            sw.WriteLine("Dup" & vbTab & "MD5" & vbTab & "Filename" & vbTab & "User Name" & vbTab & "Full Filename")
             Sort_Submissions()
 
             DupFlag = False
@@ -788,7 +816,7 @@ Public Class frmMain
             sw.Close()
             ' ------------------------------------Web page with dups ------------------------------------------------------
 
-            fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html"
+            fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html"
             sw = File.AppendText(fname)
             'Dim sr1 As StreamReader
             'Dim s As String
@@ -796,12 +824,12 @@ Public Class frmMain
             'sw.Write(sr1.ReadToEnd)
             'sr1.Close()
 
-            sw.WriteLine("<h2>Identical Student File CRCs</h2>" & vbCrLf)
+            sw.WriteLine("<h2>Identical Student File MD5s</h2>" & vbCrLf)
 
             ' ---------------------------------------------------------------------------------------------------
-            sw.WriteLine("<p><em>A CRC (Cyclical Redundancy Check) is a compressed 'hash' of the contents of the file. Two files with identical CRC values have identical content. If the file has even a single extra space, or a single letter changes its case, the CRC values will not match. Thus indentical CRC values indicate the files are identical. Note, Some files that VB creates may not require modification, and therefore two separate applications will tend to have identical CRC values for these files. Example include SplashScreens and AboutBoxes. This check only looks at files ending in .vb.</em></p> <hr />" & vbCrLf)
+            sw.WriteLine("<p><em>A MD5 is referred to as a message digest. It is a 128 bit value, represented as a 32 digit hexidimal number. The MD5 algorithm is commonly used to ensure data integrity. Any change in a data file will result in a different MD5 value. If two files have identical MD5 values, the files are identical. Note, some files that VB creates may not require modification, and therefore two separate applications will tend to have identical MD5 values for these files. Example include SplashScreens and AboutBoxes. Also, the application allows the loading of reference applications that may have been distributed to the class (such as sample applications). The application distinguishes files with duplicate MD5 values between those that do not also match instructor demo applications, and those that do. The only files checked are those ending in .vb.</em></p> <hr />" & vbCrLf)
 
-            sr1 = File.OpenText(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt")
+            sr1 = File.OpenText(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt")
             s = sr1.ReadLine
 
 
@@ -821,7 +849,7 @@ Public Class frmMain
                         instructordemo = True
                         If needtoclose Then
                             sw.WriteLine("</ul>" & vbCrLf)
-                            CRCIssues = True
+                            MD5Issues = True
                         End If
                         needtoclose = False
 
@@ -829,7 +857,7 @@ Public Class frmMain
                     ElseIf instructordemo Then
                         If needtoclose Then
                             sw.WriteLine("</ul>" & vbCrLf)
-                            CRCIssues = True
+                            MD5Issues = True
                         End If
                         needtoclose = False
 
@@ -845,7 +873,7 @@ Public Class frmMain
                         instructordemo = True
                         If needtoclose Then
                             sw.WriteLine("</ul>" & vbCrLf)
-                            CRCIssues = True
+                            MD5Issues = True
                         End If
                         needtoclose = False
                         ' bypass this record
@@ -853,14 +881,14 @@ Public Class frmMain
                         instructordemo = False
                         If needtoclose Then
                             sw.WriteLine("</ul>" & vbCrLf)
-                            CRCIssues = True
+                            MD5Issues = True
                         End If
 
                         ' need to show this record.
                         If ss(0) = "*" Then
                             sw.WriteLine("<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>")
                             sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                            CRCIssues = True
+                            MD5Issues = True
                             needtoclose = True
                         End If
                     End If
@@ -871,11 +899,11 @@ Public Class frmMain
             Loop
             sr1.Close()
             ' ==================================================================================================
-            sr1 = File.OpenText(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".txt")
+            sr1 = File.OpenText(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt")
             s = sr1.ReadLine
-            sw.WriteLine("<h2>Student File CRC's identical to Instructor Demo Files</h2>" & vbCrLf)
+            sw.WriteLine("<h2>Student File MD5's identical to Instructor Demo Files</h2>" & vbCrLf)
             ' ---------------------------------------------------------------------------------------------------
-            sw.WriteLine("<p><em>This section lists files with identical CRC values that match those from Instructor Demo files. Since all students would have access to these files, identical CRC values do not necessarily indicate unauthorized collusion.</em></p> <hr />" & vbCrLf)
+            sw.WriteLine("<p><em>This section lists files with identical MD5 values that match those from Instructor Demo files. Since all students would have access to these files, identical MD5 values do not necessarily indicate unauthorized collusion.</em></p> <hr />" & vbCrLf)
 
             ' display record the are identical to Instructor files
             Do While sr1.Peek > -1
@@ -904,7 +932,7 @@ Public Class frmMain
                         'needtoclose = False
 
                     End If
-                Else    ' new CRC
+                Else    ' new MD5
                     last = ss(1)
                     If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
                         instructordemo = True
@@ -948,11 +976,12 @@ Public Class frmMain
 
         End If '  If Not cbxJustUnzip.Checked
         ' --------------------------------------------------------------------------------
+        timeend = Now
 
     End Sub
 
 
- 
+
     Function AddStudentDataToSummary(sn As String, ct As String, cd As String, tloc As String, sc As String) As String
         Dim tmp As String
 
@@ -960,7 +989,7 @@ Public Class frmMain
         Return String.Format(tmp, sn, ct, cd, tloc, sc)
     End Function
 
- 
+
 
     Sub LoadConfig()
         ' This is designed to process the Config file. The Config file must be in the same directory as the executable file. If found, it opens it up and processing the file line by line. Each line should have a Key Variable followed by a Property. Some Keys can only take a certain set of properties.  The code parses the Key/Property pair and sets the assocaited config value, which is defined in the JHGModule. This allows the user to modify the operation of the application.
@@ -987,6 +1016,7 @@ Public Class frmMain
 
     Private Sub btnOutput_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnOutput.Click, ViewOutputToolStripMenuItem.Click
         If rbnBlackboardZip.Checked Then
+            ReportType = "Detail"
             frmPickStudentReport.Show()
         Else
             Dim url As New Uri("file:\\\" & StudentReportPath)
@@ -996,7 +1026,25 @@ Public Class frmMain
         End If
     End Sub
 
+    Private Sub btnDetail_Click(sender As Object, e As EventArgs) Handles btnDetail.Click
+        If rbnBlackboardZip.Checked Then
+            ReportType = "Integrated"
+            frmPickStudentReport.Show()
+        Else
+            Dim url As New Uri("file:\\\" & StudentReportPath)
 
+            frmOutput.WebBrowser1.Url = url
+            frmOutput.Show()
+        End If
+
+        If File.Exists(strOutputPath & "\FacultySummaryDetailReport.html") Then
+            Dim url As New Uri("file:\\\" & strOutputPath & "\FacultySummaryDetailReport.html")
+
+            frmOutput.WebBrowser1.Url = url
+            '   frmOutput.Close()
+            frmOutput.Show()
+        End If
+    End Sub
 
     Private Sub BackgroundWorker1_ProgressChanged(ByVal sender As Object, ByVal e As System.ComponentModel.ProgressChangedEventArgs, Optional path As String = "", Optional txt As String = "") Handles BackgroundWorker1.ProgressChanged
         'This method is executed in the UI thread. 
@@ -1057,20 +1105,49 @@ Public Class frmMain
 
         Me.lblMessage.Text = "Processing Complete"
         If GuidIssues Then lblMessage.Text &= " *** GUID Issues Found "
-        If CRCIssues Then lblMessage.Text &= " *** CRC Issues Found "
+        If MD5Issues Then lblMessage.Text &= " *** MD5 Issues Found "
 
-        If GuidIssues Or CRCIssues Then btnViewPlagiarism.Visible = True
+        If GuidIssues Or MD5Issues Then btnViewPlagiarism.Visible = True
 
         btnOutput.Visible = True
         btnAssignSummary.Visible = True
-        Button2.Visible = True
+        btnDetail.Visible = True
+        ' ----------------------------------------------------------------------
+        Dim dd As TimeSpan
+
+        Dim sw As StreamWriter
+
+        sw = File.AppendText(Application.StartupPath & "\TimeStudy.txt")
+        sw.WriteLine("Today" & vbTab & Now.ToString)
+        sw.WriteLine("Student Files" & vbTab & nstudentfiles.ToString("n1"))
+        sw.WriteLine("Instructor Apps" & vbTab & ninstructorapps.ToString("n1"))
+        sw.WriteLine("Instructor Files" & vbTab & ninstructorfiles.ToString("n1"))
+        sw.WriteLine("Average LOC" & vbTab & (averageLOC / nstudentfiles).ToString("n2"))
+        sw.WriteLine("")
+        dd = timeLoadInstructorFiles.Subtract(timeStart)
+        sw.WriteLine("Load Instructor files" & vbTab & timeLoadInstructorFiles.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("ss\.fff"))
+        dd = timeUnzipStart.Subtract(timeLoadInstructorFiles)
+        sw.WriteLine("Unzip" & vbTab & timeUnzipStart.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("ss\.fff"))
+        dd = timeProcess.Subtract(timeUnzipStart)
+        sw.WriteLine("Start Processing" & vbTab & timeProcess.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("s\.fff"))
+        dd = timeLoadInstructorFiles2.Subtract(timeProcess)
+        sw.WriteLine("Load Instr. MD5" & vbTab & timeLoadInstructorFiles2.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("ss\.fff"))
+        dd = timeMD5.Subtract(timeLoadInstructorFiles2)
+        sw.WriteLine("MD5" & vbTab & timeMD5.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("s\.fff"))
+        dd = timeend.Subtract(timeMD5)
+        sw.WriteLine("end" & vbTab & timeend.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("s\.fff"))
+        sw.WriteLine("")
+        dd = timeend.Subtract(timeStart)
+        sw.WriteLine("Overall" & vbTab & "" & vbTab & dd.ToString("s\.fff"))
+        sw.WriteLine("------------------------------------------------------------------------")
+        sw.Close()
     End Sub
 
     Private Sub Sort_Submissions()
         Submissions = Submissions.OrderBy(Function(x) x.vbCRC).ToList
     End Sub
 
-   
+
 
     Sub ExtractGUID(Path As String)
         Dim GUID As String = ""
@@ -1094,11 +1171,11 @@ Public Class frmMain
         GUIDs.Clear()
 
 
-
+        timeLoadInstructorFiles2 = Now
         If Path > "" Then
             fname = lblDir.Text & "\GUIDData.txt"
             sw = File.CreateText(fname)
-
+            ninstructorapps = 0
             ' first read in Instructor Demo Files
             If lblDemoDir.Text <> Nothing Then
                 For Each myfile In Get_Files(lblDemoDir.Text, True, "AssemblyInfo.vb")
@@ -1122,9 +1199,12 @@ Public Class frmMain
 
                     'Add it to the list
                     GUIDs.Add(newGUID)
+                    ninstructorapps += 1
                 Next
             End If
+
             ' --------------------------------------------------------------------
+            timeMD5 = Now
 
             ' Now get student files.
             For Each myfile In Get_Files(Path, True, "AssemblyInfo.vb")
@@ -1158,11 +1238,12 @@ Public Class frmMain
             ' worker.ReportProgress(x, "Individual Work")
             ' --------------------------------------------------------------------
 
+
             'Initialize the web page
             ' ---------------------------------------------------------------------------------------------------
-            fname = strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html"
+            fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html"
             sw = File.CreateText(fname)
-            Dim sr1 As StreamReader = File.OpenText(Application.StartupPath & "/templates/crctemplate.html")
+            Dim sr1 As StreamReader = File.OpenText(Application.StartupPath & "/templates/MD5template.html")
 
             GUIDHeader = sr1.ReadToEnd
             sr1.Close()
@@ -1253,7 +1334,7 @@ Public Class frmMain
 
 #End Region
 
-   
+
 
     Private Sub ExitToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem1.Click
         Me.Close()
@@ -1268,6 +1349,8 @@ Public Class frmMain
 
 
     Private Sub btnSelectFile_Click(sender As Object, e As EventArgs) Handles btnSelectFile.Click, Button1.Click
+
+
         lblMessage.Text = ""
         frmPickStudentReport.Close()
 
@@ -1379,9 +1462,9 @@ Public Class frmMain
             path = FolderBrowserDialog1.SelectedPath
 
             ' Save path
-            Dim sw As StreamWriter = File.CreateText(Application.StartupPath & "\demodir.txt")
-            sw.WriteLine(path)
-            sw.Close()
+            'Dim sw As StreamWriter = File.CreateText(Application.StartupPath & "\demodir.txt")
+            'sw.WriteLine(path)
+            'sw.Close()
         End If
 
 
@@ -1393,8 +1476,8 @@ Public Class frmMain
 
 
     Private Sub btnViewPlagiarism_Click(sender As Object, e As EventArgs) Handles btnViewPlagiarism.Click, PlagiarismSummaryToolStripMenuItem.Click
-        If File.Exists(strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html") Then
-            Dim url As New Uri("file:\\\" & strOutputPath & "\" & "CRCData-" & AssignmentName.Trim & ".html")
+        If File.Exists(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html") Then
+            Dim url As New Uri("file:\\\" & strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html")
 
             frmOutput.WebBrowser1.Url = url
             '   frmOutput.Close()
@@ -1402,14 +1485,14 @@ Public Class frmMain
         End If
     End Sub
 
-   
+
     Private Sub btnExit_Click_1(sender As Object, e As EventArgs) Handles btnExit.Click
         ' Exit application.
         Me.Close()
         Application.Exit()
     End Sub
 
- 
+
     Private Sub HelpToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles HelpToolStripMenuItem.Click
         frmAboutBox1.Show()
     End Sub
@@ -1437,13 +1520,5 @@ Public Class frmMain
         End If
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        If File.Exists(strOutputPath & "\FacultySummaryDetailReport.html") Then
-            Dim url As New Uri("file:\\\" & strOutputPath & "\FacultySummaryDetailReport.html")
 
-            frmOutput.WebBrowser1.Url = url
-            '   frmOutput.Close()
-            frmOutput.Show()
-        End If
-    End Sub
 End Class
