@@ -24,7 +24,7 @@ Module Settings
         Dim sw As StreamWriter
 
 
-        ' Thsi reads the config file into the ns array, but where does it save the settings?????   jhg
+        ' This reads the config file into the ns array, but where does it save the settings?????   jhg
         Try
             '    Settings.Clear()                            ' delete existing settings
             sr = File.OpenText(fn)
@@ -82,7 +82,7 @@ Module Settings
             End If
 
         Catch ex As Exception
-            '     MessageBox.Show("Error Loading " & ss(oex.Message, "Error Loading Config File")
+            MessageBox.Show("Error Loading Config file. " & ex.Message, "Error Loading Config File")
         End Try
     End Sub
 

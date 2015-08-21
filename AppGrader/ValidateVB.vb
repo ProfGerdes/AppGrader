@@ -66,6 +66,7 @@ Module ValidateVB
             s = s.Replace("[ASSIGNMENTNAME]", cfgAssignmentTitle)
             s = s.Replace("[REPORTDATE]", Today.ToString("d"))
             s = s.Replace("[VERSION]", Application.ProductVersion)
+            s = s.Replace("[CONFIGFILE]", frmMain.lblConfigFile.Text)
 
             s &= ("<tr><th class=""header"";>Student ID</th><th class=""header"";>Filename</th><th class=""header"";>TLOC</th><th class=""header"";>Score</th></tr>" & vbCrLf)
 
@@ -87,6 +88,8 @@ Module ValidateVB
         Loop
 
         src = src.Replace("[SCORE]", score)
+        src = src.Replace("[CONFIGFILE]", frmMain.lblConfigFile.Text)
+
 
         sr = File.OpenText(AppDataDir & "\templates\rptFacFooter.html")
         src &= sr.ReadToEnd

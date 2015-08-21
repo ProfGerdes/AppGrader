@@ -34,8 +34,10 @@ Public Class frmConfig
 
         StuffAlldgvs()
 
+        ' not sure why we apparently load this twice.
 
-
+        LoadCfgFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+        LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
 
 
     End Sub
@@ -1295,11 +1297,14 @@ Public Class frmConfig
         End Select
 
         Try
-            If dgv.CurrentCell.RowIndex = Nothing Then Me.dgv.CurrentCell = Me.dgv(1, 1)
-            tbx.Text = dgv.Rows(dgv.CurrentCell.RowIndex).Cells(7).Value.ToString
+            If TabControl1.SelectedIndex <> 0 Then
+                If dgv.CurrentCell.RowIndex = Nothing Then Me.dgv.CurrentCell = Me.dgv(1, 1)
+                tbx.Text = dgv.Rows(dgv.CurrentCell.RowIndex).Cells(7).Value.ToString
+            End If
         Catch ex As Exception
             MessageBox.Show(ex.Message)
         End Try
+
 
     End Sub
 
@@ -1310,7 +1315,7 @@ Public Class frmConfig
         lblAssessmentFile.Text = AppDataDir & "\templates\FactoryConfig.cfg"
         LoadCfgFile(AppDataDir & "\templates\FactoryConfig.cfg")
         LoadConfigFile(AppDataDir & "\templates\FactoryConfig.cfg")
-        lblMsg.Text = "Restored Original Configuration."
+        lblMsg.Text = "Restored Factory Configuration."
     End Sub
 
     Private Sub dgv_CellEndEdit(sender As Object, e As DataGridViewCellEventArgs) Handles dgvAppInfo.CellEndEdit, dgvCoding.CellEndEdit, dgvComments.CellEndEdit, dgvCompileOptions.CellEndEdit, dgvDataStructures.CellEndEdit, dgvDataTypes.CellEndEdit, dgvDevEnvironment.CellEndEdit, dgvFormDesign.CellEndEdit, dgvFormObj.CellEndEdit, dgvImports.CellEndEdit, dgvSubs.CellEndEdit

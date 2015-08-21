@@ -63,7 +63,9 @@ Public Class frmMain
     ' ================================================================================================
     Private Sub frmMain_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
+        ' #############################################################################################################
         IsFacultyVersion = True          ' if false, then it is the Student Version. It True, it is the Faculty Version
+        ' #############################################################################################################
 
         '        AppDataDir = RemoveLastField(Application.ExecutablePath, "\")
         AppDataDir = Application.StartupPath
@@ -129,7 +131,7 @@ Public Class frmMain
             GroupBox4.Location = New Point(9, 80)
 
             Panel3.Visible = False
-            btnProcessApps.Location = New Point(524, 235)
+            btnProcessApps.Location = New Point(524, 315)
 
             Label3.Visible = False
             lblSelectedTemplate.Visible = False
@@ -747,6 +749,8 @@ Public Class frmMain
                         strStudentReport = strStudentReport.Replace("<br>" & vbCrLf & " <br>", "<br>")
                     Loop
 
+                    strStudentReport = strStudentReport.Replace("[CONFIGFILE]", lblConfigFile.Text)
+
                     strStudentReport = strStudentReport.Replace("[SCORE]", AssScore.ToString("n1") & " deduction out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1"))
 
                     sr = File.OpenText((AppDataDir & "\templates\rptStudentFooter.html"))
@@ -1083,19 +1087,12 @@ Public Class frmMain
             ReportType = "Integrated"
             frmPickStudentReport.Show()
         Else
-            Dim url As New Uri("file:\\\" & StudentReportPath)
+            Dim url As New Uri("file:\\\" & StudentReportPath.Replace("GradeReport", "IntegratedReport"))
 
             frmOutput.WebBrowser1.Url = url
             frmOutput.Show()
         End If
 
-        If File.Exists(strOutputPath & "\FacultySummaryDetailReport.html") Then
-            Dim url As New Uri("file:\\\" & strOutputPath & "\FacultySummaryDetailReport.html")
-
-            frmOutput.WebBrowser1.Url = url
-            '   frmOutput.Close()
-            frmOutput.Show()
-        End If
     End Sub
 
     Private Sub BackgroundWorker1_ProgressChanged(ByVal sender As Object, ByVal e As System.ComponentModel.ProgressChangedEventArgs, Optional path As String = "", Optional txt As String = "") Handles BackgroundWorker1.ProgressChanged
@@ -1440,6 +1437,7 @@ Public Class frmMain
         ElseIf rbnSingleProject.Checked Then
             lblTarget.Text = "Target Application"
             FolderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyDocuments
+            FolderBrowserDialog1.Description = "Select the folder than contains your Application. It normally is where your .sln file is located."
 
             FolderBrowserDialog1.ShowDialog()
             lblTargetFile.Text = FolderBrowserDialog1.SelectedPath
