@@ -10,7 +10,7 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("AppGrader")> 
+<Assembly: AssemblyTitle("App Grader Pro")> 
 <Assembly: AssemblyDescription("There is a lot of administration needed when grading assignments submitted through Blackboard, especially when each submission is zipped. Errors due to excessively long file names can result. This application trims each zip filename leaving only the user ID, and then unzips these files placing the contained files in their own subdirectory. It was designed to handle Programming Homework, but it will handle any compressed file submission.")> 
 <Assembly: AssemblyCompany("University of South Carolina")> 
 <Assembly: AssemblyProduct("Application Grader")> 

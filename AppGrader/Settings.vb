@@ -32,7 +32,7 @@ Module Settings
             If s <> "AppGrader Assignment Configuration File" Then
                 MessageBox.Show("The selected file (" & fn & ") is not a valid configuration file for this application. Either load a different file, or use the default settings.")
             Else
-                sw = File.CreateText(Application.StartupPath & "\Settings.txt")
+                sw = File.CreateText(AppDataDir & "\Settings.txt")
                 sw.WriteLine("DVG" & vbTab & "Name" & vbTab & "Show Var" & vbTab & "Req" & vbTab & "Feedback")
 
                 Do While sr.Peek <> -1
@@ -97,7 +97,7 @@ Module Settings
         p = Settings.Find(Function(item As MySettings) item.nm = nm)
         If p Is Nothing Then
             '  MessageBox.Show("Find_Setting could not find <" & nm & ">")
-            sw = File.CreateText(Application.StartupPath & "/CantFind.txt")
+            sw = File.CreateText(AppDataDir & "\CantFind.txt")
 
             sw.WriteLine("Find_Setting could not find <" & nm & "> called from " & calledfrom)
             sw.Close()

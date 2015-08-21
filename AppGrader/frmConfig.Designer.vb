@@ -214,6 +214,12 @@ Partial Class frmConfig
         Me.DataGridViewTextBoxColumn35 = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.DataGridViewTextBoxColumn36 = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Column22 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.btnSaveConfig = New System.Windows.Forms.Button()
+        Me.btnSaveAsDefault = New System.Windows.Forms.Button()
+        Me.Label14 = New System.Windows.Forms.Label()
+        Me.Label15 = New System.Windows.Forms.Label()
+        Me.btnSelectConfigLoc = New System.Windows.Forms.Button()
+        Me.lblTargetConfig = New System.Windows.Forms.Label()
         Me.MenuStrip1.SuspendLayout()
         Me.MenuStrip2.SuspendLayout()
         Me.TabImports.SuspendLayout()
@@ -283,7 +289,7 @@ Partial Class frmConfig
         Me.btnReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnReturn.Location = New System.Drawing.Point(1150, 767)
         Me.btnReturn.Name = "btnReturn"
-        Me.btnReturn.Size = New System.Drawing.Size(67, 23)
+        Me.btnReturn.Size = New System.Drawing.Size(67, 25)
         Me.btnReturn.TabIndex = 15
         Me.btnReturn.Text = "Return"
         Me.btnReturn.UseVisualStyleBackColor = True
@@ -1045,6 +1051,10 @@ Partial Class frmConfig
         '
         'tabAppSettings
         '
+        Me.tabAppSettings.Controls.Add(Me.lblTargetConfig)
+        Me.tabAppSettings.Controls.Add(Me.btnSelectConfigLoc)
+        Me.tabAppSettings.Controls.Add(Me.Label15)
+        Me.tabAppSettings.Controls.Add(Me.Label14)
         Me.tabAppSettings.Controls.Add(Me.Label1)
         Me.tabAppSettings.Controls.Add(Me.lblAssessmentFile)
         Me.tabAppSettings.Controls.Add(Me.btnLoadAssessmentFile)
@@ -1946,6 +1956,67 @@ Partial Class frmConfig
         Me.Column22.Name = "Column22"
         Me.Column22.Visible = False
         '
+        'btnSaveConfig
+        '
+        Me.btnSaveConfig.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnSaveConfig.Location = New System.Drawing.Point(1029, 766)
+        Me.btnSaveConfig.Name = "btnSaveConfig"
+        Me.btnSaveConfig.Size = New System.Drawing.Size(115, 25)
+        Me.btnSaveConfig.TabIndex = 22
+        Me.btnSaveConfig.Text = "Save Config"
+        Me.btnSaveConfig.UseVisualStyleBackColor = True
+        Me.btnSaveConfig.Visible = False
+        '
+        'btnSaveAsDefault
+        '
+        Me.btnSaveAsDefault.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnSaveAsDefault.Location = New System.Drawing.Point(898, 767)
+        Me.btnSaveAsDefault.Name = "btnSaveAsDefault"
+        Me.btnSaveAsDefault.Size = New System.Drawing.Size(125, 25)
+        Me.btnSaveAsDefault.TabIndex = 23
+        Me.btnSaveAsDefault.Text = "Save As Default"
+        Me.btnSaveAsDefault.UseVisualStyleBackColor = True
+        Me.btnSaveAsDefault.Visible = False
+        '
+        'Label14
+        '
+        Me.Label14.AutoSize = True
+        Me.Label14.ForeColor = System.Drawing.Color.Black
+        Me.Label14.Location = New System.Drawing.Point(102, 214)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(108, 17)
+        Me.Label14.TabIndex = 12
+        Me.Label14.Text = "Target Location"
+        '
+        'Label15
+        '
+        Me.Label15.AutoSize = True
+        Me.Label15.ForeColor = System.Drawing.Color.Black
+        Me.Label15.Location = New System.Drawing.Point(41, 178)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(493, 17)
+        Me.Label15.TabIndex = 14
+        Me.Label15.Text = "Specify the directcry and filename where the configuration file is to be stored."
+        '
+        'btnSelectConfigLoc
+        '
+        Me.btnSelectConfigLoc.Location = New System.Drawing.Point(540, 175)
+        Me.btnSelectConfigLoc.Margin = New System.Windows.Forms.Padding(3, 0, 3, 0)
+        Me.btnSelectConfigLoc.Name = "btnSelectConfigLoc"
+        Me.btnSelectConfigLoc.Size = New System.Drawing.Size(59, 23)
+        Me.btnSelectConfigLoc.TabIndex = 15
+        Me.btnSelectConfigLoc.Text = "Select"
+        Me.btnSelectConfigLoc.UseVisualStyleBackColor = True
+        '
+        'lblTargetConfig
+        '
+        Me.lblTargetConfig.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.lblTargetConfig.ForeColor = System.Drawing.Color.Black
+        Me.lblTargetConfig.Location = New System.Drawing.Point(216, 213)
+        Me.lblTargetConfig.Name = "lblTargetConfig"
+        Me.lblTargetConfig.Size = New System.Drawing.Size(623, 25)
+        Me.lblTargetConfig.TabIndex = 16
+        '
         'frmConfig
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -1953,6 +2024,8 @@ Partial Class frmConfig
         Me.AutoSize = True
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(192, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(255, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(1233, 814)
+        Me.Controls.Add(Me.btnSaveAsDefault)
+        Me.Controls.Add(Me.btnSaveConfig)
         Me.Controls.Add(Me.lblMsg)
         Me.Controls.Add(Me.btnReturn)
         Me.Controls.Add(Me.TabControl1)
@@ -2186,4 +2259,10 @@ Partial Class frmConfig
     Friend WithEvents DataGridViewTextBoxColumn36 As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Column22 As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents RestoreStandardSettingsToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents btnSaveConfig As System.Windows.Forms.Button
+    Friend WithEvents btnSaveAsDefault As System.Windows.Forms.Button
+    Friend WithEvents btnSelectConfigLoc As System.Windows.Forms.Button
+    Friend WithEvents Label15 As System.Windows.Forms.Label
+    Friend WithEvents Label14 As System.Windows.Forms.Label
+    Friend WithEvents lblTargetConfig As System.Windows.Forms.Label
 End Class

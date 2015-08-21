@@ -63,6 +63,16 @@ Public Class frmMain
     ' ================================================================================================
     Private Sub frmMain_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
+        IsFacultyVersion = True          ' if false, then it is the Student Version. It True, it is the Faculty Version
+
+        '        AppDataDir = RemoveLastField(Application.ExecutablePath, "\")
+        AppDataDir = Application.StartupPath
+
+        ' the following was added to account for the difference in IDE and Published handling of data files
+        If Not AppDataDir.ToLower.Contains("\bin\debug") Then
+            AppDataDir &= "\bin\Debug"
+        End If
+
         btnViewPlagiarism.Visible = False
         btnOutput.Visible = False
         btnAssignSummary.Visible = False
@@ -70,19 +80,19 @@ Public Class frmMain
 
         rbnCheckGray.Checked = True
 
-        If File.Exists(Application.StartupPath & "\demodir.txt") Then
-            Dim sr As StreamReader = File.OpenText(Application.StartupPath & "\demodir.txt")
+        If File.Exists(AppDataDir & "\demodir.txt") Then
+            Dim sr As StreamReader = File.OpenText(AppDataDir & "\demodir.txt")
             lblDemoDir.Text = sr.ReadLine
             sr.Close()
         End If
 
 
         ' ----------------------------------------------------------------------
-        File.Delete(Application.StartupPath & "/CantFind.txt")
+        File.Delete(AppDataDir & "\CantFind.txt")
 
-        Settings.LoadCfgFile(Application.StartupPath & "\templates\defaultConfig.cfg") ' this only seems to read the settings and same them to a settings.txt file.
+        Settings.LoadCfgFile(AppDataDir & "\templates\defaultConfig.cfg") ' this only seems to read the settings and same them to a settings.txt file.
 
-        If File.Exists(Application.StartupPath & "\MissingSetting.txt") Then File.Delete(Application.StartupPath & "\MissingSetting.txt")
+        If File.Exists(AppDataDir & "\MissingSetting.txt") Then File.Delete(AppDataDir & "\MissingSetting.txt")
 
         LoadConfig()
 
@@ -90,6 +100,43 @@ Public Class frmMain
         lblNZips.Text = "-"
         '       Me.BackgroundWorker1.RunWorkerAsync()
 
+        If IsFacultyVersion Then
+            ' use the design time defaults
+        Else
+
+            Me.BackColor = Color.LightCoral
+            GroupBox1.Visible = False
+            GroupBox1.BackColor = Color.LightCoral
+            btnViewPlagiarism.Visible = False
+            GroupBox3.Visible = False
+            cbxLoadWordTemplate.Visible = False
+            cbxJustUnzip.Visible = False
+            cbxNoDemoFiles.Checked = True
+
+
+            ConfigureAppToolStripMenuItem.Visible = False
+
+            btnSelectFile2.Visible = True
+            btnSelectFile2.Location = New Point(21, 40)
+
+            Panel2.Location = New Point(21, 23)
+            GroupBox1.Height = 170
+
+            GroupBox2.Location = New Point(9, 160)
+            GroupBox2.Height = 140
+            lblConfigFile.BackColor = Color.White
+            ' lblConfigFile.ForeColor = Color.LightPink
+            GroupBox4.Location = New Point(9, 80)
+
+            Panel3.Visible = False
+            btnProcessApps.Location = New Point(524, 235)
+
+            Label3.Visible = False
+            lblSelectedTemplate.Visible = False
+            btnBrowseTemplate.Visible = False
+
+            Me.Height = 470
+        End If
 
     End Sub
     ' ================================================================================================
@@ -702,7 +749,7 @@ Public Class frmMain
 
                     strStudentReport = strStudentReport.Replace("[SCORE]", AssScore.ToString("n1") & " deduction out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1"))
 
-                    sr = File.OpenText((Application.StartupPath & "\templates\rptStudentFooter.html"))
+                    sr = File.OpenText((AppDataDir & "\templates\rptStudentFooter.html"))
                     strStudentReport &= sr.ReadToEnd
                     sr.Close()
 
@@ -745,7 +792,8 @@ Public Class frmMain
             If nfiles > 1 Then       ' no need to process an integrated application if it only has a single file
                 BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
                 s = AssScore.ToString("n1") & " out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1")
-                s2 = "\" & strStudentID & "\Reports\" & strStudentID & "_IntegratedReport.html"
+                '    s2 = "\" & strStudentID & "\Reports\" & strStudentID & "_IntegratedReport.html"
+                s2 = "\Reports\" & strStudentID & "_IntegratedReport.html"
                 CloseFacReport(strFacReportDetail, s2, s)
             End If
         Next ii    ' End of student loop
@@ -754,227 +802,230 @@ Public Class frmMain
 
         '  strFacReport = strAssignmentSummary
 
-        If Not cbxJustUnzip.Checked Then CloseFacReport(strFacReport, "\FacultySummaryReport.html", s)
-        strFacReport = ""
+        If IsFacultyVersion Then
+
+            If Not cbxJustUnzip.Checked Then CloseFacReport(strFacReport, "\FacultySummaryReport.html", s)
+            strFacReport = ""
 
 
-        ' ############################################################################################
+            ' ############################################################################################
 
-        ExtractGUID(strOutputPath)
+            ExtractGUID(strOutputPath)
 
 
 
-        ' ----------------------- Save MD5 Data --------------------------------------
-        If Not cbxJustUnzip.Checked Then
-            Dim fname As String
-            '   Dim sw As StreamWriter
-            '   Dim lastUser As String = ""
-            Dim lastMD5 As String = ""
-            Dim ShortFilename As String = ""
-            Dim DupFlag As Boolean
-            '      Dim NoDesignerVB As Boolean = True
+            ' ----------------------- Save MD5 Data --------------------------------------
+            If Not cbxJustUnzip.Checked Then
+                Dim fname As String
+                '   Dim sw As StreamWriter
+                '   Dim lastUser As String = ""
+                Dim lastMD5 As String = ""
+                Dim ShortFilename As String = ""
+                Dim DupFlag As Boolean
+                '      Dim NoDesignerVB As Boolean = True
 
-            fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt"
-            sw = File.CreateText(fname)
-            sw.WriteLine("Dup" & vbTab & "MD5" & vbTab & "Filename" & vbTab & "User Name" & vbTab & "Full Filename")
-            Sort_Submissions()
+                fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt"
+                sw = File.CreateText(fname)
+                sw.WriteLine("Dup" & vbTab & "MD5" & vbTab & "Filename" & vbTab & "User Name" & vbTab & "Full Filename")
+                Sort_Submissions()
 
-            DupFlag = False
-            For i = 0 To Submissions.Count - 2
-                With Submissions(i)
-                    If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
-                        ShortFilename = ReturnLastField(.Filename, "\")
-                        If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Or DupFlag = True Then
-                            sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
-                            DupFlag = False
-                        Else
-                            sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                DupFlag = False
+                For i = 0 To Submissions.Count - 2
+                    With Submissions(i)
+                        If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
+                            ShortFilename = ReturnLastField(.Filename, "\")
+                            If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Or DupFlag = True Then
+                                sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                                DupFlag = False
+                            Else
+                                sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
 
+                            End If
+                            If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Then DupFlag = True
                         End If
-                        If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Then DupFlag = True
-                    End If
-                End With
-            Next
+                    End With
+                Next
 
-            ' Print the last line
-            If Submissions.Count > 2 Then
-                With Submissions(Submissions.Count - 1)
-                    If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
+                ' Print the last line
+                If Submissions.Count > 2 Then
+                    With Submissions(Submissions.Count - 1)
+                        If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
 
-                        ShortFilename = ReturnLastField(.Filename, "\")
+                            ShortFilename = ReturnLastField(.Filename, "\")
 
-                        If Submissions(Submissions.Count - 2).vbCRC = Submissions(Submissions.Count - 1).vbCRC Then
-                            sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
-                        Else
-                            sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                            If Submissions(Submissions.Count - 2).vbCRC = Submissions(Submissions.Count - 1).vbCRC Then
+                                sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                            Else
+                                sw.WriteLine((vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
+                            End If
                         End If
-                    End If
-                End With
-            End If
-
-
-            sw.Close()
-            ' ------------------------------------Web page with dups ------------------------------------------------------
-
-            fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html"
-            sw = File.AppendText(fname)
-            'Dim sr1 As StreamReader
-            'Dim s As String
-
-            'sw.Write(sr1.ReadToEnd)
-            'sr1.Close()
-
-            sw.WriteLine("<h2>Identical Student File MD5s</h2>" & vbCrLf)
-
-            ' ---------------------------------------------------------------------------------------------------
-            sw.WriteLine("<p><em>A MD5 is referred to as a message digest. It is a 128 bit value, represented as a 32 digit hexidimal number. The MD5 algorithm is commonly used to ensure data integrity. Any change in a data file will result in a different MD5 value. If two files have identical MD5 values, the files are identical. Note, some files that VB creates may not require modification, and therefore two separate applications will tend to have identical MD5 values for these files. Example include SplashScreens and AboutBoxes. Also, the application allows the loading of reference applications that may have been distributed to the class (such as sample applications). The application distinguishes files with duplicate MD5 values between those that do not also match instructor demo applications, and those that do. The only files checked are those ending in .vb.</em></p> <hr />" & vbCrLf)
-
-            sr1 = File.OpenText(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt")
-            s = sr1.ReadLine
-
-
-            Dim last As String = ""
-            Dim ss() As String
-            Dim instructordemo As Boolean
-            Dim needtoclose As Boolean = False
-            Dim allInstructorDemo As Boolean = False
-            Dim tmp As String = ""
-
-            ' ==================================================================================================
-            Do While sr1.Peek > -1
-                s = sr1.ReadLine
-                ss = s.Split(CChar(vbTab))
-                If ss(1) = last Then
-                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                        instructordemo = True
-                        If needtoclose Then
-                            sw.WriteLine("</ul>" & vbCrLf)
-                            MD5Issues = True
-                        End If
-                        needtoclose = False
-
-                        ' bypass this record
-                    ElseIf instructordemo Then
-                        If needtoclose Then
-                            sw.WriteLine("</ul>" & vbCrLf)
-                            MD5Issues = True
-                        End If
-                        needtoclose = False
-
-                        ' bypass this record
-                    Else
-                        ' need to show this record.
-                        sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                        needtoclose = True
-                    End If
-                Else
-                    last = ss(1)
-                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                        instructordemo = True
-                        If needtoclose Then
-                            sw.WriteLine("</ul>" & vbCrLf)
-                            MD5Issues = True
-                        End If
-                        needtoclose = False
-                        ' bypass this record
-                    Else
-                        instructordemo = False
-                        If needtoclose Then
-                            sw.WriteLine("</ul>" & vbCrLf)
-                            MD5Issues = True
-                        End If
-
-                        ' need to show this record.
-                        If ss(0) = "*" Then
-                            sw.WriteLine("<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>")
-                            sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                            MD5Issues = True
-                            needtoclose = True
-                        End If
-                    End If
-
+                    End With
                 End If
 
 
-            Loop
-            sr1.Close()
-            ' ==================================================================================================
-            sr1 = File.OpenText(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt")
-            s = sr1.ReadLine
-            sw.WriteLine("<h2>Student File MD5's identical to Instructor Demo Files</h2>" & vbCrLf)
-            ' ---------------------------------------------------------------------------------------------------
-            sw.WriteLine("<p><em>This section lists files with identical MD5 values that match those from Instructor Demo files. Since all students would have access to these files, identical MD5 values do not necessarily indicate unauthorized collusion.</em></p> <hr />" & vbCrLf)
+                sw.Close()
+                ' ------------------------------------Web page with dups ------------------------------------------------------
 
-            ' display record the are identical to Instructor files
-            Do While sr1.Peek > -1
+                fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html"
+                sw = File.AppendText(fname)
+                'Dim sr1 As StreamReader
+                'Dim s As String
+
+                'sw.Write(sr1.ReadToEnd)
+                'sr1.Close()
+
+                sw.WriteLine("<h2>Identical Student File MD5s</h2>" & vbCrLf)
+
+                ' ---------------------------------------------------------------------------------------------------
+                sw.WriteLine("<p><em>A MD5 is referred to as a message digest. It is a 128 bit value, represented as a 32 digit hexidimal number. The MD5 algorithm is commonly used to ensure data integrity. Any change in a data file will result in a different MD5 value. If two files have identical MD5 values, the files are identical. Note, some files that VB creates may not require modification, and therefore two separate applications will tend to have identical MD5 values for these files. Example include SplashScreens and AboutBoxes. Also, the application allows the loading of reference applications that may have been distributed to the class (such as sample applications). The application distinguishes files with duplicate MD5 values between those that do not also match instructor demo applications, and those that do. The only files checked are those ending in .vb.</em></p> <hr />" & vbCrLf)
+
+                sr1 = File.OpenText(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt")
                 s = sr1.ReadLine
-                ss = s.Split(CChar(vbTab))
-                If ss(1) = last Then
-                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                        If ss(0) = "*" Then
+
+
+                Dim last As String = ""
+                Dim ss() As String
+                Dim instructordemo As Boolean
+                Dim needtoclose As Boolean = False
+                Dim allInstructorDemo As Boolean = False
+                Dim tmp As String = ""
+
+                ' ==================================================================================================
+                Do While sr1.Peek > -1
+                    s = sr1.ReadLine
+                    ss = s.Split(CChar(vbTab))
+                    If ss(1) = last Then
+                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
                             instructordemo = True
-                            allInstructorDemo = True
-                            tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                        End If
-                    ElseIf instructordemo Then
-                        If ss(0) = "*" Then
-                            allInstructorDemo = False
-                            tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
-                        End If
-                    Else
-                        'If needtoclose Then
-                        '    If Not allInstructorDemo Then
-                        '        tmp &= "</ul>" & vbCrLf
-                        '        sw.WriteLine(tmp)
-                        '        tmp = ""
-                        '    End If
-                        'End If
-                        'needtoclose = False
+                            If needtoclose Then
+                                sw.WriteLine("</ul>" & vbCrLf)
+                                MD5Issues = True
+                            End If
+                            needtoclose = False
 
-                    End If
-                Else    ' new MD5
-                    last = ss(1)
-                    If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
-                        instructordemo = True
+                            ' bypass this record
+                        ElseIf instructordemo Then
+                            If needtoclose Then
+                                sw.WriteLine("</ul>" & vbCrLf)
+                                MD5Issues = True
+                            End If
+                            needtoclose = False
 
-                        If needtoclose And Not allInstructorDemo Then
-                            tmp &= "</ul>" & vbCrLf
-                            sw.WriteLine(tmp)
-                            tmp = ""
+                            ' bypass this record
                         Else
-                            tmp = ""
-                        End If
-
-                        allInstructorDemo = True                        ' need to show this record.
-                        If ss(0) = "*" Then
-                            tmp = "<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>"
-                            tmp &= "<li>" & ss(3) & " - " & ss(4) & "</li>"
+                            ' need to show this record.
+                            sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
                             needtoclose = True
                         End If
-                    Else   ' student file - not based on instructor demo
-                        If needtoclose And Not allInstructorDemo Then
-                            tmp &= "</ul>" & vbCrLf
-                            sw.WriteLine(tmp)
-                            tmp = ""
+                    Else
+                        last = ss(1)
+                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                            instructordemo = True
+                            If needtoclose Then
+                                sw.WriteLine("</ul>" & vbCrLf)
+                                MD5Issues = True
+                            End If
+                            needtoclose = False
+                            ' bypass this record
                         Else
-                            tmp = ""
+                            instructordemo = False
+                            If needtoclose Then
+                                sw.WriteLine("</ul>" & vbCrLf)
+                                MD5Issues = True
+                            End If
+
+                            ' need to show this record.
+                            If ss(0) = "*" Then
+                                sw.WriteLine("<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>")
+                                sw.WriteLine("<li>" & ss(3) & " - " & ss(4) & "</li>")
+                                MD5Issues = True
+                                needtoclose = True
+                            End If
                         End If
 
-                        allInstructorDemo = False
-                        instructordemo = False ' do not show this
-                        ' bypass this record
                     End If
 
-                End If
-            Loop
 
-            If needtoclose And Not allInstructorDemo Then sw.WriteLine("</ul>" & vbCrLf)
-            needtoclose = False
+                Loop
+                sr1.Close()
+                ' ==================================================================================================
+                sr1 = File.OpenText(strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".txt")
+                s = sr1.ReadLine
+                sw.WriteLine("<h2>Student File MD5's identical to Instructor Demo Files</h2>" & vbCrLf)
+                ' ---------------------------------------------------------------------------------------------------
+                sw.WriteLine("<p><em>This section lists files with identical MD5 values that match those from Instructor Demo files. Since all students would have access to these files, identical MD5 values do not necessarily indicate unauthorized collusion.</em></p> <hr />" & vbCrLf)
 
-            sw.WriteLine("</body> </html>")
-            sw.Close()
+                ' display record the are identical to Instructor files
+                Do While sr1.Peek > -1
+                    s = sr1.ReadLine
+                    ss = s.Split(CChar(vbTab))
+                    If ss(1) = last Then
+                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                            If ss(0) = "*" Then
+                                instructordemo = True
+                                allInstructorDemo = True
+                                tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
+                            End If
+                        ElseIf instructordemo Then
+                            If ss(0) = "*" Then
+                                allInstructorDemo = False
+                                tmp &= ("<li>" & ss(3) & " - " & ss(4) & "</li>")
+                            End If
+                        Else
+                            'If needtoclose Then
+                            '    If Not allInstructorDemo Then
+                            '        tmp &= "</ul>" & vbCrLf
+                            '        sw.WriteLine(tmp)
+                            '        tmp = ""
+                            '    End If
+                            'End If
+                            'needtoclose = False
 
-        End If '  If Not cbxJustUnzip.Checked
+                        End If
+                    Else    ' new MD5
+                        last = ss(1)
+                        If ss(3) = "Instructor Demo" Then   ' this is an instructor supplied file
+                            instructordemo = True
+
+                            If needtoclose And Not allInstructorDemo Then
+                                tmp &= "</ul>" & vbCrLf
+                                sw.WriteLine(tmp)
+                                tmp = ""
+                            Else
+                                tmp = ""
+                            End If
+
+                            allInstructorDemo = True                        ' need to show this record.
+                            If ss(0) = "*" Then
+                                tmp = "<h3>" & ss(1) & " - " & ss(2) & "</h3>" & vbCrLf & "<ul>"
+                                tmp &= "<li>" & ss(3) & " - " & ss(4) & "</li>"
+                                needtoclose = True
+                            End If
+                        Else   ' student file - not based on instructor demo
+                            If needtoclose And Not allInstructorDemo Then
+                                tmp &= "</ul>" & vbCrLf
+                                sw.WriteLine(tmp)
+                                tmp = ""
+                            Else
+                                tmp = ""
+                            End If
+
+                            allInstructorDemo = False
+                            instructordemo = False ' do not show this
+                            ' bypass this record
+                        End If
+
+                    End If
+                Loop
+
+                If needtoclose And Not allInstructorDemo Then sw.WriteLine("</ul>" & vbCrLf)
+                needtoclose = False
+
+                sw.WriteLine("</body> </html>")
+                sw.Close()
+
+            End If '  If Not cbxJustUnzip.Checked
+        End If ' if isFacultyVersion
         ' --------------------------------------------------------------------------------
         timeend = Now
 
@@ -998,9 +1049,10 @@ Public Class frmMain
         '  Dim msgflag As Boolean = False
 
         ' Check to see if the Config file exists. If not bypass the remainder of the the load process.
-        If File.Exists(Application.StartupPath & "\templates\defaultConfig.cfg") Then
+        If File.Exists(AppDataDir & "\templates\defaultConfig.cfg") Then
 
-            frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+            frmConfig.LoadConfigFile(AppDataDir & "\templates\defaultConfig.cfg")
+            lblConfigFile.Text = "Default Config"
         End If
     End Sub
 
@@ -1117,7 +1169,7 @@ Public Class frmMain
 
         Dim sw As StreamWriter
 
-        sw = File.AppendText(Application.StartupPath & "\TimeStudy.txt")
+        sw = File.AppendText(AppDataDir & "\TimeStudy.txt")
         sw.WriteLine("Today" & vbTab & Now.ToString)
         sw.WriteLine("Student Files" & vbTab & nstudentfiles.ToString("n1"))
         sw.WriteLine("Instructor Apps" & vbTab & ninstructorapps.ToString("n1"))
@@ -1243,7 +1295,7 @@ Public Class frmMain
             ' ---------------------------------------------------------------------------------------------------
             fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html"
             sw = File.CreateText(fname)
-            Dim sr1 As StreamReader = File.OpenText(Application.StartupPath & "/templates/MD5template.html")
+            Dim sr1 As StreamReader = File.OpenText(AppDataDir & "\templates\MD5template.html")
 
             GUIDHeader = sr1.ReadToEnd
             sr1.Close()
@@ -1348,8 +1400,7 @@ Public Class frmMain
     End Sub
 
 
-    Private Sub btnSelectFile_Click(sender As Object, e As EventArgs) Handles btnSelectFile.Click, Button1.Click
-
+    Private Sub btnSelectFile_Click(sender As Object, e As EventArgs) Handles btnSelectFile.Click, Button1.Click, btnSelectFile2.Click
 
         lblMessage.Text = ""
         frmPickStudentReport.Close()
@@ -1425,7 +1476,7 @@ Public Class frmMain
         Dim ss() As String
 
         Dim newComment As New ErrComments
-        Dim sr As New StreamReader(Application.StartupPath & "\templates\feedback.txt")
+        Dim sr As New StreamReader(AppDataDir & "\templates\feedback.txt")
 
         Do While sr.Peek > -1
 
@@ -1462,7 +1513,7 @@ Public Class frmMain
             path = FolderBrowserDialog1.SelectedPath
 
             ' Save path
-            'Dim sw As StreamWriter = File.CreateText(Application.StartupPath & "\demodir.txt")
+            'Dim sw As StreamWriter = File.CreateText(AppDataDir & "\demodir.txt")
             'sw.WriteLine(path)
             'sw.Close()
         End If
@@ -1521,4 +1572,20 @@ Public Class frmMain
     End Sub
 
 
+    Private Sub btnLoadAssessmentConfig_Click(sender As Object, e As EventArgs) Handles btnLoadAssessmentConfig.Click
+        Dim filename As String
+
+        OpenFileDialog1.Filter = "Config files |*.cfg"
+        OpenFileDialog1.FilterIndex = 0
+        OpenFileDialog1.RestoreDirectory = True
+
+        OpenFileDialog1.ShowDialog()
+        filename = OpenFileDialog1.FileName
+
+        If filename.ToLower.Contains(".cfg") Then
+            lblConfigFile.Text = filename
+            frmConfig.LoadConfigFile(filename)
+        End If
+
+    End Sub
 End Class

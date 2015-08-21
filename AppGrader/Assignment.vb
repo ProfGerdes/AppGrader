@@ -255,7 +255,11 @@ Module Assignment
     Public ninstructorapps As Integer
     Public averageLOC As Decimal
 
+
     Public ReportType As String = ""
+
+    Public AppDataDir As String
+    Public IsFacultyVersion As Boolean = False
     ' ===========================================================================================
 
     '  Public AppSummary(80) As MyItems  ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

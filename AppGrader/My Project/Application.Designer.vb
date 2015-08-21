@@ -32,12 +32,12 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.PrepareStudentAppsForGrading.frmMain
+            Me.MainForm = Global.AppGraderPro.frmMain
         End Sub
-        
-        <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
+
+        <Global.System.Diagnostics.DebuggerStepThroughAttribute()> _
         Protected Overrides Sub OnCreateSplashScreen()
-            Me.SplashScreen = Global.PrepareStudentAppsForGrading.frmSplashScreen
+            Me.SplashScreen = Global.AppGraderPro.frmSplashScreen
         End Sub
     End Class
 End Namespace

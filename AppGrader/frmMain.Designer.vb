@@ -77,9 +77,14 @@ Partial Class frmMain
         Me.rbnShowOnlyReq = New System.Windows.Forms.RadioButton()
         Me.rbnShowAll = New System.Windows.Forms.RadioButton()
         Me.rbnCheckGray = New System.Windows.Forms.RadioButton()
+        Me.btnSelectFile2 = New System.Windows.Forms.Button()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.SaveFileDialog1 = New System.Windows.Forms.SaveFileDialog()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
+        Me.btnLoadAssessmentConfig = New System.Windows.Forms.Button()
+        Me.lblConfigFile = New System.Windows.Forms.Label()
+        Me.Label7 = New System.Windows.Forms.Label()
+        Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.MenuStrip1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -87,6 +92,7 @@ Partial Class frmMain
         Me.Panel3.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
+        Me.GroupBox4.SuspendLayout()
         Me.SuspendLayout()
         '
         'FolderBrowserDialog1
@@ -99,7 +105,7 @@ Partial Class frmMain
         Me.btnProcessApps.BackColor = System.Drawing.SystemColors.InactiveCaption
         Me.btnProcessApps.Enabled = False
         Me.btnProcessApps.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnProcessApps.Location = New System.Drawing.Point(524, 576)
+        Me.btnProcessApps.Location = New System.Drawing.Point(527, 636)
         Me.btnProcessApps.Margin = New System.Windows.Forms.Padding(2)
         Me.btnProcessApps.Name = "btnProcessApps"
         Me.btnProcessApps.Size = New System.Drawing.Size(128, 33)
@@ -111,7 +117,7 @@ Partial Class frmMain
         '
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.Location = New System.Drawing.Point(23, 584)
+        Me.Label1.Location = New System.Drawing.Point(26, 644)
         Me.Label1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(175, 17)
@@ -123,7 +129,7 @@ Partial Class frmMain
         '
         Me.lblNZips.AutoSize = True
         Me.lblNZips.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblNZips.Location = New System.Drawing.Point(159, 584)
+        Me.lblNZips.Location = New System.Drawing.Point(162, 644)
         Me.lblNZips.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblNZips.Name = "lblNZips"
         Me.lblNZips.Size = New System.Drawing.Size(59, 17)
@@ -189,48 +195,48 @@ Partial Class frmMain
         'ProcessToolStripMenuItem
         '
         Me.ProcessToolStripMenuItem.Name = "ProcessToolStripMenuItem"
-        Me.ProcessToolStripMenuItem.Size = New System.Drawing.Size(261, 22)
+        Me.ProcessToolStripMenuItem.Size = New System.Drawing.Size(254, 22)
         Me.ProcessToolStripMenuItem.Text = "Application Settings"
         '
         'IndentifyInstructorDemoDirectoryToolStripMenuItem
         '
         Me.IndentifyInstructorDemoDirectoryToolStripMenuItem.Name = "IndentifyInstructorDemoDirectoryToolStripMenuItem"
-        Me.IndentifyInstructorDemoDirectoryToolStripMenuItem.Size = New System.Drawing.Size(261, 22)
-        Me.IndentifyInstructorDemoDirectoryToolStripMenuItem.Text = "Indentify Instructor Demo Directory"
+        Me.IndentifyInstructorDemoDirectoryToolStripMenuItem.Size = New System.Drawing.Size(254, 22)
+        Me.IndentifyInstructorDemoDirectoryToolStripMenuItem.Text = "Identify Instructor Demo Directory"
         '
         'SelectTargetFileToolStripMenuItem
         '
         Me.SelectTargetFileToolStripMenuItem.Name = "SelectTargetFileToolStripMenuItem"
-        Me.SelectTargetFileToolStripMenuItem.Size = New System.Drawing.Size(261, 22)
+        Me.SelectTargetFileToolStripMenuItem.Size = New System.Drawing.Size(254, 22)
         Me.SelectTargetFileToolStripMenuItem.Text = "Select Target File"
         '
         'StartProcessingToolStripMenuItem
         '
         Me.StartProcessingToolStripMenuItem.Name = "StartProcessingToolStripMenuItem"
-        Me.StartProcessingToolStripMenuItem.Size = New System.Drawing.Size(261, 22)
+        Me.StartProcessingToolStripMenuItem.Size = New System.Drawing.Size(254, 22)
         Me.StartProcessingToolStripMenuItem.Text = "Start Processing"
         '
         'ViewOutputToolStripMenuItem
         '
         Me.ViewOutputToolStripMenuItem.Name = "ViewOutputToolStripMenuItem"
-        Me.ViewOutputToolStripMenuItem.Size = New System.Drawing.Size(261, 22)
+        Me.ViewOutputToolStripMenuItem.Size = New System.Drawing.Size(254, 22)
         Me.ViewOutputToolStripMenuItem.Text = "View Assessment"
         '
         'PlagiarismSummaryToolStripMenuItem
         '
         Me.PlagiarismSummaryToolStripMenuItem.Name = "PlagiarismSummaryToolStripMenuItem"
-        Me.PlagiarismSummaryToolStripMenuItem.Size = New System.Drawing.Size(261, 22)
+        Me.PlagiarismSummaryToolStripMenuItem.Size = New System.Drawing.Size(254, 22)
         Me.PlagiarismSummaryToolStripMenuItem.Text = "Plagiarism Summary"
         '
         'ToolStripSeparator6
         '
         Me.ToolStripSeparator6.Name = "ToolStripSeparator6"
-        Me.ToolStripSeparator6.Size = New System.Drawing.Size(258, 6)
+        Me.ToolStripSeparator6.Size = New System.Drawing.Size(251, 6)
         '
         'ExitToolStripMenuItem1
         '
         Me.ExitToolStripMenuItem1.Name = "ExitToolStripMenuItem1"
-        Me.ExitToolStripMenuItem1.Size = New System.Drawing.Size(261, 22)
+        Me.ExitToolStripMenuItem1.Size = New System.Drawing.Size(254, 22)
         Me.ExitToolStripMenuItem1.Text = "Exit"
         '
         'HelpToolStripMenuItem
@@ -271,9 +277,9 @@ Partial Class frmMain
         Me.lblTarget.Location = New System.Drawing.Point(12, 38)
         Me.lblTarget.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblTarget.Name = "lblTarget"
-        Me.lblTarget.Size = New System.Drawing.Size(100, 17)
+        Me.lblTarget.Size = New System.Drawing.Size(76, 17)
         Me.lblTarget.TabIndex = 34
-        Me.lblTarget.Text = "Target Zip File"
+        Me.lblTarget.Text = "Target File"
         '
         'lblTargetFile
         '
@@ -315,7 +321,7 @@ Partial Class frmMain
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(12, 95)
+        Me.Label6.Location = New System.Drawing.Point(14, 103)
         Me.Label6.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(122, 17)
@@ -332,7 +338,7 @@ Partial Class frmMain
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(12, 124)
+        Me.Label3.Location = New System.Drawing.Point(14, 130)
         Me.Label3.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(111, 17)
@@ -368,7 +374,7 @@ Partial Class frmMain
         Me.Panel1.Controls.Add(Me.Button1)
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Panel1.Location = New System.Drawing.Point(0, 620)
+        Me.Panel1.Location = New System.Drawing.Point(0, 679)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(678, 80)
         Me.Panel1.TabIndex = 44
@@ -467,7 +473,7 @@ Partial Class frmMain
         Me.GroupBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox1.Location = New System.Drawing.Point(9, 41)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(657, 328)
+        Me.GroupBox1.Size = New System.Drawing.Size(657, 327)
         Me.GroupBox1.TabIndex = 48
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Select Applications to Process"
@@ -520,7 +526,7 @@ Partial Class frmMain
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(9, 40)
+        Me.Label4.Location = New System.Drawing.Point(9, 37)
         Me.Label4.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(106, 17)
@@ -578,6 +584,19 @@ Partial Class frmMain
         Me.rbnCheckGray.Text = "Grayout checks not related to assignment"
         Me.rbnCheckGray.UseVisualStyleBackColor = True
         '
+        'btnSelectFile2
+        '
+        Me.btnSelectFile2.BackColor = System.Drawing.SystemColors.InactiveCaption
+        Me.btnSelectFile2.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btnSelectFile2.Location = New System.Drawing.Point(524, 26)
+        Me.btnSelectFile2.Margin = New System.Windows.Forms.Padding(2)
+        Me.btnSelectFile2.Name = "btnSelectFile2"
+        Me.btnSelectFile2.Size = New System.Drawing.Size(128, 29)
+        Me.btnSelectFile2.TabIndex = 53
+        Me.btnSelectFile2.Text = "Select File"
+        Me.btnSelectFile2.UseVisualStyleBackColor = False
+        Me.btnSelectFile2.Visible = False
+        '
         'GroupBox2
         '
         Me.GroupBox2.Controls.Add(Me.btnBrowseTemplate)
@@ -592,12 +611,59 @@ Partial Class frmMain
         Me.GroupBox2.Controls.Add(Me.lblTarget)
         Me.GroupBox2.Controls.Add(Me.cbxLoadWordTemplate)
         Me.GroupBox2.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox2.Location = New System.Drawing.Point(9, 384)
+        Me.GroupBox2.Location = New System.Drawing.Point(9, 444)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(657, 187)
+        Me.GroupBox2.Size = New System.Drawing.Size(660, 187)
         Me.GroupBox2.TabIndex = 49
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Assignment Detail"
+        '
+        'btnLoadAssessmentConfig
+        '
+        Me.btnLoadAssessmentConfig.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btnLoadAssessmentConfig.Location = New System.Drawing.Point(570, 28)
+        Me.btnLoadAssessmentConfig.Name = "btnLoadAssessmentConfig"
+        Me.btnLoadAssessmentConfig.Size = New System.Drawing.Size(71, 26)
+        Me.btnLoadAssessmentConfig.TabIndex = 56
+        Me.btnLoadAssessmentConfig.Text = "Browse"
+        Me.btnLoadAssessmentConfig.UseVisualStyleBackColor = True
+        '
+        'lblConfigFile
+        '
+        Me.lblConfigFile.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.lblConfigFile.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblConfigFile.ForeColor = System.Drawing.Color.Navy
+        Me.lblConfigFile.Location = New System.Drawing.Point(140, 32)
+        Me.lblConfigFile.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblConfigFile.Name = "lblConfigFile"
+        Me.lblConfigFile.Size = New System.Drawing.Size(414, 21)
+        Me.lblConfigFile.TabIndex = 55
+        Me.lblConfigFile.Text = "Default Config"
+        Me.lblConfigFile.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label7.Location = New System.Drawing.Point(22, 33)
+        Me.Label7.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(94, 16)
+        Me.Label7.TabIndex = 54
+        Me.Label7.Text = "Assess Config"
+        '
+        'GroupBox4
+        '
+        Me.GroupBox4.Controls.Add(Me.btnLoadAssessmentConfig)
+        Me.GroupBox4.Controls.Add(Me.lblConfigFile)
+        Me.GroupBox4.Controls.Add(Me.Label7)
+        Me.GroupBox4.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.GroupBox4.Location = New System.Drawing.Point(9, 374)
+        Me.GroupBox4.Name = "GroupBox4"
+        Me.GroupBox4.Size = New System.Drawing.Size(657, 64)
+        Me.GroupBox4.TabIndex = 57
+        Me.GroupBox4.TabStop = False
+        Me.GroupBox4.Text = "Assessment Config File"
         '
         'frmMain
         '
@@ -605,7 +671,9 @@ Partial Class frmMain
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.GradientActiveCaption
-        Me.ClientSize = New System.Drawing.Size(678, 700)
+        Me.ClientSize = New System.Drawing.Size(678, 759)
+        Me.Controls.Add(Me.GroupBox4)
+        Me.Controls.Add(Me.btnSelectFile2)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.Panel1)
@@ -632,6 +700,8 @@ Partial Class frmMain
         Me.Panel2.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox2.PerformLayout()
+        Me.GroupBox4.ResumeLayout(False)
+        Me.GroupBox4.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -693,5 +763,10 @@ Partial Class frmMain
     Friend WithEvents btnAssignSummary As System.Windows.Forms.Button
     Friend WithEvents btnDetail As System.Windows.Forms.Button
     Friend WithEvents Timer1 As System.Windows.Forms.Timer
+    Friend WithEvents btnSelectFile2 As System.Windows.Forms.Button
+    Friend WithEvents btnLoadAssessmentConfig As System.Windows.Forms.Button
+    Friend WithEvents lblConfigFile As System.Windows.Forms.Label
+    Friend WithEvents Label7 As System.Windows.Forms.Label
+    Friend WithEvents GroupBox4 As System.Windows.Forms.GroupBox
 
 End Class

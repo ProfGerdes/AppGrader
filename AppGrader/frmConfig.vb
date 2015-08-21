@@ -4,6 +4,7 @@ Public Class frmConfig
     Dim previousRow As Integer
     Dim dgv As DataGridView
     Dim loadphase As Boolean
+    Dim NeedsToBeSaved As Boolean = False
 
     Private Sub frmConfig_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -28,7 +29,8 @@ Public Class frmConfig
         lblAppTitle.Location = New Point(36, 88)
         txtAssignmentTitle.Location = New Point(213, 88)
         txtAssignmentTitle.Width = 834
-
+        btnSaveAsDefault.Visible = False
+        btnSaveConfig.Visible = False
 
         StuffAlldgvs()
 
@@ -296,7 +298,7 @@ Public Class frmConfig
 
     Private Sub btnSetAsDefault_Click(sender As Object, e As EventArgs)
 
-        Dim sw As New StreamWriter(Application.StartupPath & "\templates\defaultConfig.cfg")
+        Dim sw As New StreamWriter(AppDataDir & "\templates\defaultConfig.cfg")
         Dim s As String
 
         sw.WriteLine("AppGrader Assignment Configuration File")  ' this first line is requried. It is used to identify it as a Config File
@@ -472,8 +474,8 @@ Public Class frmConfig
 
         OpenFileDialog1.Filter = "Config|*.cfg|All Files|*.*;"
         If OpenFileDialog1.FileName <> Nothing Then
-            File.Delete(Application.StartupPath & "/CantFind.txt")
-            If File.Exists(Application.StartupPath & "\MissingSetting.txt") Then File.Delete(Application.StartupPath & "\MissingSetting.txt")
+            File.Delete(AppDataDir & "\CantFind.txt")
+            If File.Exists(AppDataDir & "\MissingSetting.txt") Then File.Delete(AppDataDir & "\MissingSetting.txt")
 
             LoadConfigFile(OpenFileDialog1.FileName)
             Settings.LoadCfgFile(OpenFileDialog1.FileName)
@@ -487,24 +489,37 @@ Public Class frmConfig
         ' check to see if the current settings have been saved
         ' Warn user if not saved
 
-        frmMain.Show()
-        Me.Close()
+        Dim UserResp As Integer
 
-    End Sub
-
-
-    Private Sub SaveNewConfigToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveNewConfigToolStripMenuItem.Click
-
-        SaveFileDialog1.ShowDialog()
-        If SaveFileDialog1.FileName <> Nothing Then
-            SaveConfigFile(SaveFileDialog1.FileName)
+        If NeedsToBeSaved Then
+            UserResp = MessageBox.Show("Your changes have not been saved. Do you want to exit without saving?", "Configuration not Saved", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
         End If
 
-        lblMsg.Text = "Successfully saved Assignment Config File."
+        If Not NeedsToBeSaved Or UserResp = vbYes Then
+            frmMain.Show()
+            Me.Close()
+        End If
+
+
     End Sub
 
-    Private Sub SaveAsDefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAsDefaultToolStripMenuItem.Click
-        SaveConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+
+    Private Sub SaveNewConfigToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveNewConfigToolStripMenuItem.Click, btnSaveConfig.Click
+
+        '    SaveFileDialog1.ShowDialog()
+        If lblTargetConfig.Text > "" Then
+            SaveConfigFile(lblTargetConfig.Text)
+            NeedsToBeSaved = False
+            lblMsg.Text = "Successfully saved Assignment Config File."
+        Else
+            lblMsg.Text = "Assignment Config File NOT saved. You need to specify a target filename on the first tab page."
+
+        End If
+
+    End Sub
+
+    Private Sub SaveAsDefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAsDefaultToolStripMenuItem.Click, btnSaveAsDefault.Click
+        SaveConfigFile(AppDataDir & "\templates\defaultConfig.cfg")
 
         lblMsg.Text = "Saved default Configuration File."
     End Sub
@@ -546,6 +561,7 @@ Public Class frmConfig
             s &= arow.Cells(5).Value.ToString & vbTab
             s &= arow.Cells(6).Value.ToString & vbTab
             s &= arow.Cells(7).Value.ToString & vbTab
+
             '           s &= arow.Cells(8).Value.ToString
             sw.WriteLine(s)
         Next
@@ -696,7 +712,7 @@ Public Class frmConfig
         lblMsg.Visible = True
     End Sub
 
-    Sub LoadConfigFile(fn As String)
+    Public Sub LoadConfigFile(fn As String)
         Dim s As String
         Dim ss() As String
         Dim sr As StreamReader
@@ -958,9 +974,9 @@ Public Class frmConfig
     Private Sub LoadDefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LoadDefaultToolStripMenuItem.Click
         ' loads in the default config file. It stuffs the app settings, and also the dgvs
 
-        lblAssessmentFile.Text = Application.StartupPath & "/templates/defaultConfig.cfg"
-        LoadCfgFile(Application.StartupPath & "/templates/defaultConfig.cfg")          ' this reads the config file and stuffs the data into the settings.
-        LoadConfigFile(Application.StartupPath & "/templates/defaultConfig.cfg")       ' this read in the title & language, and stuffs the dgvs.
+        lblAssessmentFile.Text = AppDataDir & "\templates\defaultConfig.cfg"
+        LoadCfgFile(AppDataDir & "\templates\defaultConfig.cfg")          ' this reads the config file and stuffs the data into the settings.
+        LoadConfigFile(AppDataDir & "\templates\defaultConfig.cfg")       ' this read in the title & language, and stuffs the dgvs.
 
         lblMsg.Text = "Default configuration file Loaded."
     End Sub
@@ -1104,7 +1120,7 @@ Public Class frmConfig
             End If
         End With
     End Sub
-
+   
     Private Sub btnToggle8_Click(sender As Object, e As EventArgs) Handles btnToggle8.Click
         Dim i As Integer
 
@@ -1291,9 +1307,31 @@ Public Class frmConfig
   
     Private Sub RestoreStandardSettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestoreStandardSettingsToolStripMenuItem.Click
         ' This loads the factory settings. There is no 
-        lblAssessmentFile.Text = Application.StartupPath & "/templates/FactoryConfig.cfg"
-        LoadCfgFile(Application.StartupPath & "/templates/FactoryConfig.cfg")
-        LoadConfigFile(Application.StartupPath & "/templates/FactoryConfig.cfg")
+        lblAssessmentFile.Text = AppDataDir & "\templates\FactoryConfig.cfg"
+        LoadCfgFile(AppDataDir & "\templates\FactoryConfig.cfg")
+        LoadConfigFile(AppDataDir & "\templates\FactoryConfig.cfg")
         lblMsg.Text = "Restored Original Configuration."
+    End Sub
+
+    Private Sub dgv_CellEndEdit(sender As Object, e As DataGridViewCellEventArgs) Handles dgvAppInfo.CellEndEdit, dgvCoding.CellEndEdit, dgvComments.CellEndEdit, dgvCompileOptions.CellEndEdit, dgvDataStructures.CellEndEdit, dgvDataTypes.CellEndEdit, dgvDevEnvironment.CellEndEdit, dgvFormDesign.CellEndEdit, dgvFormObj.CellEndEdit, dgvImports.CellEndEdit, dgvSubs.CellEndEdit
+
+        ' If there are any changes in any dgv, then mark the data indicating it needs to be saved
+        NeedsToBeSaved = True
+
+        btnSaveAsDefault.Visible = True
+        btnSaveConfig.Visible = True
+
+    End Sub
+
+    Private Sub btnSelectConfigLoc_Click(sender As Object, e As EventArgs) Handles btnSelectConfigLoc.Click
+        SaveFileDialog1.ShowDialog()
+
+        If SaveFileDialog1.FileName <> "" Then
+            If SaveFileDialog1.FileName.ToLower.Contains(".cfg") Then
+                lblTargetConfig.Text = SaveFileDialog1.FileName
+            Else
+                MessageBox.Show("The specified filename needs to have a .cfg extension. Please specify an appropriate filename.", "Improper Filename")
+            End If
+        End If
     End Sub
 End Class
