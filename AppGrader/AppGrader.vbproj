@@ -233,6 +233,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="cantfind.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="faviconPro.ico" />
     <None Include="app.config" />
     <None Include="AppGrader_TemporaryKey.pfx" />
