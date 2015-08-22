@@ -71,9 +71,9 @@ Public Class frmMain
         AppDataDir = Application.StartupPath
 
         ' the following was added to account for the difference in IDE and Published handling of data files
-        If Not AppDataDir.ToLower.Contains("\bin\debug") Then
-            AppDataDir &= "\bin\Debug"
-        End If
+        'If Not AppDataDir.ToLower.Contains("\bin\debug") Then
+        '    AppDataDir &= "\bin\Debug"
+        'End If
 
         btnViewPlagiarism.Visible = False
         btnOutput.Visible = False
@@ -82,19 +82,19 @@ Public Class frmMain
 
         rbnCheckGray.Checked = True
 
-        If File.Exists(AppDataDir & "\demodir.txt") Then
-            Dim sr As StreamReader = File.OpenText(AppDataDir & "\demodir.txt")
+        If File.Exists(Application.StartupPath & "\demodir.txt") Then
+            Dim sr As StreamReader = File.OpenText(Application.StartupPath & "\demodir.txt")
             lblDemoDir.Text = sr.ReadLine
             sr.Close()
         End If
 
 
         ' ----------------------------------------------------------------------
-        File.Delete(AppDataDir & "\CantFind.txt")
+        File.Delete(Application.StartupPath & "\CantFind.txt")
 
-        Settings.LoadCfgFile(AppDataDir & "\templates\defaultConfig.cfg") ' this only seems to read the settings and same them to a settings.txt file.
+        Settings.LoadCfgFile(Application.StartupPath & "\templates\defaultConfig.cfg") ' this only seems to read the settings and same them to a settings.txt file.
 
-        If File.Exists(AppDataDir & "\MissingSetting.txt") Then File.Delete(AppDataDir & "\MissingSetting.txt")
+        If File.Exists(Application.StartupPath & "\MissingSetting.txt") Then File.Delete(Application.StartupPath & "\MissingSetting.txt")
 
         LoadConfig()
 
@@ -753,7 +753,7 @@ Public Class frmMain
 
                     strStudentReport = strStudentReport.Replace("[SCORE]", AssScore.ToString("n1") & " deduction out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1"))
 
-                    sr = File.OpenText((AppDataDir & "\templates\rptStudentFooter.html"))
+                    sr = File.OpenText((Application.StartupPath & "\templates\rptStudentFooter.html"))
                     strStudentReport &= sr.ReadToEnd
                     sr.Close()
 
@@ -1053,9 +1053,9 @@ Public Class frmMain
         '  Dim msgflag As Boolean = False
 
         ' Check to see if the Config file exists. If not bypass the remainder of the the load process.
-        If File.Exists(AppDataDir & "\templates\defaultConfig.cfg") Then
+        If File.Exists(Application.StartupPath & "\templates\defaultConfig.cfg") Then
 
-            frmConfig.LoadConfigFile(AppDataDir & "\templates\defaultConfig.cfg")
+            frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
             lblConfigFile.Text = "Default Config"
         End If
     End Sub
@@ -1166,7 +1166,7 @@ Public Class frmMain
 
         Dim sw As StreamWriter
 
-        sw = File.AppendText(AppDataDir & "\TimeStudy.txt")
+        sw = File.AppendText(Application.StartupPath & "\TimeStudy.txt")
         sw.WriteLine("Today" & vbTab & Now.ToString)
         sw.WriteLine("Student Files" & vbTab & nstudentfiles.ToString("n1"))
         sw.WriteLine("Instructor Apps" & vbTab & ninstructorapps.ToString("n1"))
@@ -1292,7 +1292,7 @@ Public Class frmMain
             ' ---------------------------------------------------------------------------------------------------
             fname = strOutputPath & "\" & "MD5Data-" & AssignmentName.Trim & ".html"
             sw = File.CreateText(fname)
-            Dim sr1 As StreamReader = File.OpenText(AppDataDir & "\templates\MD5template.html")
+            Dim sr1 As StreamReader = File.OpenText(Application.StartupPath & "\templates\MD5template.html")
 
             GUIDHeader = sr1.ReadToEnd
             sr1.Close()
@@ -1474,7 +1474,7 @@ Public Class frmMain
         Dim ss() As String
 
         Dim newComment As New ErrComments
-        Dim sr As New StreamReader(AppDataDir & "\templates\feedback.txt")
+        Dim sr As New StreamReader(Application.StartupPath & "\templates\feedback.txt")
 
         Do While sr.Peek > -1
 

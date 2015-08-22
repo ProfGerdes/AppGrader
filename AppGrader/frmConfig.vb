@@ -300,7 +300,7 @@ Public Class frmConfig
 
     Private Sub btnSetAsDefault_Click(sender As Object, e As EventArgs)
 
-        Dim sw As New StreamWriter(AppDataDir & "\templates\defaultConfig.cfg")
+        Dim sw As New StreamWriter(Application.StartupPath & "\templates\defaultConfig.cfg")
         Dim s As String
 
         sw.WriteLine("AppGrader Assignment Configuration File")  ' this first line is requried. It is used to identify it as a Config File
@@ -476,8 +476,8 @@ Public Class frmConfig
 
         OpenFileDialog1.Filter = "Config|*.cfg|All Files|*.*;"
         If OpenFileDialog1.FileName <> Nothing Then
-            File.Delete(AppDataDir & "\CantFind.txt")
-            If File.Exists(AppDataDir & "\MissingSetting.txt") Then File.Delete(AppDataDir & "\MissingSetting.txt")
+            File.Delete(Application.StartupPath & "\CantFind.txt")
+            If File.Exists(Application.StartupPath & "\MissingSetting.txt") Then File.Delete(Application.StartupPath & "\MissingSetting.txt")
 
             LoadConfigFile(OpenFileDialog1.FileName)
             Settings.LoadCfgFile(OpenFileDialog1.FileName)
@@ -521,7 +521,7 @@ Public Class frmConfig
     End Sub
 
     Private Sub SaveAsDefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAsDefaultToolStripMenuItem.Click, btnSaveAsDefault.Click
-        SaveConfigFile(AppDataDir & "\templates\defaultConfig.cfg")
+        SaveConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
 
         lblMsg.Text = "Saved default Configuration File."
     End Sub
@@ -976,9 +976,9 @@ Public Class frmConfig
     Private Sub LoadDefaultToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LoadDefaultToolStripMenuItem.Click
         ' loads in the default config file. It stuffs the app settings, and also the dgvs
 
-        lblAssessmentFile.Text = AppDataDir & "\templates\defaultConfig.cfg"
-        LoadCfgFile(AppDataDir & "\templates\defaultConfig.cfg")          ' this reads the config file and stuffs the data into the settings.
-        LoadConfigFile(AppDataDir & "\templates\defaultConfig.cfg")       ' this read in the title & language, and stuffs the dgvs.
+        lblAssessmentFile.Text = Application.StartupPath & "\templates\defaultConfig.cfg"
+        LoadCfgFile(Application.StartupPath & "\templates\defaultConfig.cfg")          ' this reads the config file and stuffs the data into the settings.
+        LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")       ' this read in the title & language, and stuffs the dgvs.
 
         lblMsg.Text = "Default configuration file Loaded."
     End Sub
@@ -1312,9 +1312,9 @@ Public Class frmConfig
   
     Private Sub RestoreStandardSettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RestoreStandardSettingsToolStripMenuItem.Click
         ' This loads the factory settings. There is no 
-        lblAssessmentFile.Text = AppDataDir & "\templates\FactoryConfig.cfg"
-        LoadCfgFile(AppDataDir & "\templates\FactoryConfig.cfg")
-        LoadConfigFile(AppDataDir & "\templates\FactoryConfig.cfg")
+        lblAssessmentFile.Text = Application.StartupPath & "\templates\FactoryConfig.cfg"
+        LoadCfgFile(Application.StartupPath & "\templates\FactoryConfig.cfg")
+        LoadConfigFile(Application.StartupPath & "\templates\FactoryConfig.cfg")
         lblMsg.Text = "Restored Factory Configuration."
     End Sub
 

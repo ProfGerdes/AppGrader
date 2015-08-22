@@ -15,7 +15,7 @@ Module ValidateVB
         Dim s As String = ""
 
         Try
-            Dim sr1 As New StreamReader(AppDataDir & "\templates\rptStudentHeader.html")
+            Dim sr1 As New StreamReader(Application.StartupPath & "\templates\rptStudentHeader.html")
 
             s = sr1.ReadToEnd
             sr1.Close()
@@ -33,7 +33,7 @@ Module ValidateVB
 
         ' -----------------------------------------------------------------------------
         ' Determine the date of the last compile
-        Dim di As New IO.DirectoryInfo(AppDataDir)
+        Dim di As New IO.DirectoryInfo(Application.StartupPath)
         Dim diar1 As IO.FileInfo() = di.GetFiles("*.exe")
         Dim dra As IO.FileInfo
 
@@ -59,7 +59,7 @@ Module ValidateVB
         Dim s As String = ""
         Dim sr As StreamReader
         Try
-            sr = File.OpenText(AppDataDir & "\templates\rptFacHeader.html")
+            sr = File.OpenText(Application.StartupPath & "\templates\rptFacHeader.html")
             s = sr.ReadToEnd
             sr.Close()
 
@@ -91,7 +91,7 @@ Module ValidateVB
         src = src.Replace("[CONFIGFILE]", frmMain.lblConfigFile.Text)
 
 
-        sr = File.OpenText(AppDataDir & "\templates\rptFacFooter.html")
+        sr = File.OpenText(Application.StartupPath & "\templates\rptFacFooter.html")
         src &= sr.ReadToEnd
         sr.Close()
 
@@ -1842,7 +1842,7 @@ Module ValidateVB
 
         Dim sw As StreamWriter
 
-        sw = File.CreateText(AppDataDir & "\integratedpts.txt")
+        sw = File.CreateText(Application.StartupPath & "\integratedpts.txt")
 
         For i = 0 To SSummary.GetUpperBound(0)
             setting = Find_Setting(EnSummaryName(i), "FindIntegratedScore")
@@ -1949,7 +1949,7 @@ Module ValidateVB
             If Setting.Name Is Nothing Then
                 ' debug
                 Dim sw As StreamWriter
-                sw = File.AppendText(AppDataDir & "\MissingSetting.txt")
+                sw = File.AppendText(Application.StartupPath & "\MissingSetting.txt")
                 sw.WriteLine(Title & vbTab & Item)
                 sw.Close()
                 feedback = ""
