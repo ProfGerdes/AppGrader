@@ -128,6 +128,7 @@ Partial Class frmProgressBar
         Me.Name = "frmProgressBar"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Analyzing Application"
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()

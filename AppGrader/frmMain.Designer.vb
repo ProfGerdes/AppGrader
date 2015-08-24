@@ -85,6 +85,8 @@ Partial Class frmMain
         Me.lblConfigFile = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.rbnDefaultCFG = New System.Windows.Forms.RadioButton()
+        Me.rbnAppCFG = New System.Windows.Forms.RadioButton()
         Me.MenuStrip1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -105,7 +107,7 @@ Partial Class frmMain
         Me.btnProcessApps.BackColor = System.Drawing.SystemColors.InactiveCaption
         Me.btnProcessApps.Enabled = False
         Me.btnProcessApps.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnProcessApps.Location = New System.Drawing.Point(527, 636)
+        Me.btnProcessApps.Location = New System.Drawing.Point(524, 683)
         Me.btnProcessApps.Margin = New System.Windows.Forms.Padding(2)
         Me.btnProcessApps.Name = "btnProcessApps"
         Me.btnProcessApps.Size = New System.Drawing.Size(128, 33)
@@ -117,7 +119,7 @@ Partial Class frmMain
         '
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.Location = New System.Drawing.Point(26, 644)
+        Me.Label1.Location = New System.Drawing.Point(23, 691)
         Me.Label1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(175, 17)
@@ -129,7 +131,7 @@ Partial Class frmMain
         '
         Me.lblNZips.AutoSize = True
         Me.lblNZips.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblNZips.Location = New System.Drawing.Point(162, 644)
+        Me.lblNZips.Location = New System.Drawing.Point(159, 691)
         Me.lblNZips.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblNZips.Name = "lblNZips"
         Me.lblNZips.Size = New System.Drawing.Size(59, 17)
@@ -374,7 +376,7 @@ Partial Class frmMain
         Me.Panel1.Controls.Add(Me.Button1)
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Panel1.Location = New System.Drawing.Point(0, 679)
+        Me.Panel1.Location = New System.Drawing.Point(0, 723)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(678, 80)
         Me.Panel1.TabIndex = 44
@@ -382,7 +384,7 @@ Partial Class frmMain
         'btnDetail
         '
         Me.btnDetail.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnDetail.Location = New System.Drawing.Point(309, 42)
+        Me.btnDetail.Location = New System.Drawing.Point(309, 43)
         Me.btnDetail.Name = "btnDetail"
         Me.btnDetail.Size = New System.Drawing.Size(129, 32)
         Me.btnDetail.TabIndex = 41
@@ -392,7 +394,7 @@ Partial Class frmMain
         'btnAssignSummary
         '
         Me.btnAssignSummary.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnAssignSummary.Location = New System.Drawing.Point(149, 42)
+        Me.btnAssignSummary.Location = New System.Drawing.Point(149, 43)
         Me.btnAssignSummary.Name = "btnAssignSummary"
         Me.btnAssignSummary.Size = New System.Drawing.Size(154, 33)
         Me.btnAssignSummary.TabIndex = 40
@@ -401,7 +403,7 @@ Partial Class frmMain
         '
         'btnExit
         '
-        Me.btnExit.Location = New System.Drawing.Point(595, 45)
+        Me.btnExit.Location = New System.Drawing.Point(595, 46)
         Me.btnExit.Name = "btnExit"
         Me.btnExit.Size = New System.Drawing.Size(71, 26)
         Me.btnExit.TabIndex = 39
@@ -411,7 +413,7 @@ Partial Class frmMain
         'btnViewPlagiarism
         '
         Me.btnViewPlagiarism.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnViewPlagiarism.Location = New System.Drawing.Point(444, 42)
+        Me.btnViewPlagiarism.Location = New System.Drawing.Point(444, 43)
         Me.btnViewPlagiarism.Name = "btnViewPlagiarism"
         Me.btnViewPlagiarism.Size = New System.Drawing.Size(145, 33)
         Me.btnViewPlagiarism.TabIndex = 23
@@ -611,9 +613,9 @@ Partial Class frmMain
         Me.GroupBox2.Controls.Add(Me.lblTarget)
         Me.GroupBox2.Controls.Add(Me.cbxLoadWordTemplate)
         Me.GroupBox2.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox2.Location = New System.Drawing.Point(9, 444)
+        Me.GroupBox2.Location = New System.Drawing.Point(9, 491)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(660, 187)
+        Me.GroupBox2.Size = New System.Drawing.Size(657, 187)
         Me.GroupBox2.TabIndex = 49
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Assignment Detail"
@@ -621,7 +623,7 @@ Partial Class frmMain
         'btnLoadAssessmentConfig
         '
         Me.btnLoadAssessmentConfig.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnLoadAssessmentConfig.Location = New System.Drawing.Point(570, 28)
+        Me.btnLoadAssessmentConfig.Location = New System.Drawing.Point(480, 36)
         Me.btnLoadAssessmentConfig.Name = "btnLoadAssessmentConfig"
         Me.btnLoadAssessmentConfig.Size = New System.Drawing.Size(71, 26)
         Me.btnLoadAssessmentConfig.TabIndex = 56
@@ -633,19 +635,18 @@ Partial Class frmMain
         Me.lblConfigFile.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.lblConfigFile.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblConfigFile.ForeColor = System.Drawing.Color.Navy
-        Me.lblConfigFile.Location = New System.Drawing.Point(140, 32)
+        Me.lblConfigFile.Location = New System.Drawing.Point(137, 72)
         Me.lblConfigFile.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblConfigFile.Name = "lblConfigFile"
         Me.lblConfigFile.Size = New System.Drawing.Size(414, 21)
         Me.lblConfigFile.TabIndex = 55
-        Me.lblConfigFile.Text = "Default Config"
         Me.lblConfigFile.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'Label7
         '
         Me.Label7.AutoSize = True
         Me.Label7.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label7.Location = New System.Drawing.Point(22, 33)
+        Me.Label7.Location = New System.Drawing.Point(19, 73)
         Me.Label7.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(94, 16)
@@ -654,16 +655,40 @@ Partial Class frmMain
         '
         'GroupBox4
         '
+        Me.GroupBox4.Controls.Add(Me.rbnAppCFG)
+        Me.GroupBox4.Controls.Add(Me.rbnDefaultCFG)
         Me.GroupBox4.Controls.Add(Me.btnLoadAssessmentConfig)
         Me.GroupBox4.Controls.Add(Me.lblConfigFile)
         Me.GroupBox4.Controls.Add(Me.Label7)
         Me.GroupBox4.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox4.Location = New System.Drawing.Point(9, 374)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(657, 64)
+        Me.GroupBox4.Size = New System.Drawing.Size(657, 111)
         Me.GroupBox4.TabIndex = 57
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Assessment Config File"
+        '
+        'rbnDefaultCFG
+        '
+        Me.rbnDefaultCFG.AutoSize = True
+        Me.rbnDefaultCFG.Location = New System.Drawing.Point(35, 21)
+        Me.rbnDefaultCFG.Name = "rbnDefaultCFG"
+        Me.rbnDefaultCFG.Size = New System.Drawing.Size(177, 20)
+        Me.rbnDefaultCFG.TabIndex = 58
+        Me.rbnDefaultCFG.TabStop = True
+        Me.rbnDefaultCFG.Text = "Use Default Configuration"
+        Me.rbnDefaultCFG.UseVisualStyleBackColor = True
+        '
+        'rbnAppCFG
+        '
+        Me.rbnAppCFG.AutoSize = True
+        Me.rbnAppCFG.Location = New System.Drawing.Point(36, 42)
+        Me.rbnAppCFG.Name = "rbnAppCFG"
+        Me.rbnAppCFG.Size = New System.Drawing.Size(358, 20)
+        Me.rbnAppCFG.TabIndex = 59
+        Me.rbnAppCFG.TabStop = True
+        Me.rbnAppCFG.Text = "Use Application Specific Configuration (Recommended)"
+        Me.rbnAppCFG.UseVisualStyleBackColor = True
         '
         'frmMain
         '
@@ -671,7 +696,7 @@ Partial Class frmMain
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.GradientActiveCaption
-        Me.ClientSize = New System.Drawing.Size(678, 759)
+        Me.ClientSize = New System.Drawing.Size(678, 803)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.btnSelectFile2)
         Me.Controls.Add(Me.GroupBox2)
@@ -768,5 +793,7 @@ Partial Class frmMain
     Friend WithEvents lblConfigFile As System.Windows.Forms.Label
     Friend WithEvents Label7 As System.Windows.Forms.Label
     Friend WithEvents GroupBox4 As System.Windows.Forms.GroupBox
+    Friend WithEvents rbnAppCFG As System.Windows.Forms.RadioButton
+    Friend WithEvents rbnDefaultCFG As System.Windows.Forms.RadioButton
 
 End Class

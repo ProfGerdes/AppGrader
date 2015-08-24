@@ -124,20 +124,20 @@ Public Class frmMain
             Panel2.Location = New Point(21, 23)
             GroupBox1.Height = 170
 
-            GroupBox2.Location = New Point(9, 160)
+            GroupBox2.Location = New Point(9, 200)
             GroupBox2.Height = 140
             lblConfigFile.BackColor = Color.White
             ' lblConfigFile.ForeColor = Color.LightPink
             GroupBox4.Location = New Point(9, 80)
 
             Panel3.Visible = False
-            btnProcessApps.Location = New Point(524, 315)
+            btnProcessApps.Location = New Point(524, 355)
 
             Label3.Visible = False
             lblSelectedTemplate.Visible = False
             btnBrowseTemplate.Visible = False
 
-            Me.Height = 470
+            Me.Height = 510
         End If
 
     End Sub
@@ -192,6 +192,20 @@ Public Class frmMain
             MessageBox.Show("The Assignment name is requried. Please insert appropriate text.", "Missing Assignment Name", MessageBoxButtons.OK, MessageBoxIcon.Error)
             txtAssignmentName.Focus()
             Exit Sub
+        End If
+
+        ' Ensure that the user entered an assignment name.
+        If lblConfigFile.Text.Trim.Length = 0 Then
+            MessageBox.Show("You need to select a Config file. It is recomended to use one that is specific to the assignment. If one is not available, use the default configuration.", "Configuration File Required", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Exit Sub
+        Else
+            If rbnAppCFG.Checked Then
+                LoadCfgFile(lblConfigFile.Text)
+                frmConfig.LoadConfigFile(lblConfigFile.Text)
+            Else
+                LoadCfgFile(Application.StartupPath & "\templates\FactoryConfig.cfg")
+                frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+            End If
         End If
 
         lblMessage.Text = ""
@@ -1055,8 +1069,8 @@ Public Class frmMain
         ' Check to see if the Config file exists. If not bypass the remainder of the the load process.
         If File.Exists(Application.StartupPath & "\templates\defaultConfig.cfg") Then
 
-            frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
-            lblConfigFile.Text = "Default Config"
+            '           frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+            '            lblConfigFile.Text = "Default Config"
         End If
     End Sub
 
@@ -1585,5 +1599,16 @@ Public Class frmMain
             frmConfig.LoadConfigFile(filename)
         End If
 
+    End Sub
+
+    Private Sub rbnDefaultCFG_CheckedChanged(sender As Object, e As EventArgs) Handles rbnDefaultCFG.CheckedChanged
+        If rbnDefaultCFG.Checked Then
+            lblConfigFile.Text = "Default Configuration"
+        End If
+
+    End Sub
+
+    Private Sub rbnAppCFG_CheckedChanged(sender As Object, e As EventArgs) Handles rbnAppCFG.CheckedChanged
+        If rbnAppCFG.Checked Then lblConfigFile.Text = ""
     End Sub
 End Class
