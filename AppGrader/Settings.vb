@@ -26,14 +26,15 @@ Module Settings
 
         ' This reads the config file into the ns array, but where does it save the settings?????   jhg
         Try
-            '    Settings.Clear()                            ' delete existing settings
+            Settings.Clear()                            ' delete existing settings
+
             sr = File.OpenText(fn)
             s = sr.ReadLine
             If s <> "AppGrader Assignment Configuration File" Then
                 MessageBox.Show("The selected file (" & fn & ") is not a valid configuration file for this application. Either load a different file, or use the default settings.")
             Else
                 sw = File.CreateText(Application.StartupPath & "\Settings.txt")
-                sw.WriteLine("DVG" & vbTab & "Name" & vbTab & "Show Var" & vbTab & "Req" & vbTab & "Feedback")
+                sw.WriteLine("DVG" & vbTab & "Name" & vbTab & "Text" & vbTab & "Req" & vbTab & "Show Var" & vbTab & "Pts Per Error" & vbTab & "Maxpts" & vbTab & "Feedback")
 
                 Do While sr.Peek <> -1
                     s = sr.ReadLine
@@ -75,7 +76,7 @@ Module Settings
                         ns.MaxPts = CDec(ss(7))
                         ns.Feedback = ss(8)
                     End If
-                    sw.WriteLine(ns.DVG & vbTab & ns.Name & vbTab & ns.ShowVar & vbTab & ns.Req & vbTab & ns.PtsPerError & vbTab & ns.MaxPts & vbTab & ns.Feedback)
+                    sw.WriteLine(ns.DVG & vbTab & ns.Name & vbTab & ns.Req & vbTab & ns.ShowVar & vbTab & ns.PtsPerError & vbTab & ns.MaxPts & vbTab & ns.Feedback)
                     Settings.Add(ns)
                 Loop
                 sw.Close()

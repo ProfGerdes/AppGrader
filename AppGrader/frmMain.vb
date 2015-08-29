@@ -92,7 +92,7 @@ Public Class frmMain
         ' ----------------------------------------------------------------------
         File.Delete(Application.StartupPath & "\CantFind.txt")
 
-        Settings.LoadCfgFile(Application.StartupPath & "\templates\defaultConfig.cfg") ' this only seems to read the settings and same them to a settings.txt file.
+        '      Settings.LoadCfgFile(Application.StartupPath & "\templates\defaultConfig.cfg") ' this only seems to read the settings and same them to a settings.txt file.
 
         If File.Exists(Application.StartupPath & "\MissingSetting.txt") Then File.Delete(Application.StartupPath & "\MissingSetting.txt")
 
@@ -201,10 +201,10 @@ Public Class frmMain
         Else
             If rbnAppCFG.Checked Then
                 LoadCfgFile(lblConfigFile.Text)
-                frmConfig.LoadConfigFile(lblConfigFile.Text)
+                frmConfig.LoadConfigFile(lblConfigFile.Text)  ' ############### JHG -  not clear why I have to do this twice. It loads two separate copies of settings.
             Else
                 LoadCfgFile(Application.StartupPath & "\templates\FactoryConfig.cfg")
-                frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")
+                frmConfig.LoadConfigFile(Application.StartupPath & "\templates\defaultConfig.cfg")    ' ############### JHG -  not clear why I have to do this twice. It loads two separate copies of settings.
             End If
         End If
 
@@ -1419,6 +1419,7 @@ Public Class frmMain
         btnViewPlagiarism.Visible = False
         btnOutput.Visible = False
         btnAssignSummary.Visible = False
+        btnDetail.Visible = False
 
         'rbnBlackboardZip.Enabled = False
         'rbnSingleProject.Enabled = False
@@ -1596,7 +1597,8 @@ Public Class frmMain
 
         If filename.ToLower.Contains(".cfg") Then
             lblConfigFile.Text = filename
-            frmConfig.LoadConfigFile(filename)
+            '            frmConfig.LoadConfigFile(filename)
+            rbnAppCFG.Checked = True
         End If
 
     End Sub
@@ -1609,6 +1611,6 @@ Public Class frmMain
     End Sub
 
     Private Sub rbnAppCFG_CheckedChanged(sender As Object, e As EventArgs) Handles rbnAppCFG.CheckedChanged
-        If rbnAppCFG.Checked Then lblConfigFile.Text = ""
+        If rbnAppCFG.Checked And lblConfigFile.Text = "Default Configuration" Then lblConfigFile.Text = ""
     End Sub
 End Class

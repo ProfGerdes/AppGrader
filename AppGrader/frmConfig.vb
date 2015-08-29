@@ -472,9 +472,9 @@ Public Class frmConfig
 
     Private Sub btnLoadAssessmentFile_Click(sender As Object, e As EventArgs) Handles btnLoadAssessmentFile.Click
 
+        OpenFileDialog1.Filter = "Config|*.cfg|All Files|*.*;"
         OpenFileDialog1.ShowDialog()
 
-        OpenFileDialog1.Filter = "Config|*.cfg|All Files|*.*;"
         If OpenFileDialog1.FileName <> Nothing Then
             File.Delete(Application.StartupPath & "\CantFind.txt")
             If File.Exists(Application.StartupPath & "\MissingSetting.txt") Then File.Delete(Application.StartupPath & "\MissingSetting.txt")
@@ -494,7 +494,7 @@ Public Class frmConfig
         Dim UserResp As Integer
 
         If NeedsToBeSaved Then
-            UserResp = MessageBox.Show("Your changes have not been saved. Do you want to exit without saving?", "Configuration not Saved", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
+            UserResp = MessageBox.Show("Your changes have not been saved. Do you want to exit without saving?" & vbCrLf & vbCrLf & "To save your settings, click the Select Button on the first tab to specify the target filename for the config file.", "Configuration not Saved", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
         End If
 
         If Not NeedsToBeSaved Or UserResp = vbYes Then
@@ -949,14 +949,14 @@ Public Class frmConfig
             ns.Text = ss(2)
 
             If ss(4) = "" Then
-                ns.ShowVar = False
-            Else
-                ns.ShowVar = CBool(ss(4))
-            End If
-            If ss(5) = "" Then
                 ns.Req = False
             Else
-                ns.Req = CBool(ss(5))
+                ns.Req = CBool(ss(4))
+            End If
+            If ss(5) = "" Then
+                ns.ShowVar = False
+            Else
+                ns.ShowVar = CBool(ss(5))
             End If
 
 
