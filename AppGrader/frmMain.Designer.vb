@@ -85,8 +85,8 @@ Partial Class frmMain
         Me.lblConfigFile = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
-        Me.rbnDefaultCFG = New System.Windows.Forms.RadioButton()
         Me.rbnAppCFG = New System.Windows.Forms.RadioButton()
+        Me.rbnDefaultCFG = New System.Windows.Forms.RadioButton()
         Me.MenuStrip1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -559,10 +559,12 @@ Partial Class frmMain
         'rbnShowOnlyReq
         '
         Me.rbnShowOnlyReq.AutoSize = True
+        Me.rbnShowOnlyReq.Checked = True
         Me.rbnShowOnlyReq.Location = New System.Drawing.Point(7, 3)
         Me.rbnShowOnlyReq.Name = "rbnShowOnlyReq"
         Me.rbnShowOnlyReq.Size = New System.Drawing.Size(205, 21)
         Me.rbnShowOnlyReq.TabIndex = 51
+        Me.rbnShowOnlyReq.TabStop = True
         Me.rbnShowOnlyReq.Text = "Show Only Required Checks"
         Me.rbnShowOnlyReq.UseVisualStyleBackColor = True
         '
@@ -668,17 +670,6 @@ Partial Class frmMain
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Assessment Config File"
         '
-        'rbnDefaultCFG
-        '
-        Me.rbnDefaultCFG.AutoSize = True
-        Me.rbnDefaultCFG.Location = New System.Drawing.Point(35, 21)
-        Me.rbnDefaultCFG.Name = "rbnDefaultCFG"
-        Me.rbnDefaultCFG.Size = New System.Drawing.Size(177, 20)
-        Me.rbnDefaultCFG.TabIndex = 58
-        Me.rbnDefaultCFG.TabStop = True
-        Me.rbnDefaultCFG.Text = "Use Default Configuration"
-        Me.rbnDefaultCFG.UseVisualStyleBackColor = True
-        '
         'rbnAppCFG
         '
         Me.rbnAppCFG.AutoSize = True
@@ -689,6 +680,17 @@ Partial Class frmMain
         Me.rbnAppCFG.TabStop = True
         Me.rbnAppCFG.Text = "Use Application Specific Configuration (Recommended)"
         Me.rbnAppCFG.UseVisualStyleBackColor = True
+        '
+        'rbnDefaultCFG
+        '
+        Me.rbnDefaultCFG.AutoSize = True
+        Me.rbnDefaultCFG.Location = New System.Drawing.Point(35, 21)
+        Me.rbnDefaultCFG.Name = "rbnDefaultCFG"
+        Me.rbnDefaultCFG.Size = New System.Drawing.Size(177, 20)
+        Me.rbnDefaultCFG.TabIndex = 58
+        Me.rbnDefaultCFG.TabStop = True
+        Me.rbnDefaultCFG.Text = "Use Default Configuration"
+        Me.rbnDefaultCFG.UseVisualStyleBackColor = True
         '
         'frmMain
         '
