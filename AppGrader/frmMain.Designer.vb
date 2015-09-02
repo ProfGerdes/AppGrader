@@ -73,6 +73,7 @@ Partial Class frmMain
         Me.lblDemoDir = New System.Windows.Forms.Label()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Panel3 = New System.Windows.Forms.Panel()
+        Me.rbnMoodle = New System.Windows.Forms.RadioButton()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.rbnShowOnlyReq = New System.Windows.Forms.RadioButton()
         Me.rbnShowAll = New System.Windows.Forms.RadioButton()
@@ -107,7 +108,7 @@ Partial Class frmMain
         Me.btnProcessApps.BackColor = System.Drawing.SystemColors.InactiveCaption
         Me.btnProcessApps.Enabled = False
         Me.btnProcessApps.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnProcessApps.Location = New System.Drawing.Point(524, 683)
+        Me.btnProcessApps.Location = New System.Drawing.Point(519, 724)
         Me.btnProcessApps.Margin = New System.Windows.Forms.Padding(2)
         Me.btnProcessApps.Name = "btnProcessApps"
         Me.btnProcessApps.Size = New System.Drawing.Size(128, 33)
@@ -119,7 +120,7 @@ Partial Class frmMain
         '
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.Location = New System.Drawing.Point(23, 691)
+        Me.Label1.Location = New System.Drawing.Point(18, 732)
         Me.Label1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(175, 17)
@@ -131,7 +132,7 @@ Partial Class frmMain
         '
         Me.lblNZips.AutoSize = True
         Me.lblNZips.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblNZips.Location = New System.Drawing.Point(159, 691)
+        Me.lblNZips.Location = New System.Drawing.Point(154, 732)
         Me.lblNZips.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblNZips.Name = "lblNZips"
         Me.lblNZips.Size = New System.Drawing.Size(59, 17)
@@ -256,7 +257,7 @@ Partial Class frmMain
         'btnSelectFile
         '
         Me.btnSelectFile.BackColor = System.Drawing.SystemColors.InactiveCaption
-        Me.btnSelectFile.Location = New System.Drawing.Point(515, 282)
+        Me.btnSelectFile.Location = New System.Drawing.Point(515, 322)
         Me.btnSelectFile.Margin = New System.Windows.Forms.Padding(2)
         Me.btnSelectFile.Name = "btnSelectFile"
         Me.btnSelectFile.Size = New System.Drawing.Size(128, 29)
@@ -376,7 +377,7 @@ Partial Class frmMain
         Me.Panel1.Controls.Add(Me.Button1)
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.Panel1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Panel1.Location = New System.Drawing.Point(0, 723)
+        Me.Panel1.Location = New System.Drawing.Point(0, 762)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(678, 80)
         Me.Panel1.TabIndex = 44
@@ -434,7 +435,7 @@ Partial Class frmMain
         'cbxJustUnzip
         '
         Me.cbxJustUnzip.AutoSize = True
-        Me.cbxJustUnzip.Location = New System.Drawing.Point(25, 287)
+        Me.cbxJustUnzip.Location = New System.Drawing.Point(25, 327)
         Me.cbxJustUnzip.Margin = New System.Windows.Forms.Padding(2)
         Me.cbxJustUnzip.Name = "cbxJustUnzip"
         Me.cbxJustUnzip.Size = New System.Drawing.Size(334, 21)
@@ -459,9 +460,9 @@ Partial Class frmMain
         Me.rbnBlackboardZip.AutoSize = True
         Me.rbnBlackboardZip.Location = New System.Drawing.Point(7, 21)
         Me.rbnBlackboardZip.Name = "rbnBlackboardZip"
-        Me.rbnBlackboardZip.Size = New System.Drawing.Size(147, 21)
+        Me.rbnBlackboardZip.Size = New System.Drawing.Size(380, 21)
         Me.rbnBlackboardZip.TabIndex = 47
-        Me.rbnBlackboardZip.Text = "Blackboard Zip File"
+        Me.rbnBlackboardZip.Text = "Single Zip File Containing Multiple Zip Files (Blackboard)"
         Me.rbnBlackboardZip.UseVisualStyleBackColor = True
         '
         'GroupBox1
@@ -475,7 +476,7 @@ Partial Class frmMain
         Me.GroupBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox1.Location = New System.Drawing.Point(9, 41)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(657, 327)
+        Me.GroupBox1.Size = New System.Drawing.Size(657, 368)
         Me.GroupBox1.TabIndex = 48
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Select Applications to Process"
@@ -538,12 +539,24 @@ Partial Class frmMain
         'Panel3
         '
         Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.Panel3.Controls.Add(Me.rbnMoodle)
         Me.Panel3.Controls.Add(Me.rbnBlackboardZip)
         Me.Panel3.Controls.Add(Me.rbnSingleProject)
-        Me.Panel3.Location = New System.Drawing.Point(26, 133)
+        Me.Panel3.Location = New System.Drawing.Point(21, 135)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(374, 47)
+        Me.Panel3.Size = New System.Drawing.Size(447, 69)
         Me.Panel3.TabIndex = 52
+        '
+        'rbnMoodle
+        '
+        Me.rbnMoodle.AutoSize = True
+        Me.rbnMoodle.Location = New System.Drawing.Point(7, 39)
+        Me.rbnMoodle.Name = "rbnMoodle"
+        Me.rbnMoodle.Size = New System.Drawing.Size(263, 21)
+        Me.rbnMoodle.TabIndex = 48
+        Me.rbnMoodle.TabStop = True
+        Me.rbnMoodle.Text = "Folder with Multiple Zip Files (Moodle)"
+        Me.rbnMoodle.UseVisualStyleBackColor = True
         '
         'Panel2
         '
@@ -551,9 +564,9 @@ Partial Class frmMain
         Me.Panel2.Controls.Add(Me.rbnShowOnlyReq)
         Me.Panel2.Controls.Add(Me.rbnShowAll)
         Me.Panel2.Controls.Add(Me.rbnCheckGray)
-        Me.Panel2.Location = New System.Drawing.Point(25, 197)
+        Me.Panel2.Location = New System.Drawing.Point(21, 237)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(375, 72)
+        Me.Panel2.Size = New System.Drawing.Size(447, 72)
         Me.Panel2.TabIndex = 51
         '
         'rbnShowOnlyReq
@@ -615,7 +628,7 @@ Partial Class frmMain
         Me.GroupBox2.Controls.Add(Me.lblTarget)
         Me.GroupBox2.Controls.Add(Me.cbxLoadWordTemplate)
         Me.GroupBox2.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox2.Location = New System.Drawing.Point(9, 491)
+        Me.GroupBox2.Location = New System.Drawing.Point(9, 532)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(657, 187)
         Me.GroupBox2.TabIndex = 49
@@ -663,7 +676,7 @@ Partial Class frmMain
         Me.GroupBox4.Controls.Add(Me.lblConfigFile)
         Me.GroupBox4.Controls.Add(Me.Label7)
         Me.GroupBox4.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox4.Location = New System.Drawing.Point(9, 374)
+        Me.GroupBox4.Location = New System.Drawing.Point(9, 415)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Size = New System.Drawing.Size(657, 111)
         Me.GroupBox4.TabIndex = 57
@@ -698,7 +711,7 @@ Partial Class frmMain
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.GradientActiveCaption
-        Me.ClientSize = New System.Drawing.Size(678, 803)
+        Me.ClientSize = New System.Drawing.Size(678, 842)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.btnSelectFile2)
         Me.Controls.Add(Me.GroupBox2)
@@ -797,5 +810,6 @@ Partial Class frmMain
     Friend WithEvents GroupBox4 As System.Windows.Forms.GroupBox
     Friend WithEvents rbnAppCFG As System.Windows.Forms.RadioButton
     Friend WithEvents rbnDefaultCFG As System.Windows.Forms.RadioButton
+    Friend WithEvents rbnMoodle As System.Windows.Forms.RadioButton
 
 End Class

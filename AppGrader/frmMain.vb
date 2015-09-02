@@ -64,7 +64,7 @@ Public Class frmMain
     Private Sub frmMain_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         ' #############################################################################################################
-        IsFacultyVersion = True          ' if false, then it is the Student Version. It True, it is the Faculty Version
+        IsFacultyVersion = True  ' if false, then it is the Student Version. It True, it is the Faculty Version
         ' #############################################################################################################
 
         '        AppDataDir = RemoveLastField(Application.ExecutablePath, "\")
@@ -368,12 +368,22 @@ Public Class frmMain
                 ' don't do anything
                 lblMessage.Text = "Process cancelled."
             Else
-
+                ' jhg - looks like I am missing the shortenFilenames in folder ##########################################################
 
                 ArchiveExtract(fn)
+
                 n = ShortenFilenamesInFolder(strOutputPath, BackgroundWorker1)
                 worker.ReportProgress(-4, "The number of projects found = " & n.ToString)
             End If
+
+        ElseIf rbnMoodle.Checked Then
+            fn = lblTargetFile.Text
+
+            strOutputPath = fn
+
+            n = ShortenFilenamesInFolder(strOutputPath, BackgroundWorker1)
+            worker.ReportProgress(-4, "The number of projects found = " & n.ToString)
+
 
         ElseIf rbnSingleProject.Checked Then
             strOutputPath = FolderBrowserDialog1.SelectedPath
@@ -389,7 +399,7 @@ Public Class frmMain
         ' --------------------------------------------------------------------------------------------
         ' capture the file extension of the gradesheet file so we can use it later
         If GenerateGradesheets Then
-            fileext = IO.Path.GetExtension(OpenFileDialog1.FileName)
+            fileext = IO.Path.GetExtension(OpenFileDialog1.FileName)    ' this looks odd ???
         End If
 
         timeProcess = Now
@@ -403,6 +413,8 @@ Public Class frmMain
         ElseIf rbnSingleProject.Checked Then
             ReDim strDir(0)
             strDir(0) = FolderBrowserDialog1.SelectedPath
+        ElseIf rbnMoodle.Checked Then
+            strDir = Directory.GetDirectories(strOutputPath)
         End If
 
         ' If Not cbxJustUnzip.Checked Then InitializeFacultyReport()
@@ -473,10 +485,14 @@ Public Class frmMain
                 End Try
 
                 ' ---------------------------------------------------------------------------------------------------
-
-                If Not rbnBlackboardZip.Checked And rbnSingleProject.Checked Then
+                If rbnSingleProject.Checked Then
                     AInfo.StudentID = AssignmentName
                 End If
+
+
+                'If Not rbnBlackboardZip.Checked And rbnSingleProject.Checked Then
+                '    AInfo.StudentID = AssignmentName
+                'End If
 
 
                 If Not Directory.Exists(path & "\Reports") Then
@@ -811,7 +827,7 @@ Public Class frmMain
                 BuildSummaryDetail(StudentAssignment, IntegratedForm, IntegratedStudentAssignment)
                 s = AssScore.ToString("n1") & " out of " & AssPossible.ToString("n1") & " possible points = " & (AssScore / AssPossible).ToString("p1")
                 '    s2 = "\" & strStudentID & "\Reports\" & strStudentID & "_IntegratedReport.html"
-                s2 = "\Reports\" & strStudentID & "_IntegratedReport.html"
+                s2 = "\" & strStudentID & "\Reports\" & strStudentID & "_IntegratedReport.html"
                 CloseFacReport(strFacReportDetail, s2, s)
             End If
         Next ii    ' End of student loop
@@ -1085,7 +1101,7 @@ Public Class frmMain
 
 
     Private Sub btnOutput_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnOutput.Click, ViewOutputToolStripMenuItem.Click
-        If rbnBlackboardZip.Checked Then
+        If rbnBlackboardZip.Checked Or rbnMoodle.Checked Then
             ReportType = "Detail"
             frmPickStudentReport.Show()
         Else
@@ -1423,6 +1439,7 @@ Public Class frmMain
 
         'rbnBlackboardZip.Enabled = False
         'rbnSingleProject.Enabled = False
+        'rbnMoodle.enabled = false
         btnProcessApps.Enabled = True
 
         If rbnBlackboardZip.Checked Then
@@ -1449,6 +1466,23 @@ Public Class frmMain
                 DeleteDirectory(lblDir.Text & "\" & AssignmentName)
             End If
             ' ------------------------------------------------------------------------------------------
+        ElseIf rbnMoodle.Checked Then
+            lblTarget.Text = "Target Application"
+            FolderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyDocuments
+            FolderBrowserDialog1.Description = "Select the folder than contains the Student Zip Files."
+
+            FolderBrowserDialog1.ShowDialog()
+            lblTargetFile.Text = FolderBrowserDialog1.SelectedPath
+
+
+            AssignmentName = ReturnLastField(lblTargetFile.Text, "\")
+            lblDir.Text = lblTargetFile.Text
+
+            txtAssignmentName.Text = AssignmentName
+
+
+
+            ' ------------------------------------------------------------------------------------------
         ElseIf rbnSingleProject.Checked Then
             lblTarget.Text = "Target Application"
             FolderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyDocuments
@@ -1467,6 +1501,7 @@ Public Class frmMain
 
         Dim FileLocation As DirectoryInfo = New DirectoryInfo(lblDir.Text & "\")
         Dim fi As FileInfo() = FileLocation.GetFiles("*.docx")
+
         If fi.Length > 0 Then
             lblSelectedTemplate.Text = fi(0).ToString
             cbxLoadWordTemplate.Checked = True
@@ -1613,4 +1648,14 @@ Public Class frmMain
     Private Sub rbnAppCFG_CheckedChanged(sender As Object, e As EventArgs) Handles rbnAppCFG.CheckedChanged
         If rbnAppCFG.Checked And lblConfigFile.Text = "Default Configuration" Then lblConfigFile.Text = ""
     End Sub
+
+    'Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+    '    '  Dim proc As New System.Diagnostics.Process()
+
+    '    'proc = Process.Start("C:\Users\Gerdes\Documents\Visual Studio 2013\Projects\hw6-Solution\hw6-Solution\bin\Debug\hw6-Solution.exe", "")
+    '    'Process.Kill()
+
+    '    'http://www.vbforums.com/showthread.php?643527-VB2010-Start-Stop-and-Detect-the-closing-of-an-external-application-(process)
+
+    'End Sub
 End Class

@@ -192,6 +192,7 @@ Module JHGModule1
         Dim n As Integer = 0
         Dim x As Integer
         Dim percent As Decimal = 0
+        Dim strEnding As String = ""
 
         Dim worker As System.ComponentModel.BackgroundWorker = DirectCast(sender, System.ComponentModel.BackgroundWorker)
 
@@ -201,33 +202,40 @@ Module JHGModule1
 
         For Each fn As String In IO.Directory.GetFiles(path, ext1, SearchOption.TopDirectoryOnly)
             i = i + 1
-            If ShortenFilename(fn, shortfn) Then
-                If shortfn = lastshortfn Then
-                    cnt = cnt + 1
-                Else
-                    cnt = Asc("a")
+
+            ' check to see if the filename has already been shortened.
+            ' see if it has a structure of   name_a.zip
+            strEnding = ReturnLastField(fn, "_")
+            If strEnding.Length - ext.Length > 1 Then  '  this indicates we just have more than a single letter in suffix
+                If ShortenFilename(fn, shortfn) Then
+                    If shortfn.Contains(".") Then shortfn = TrimAfter(shortfn, ".", True)
+                    If shortfn = lastshortfn Then
+                        cnt = cnt + 1
+                    Else
+                        cnt = Asc("a")
+                    End If
+                    lastshortfn = shortfn
+                    shortfn = shortfn & "_" & Chr(cnt)
+                    Try
+                        If AllowOverwrite And File.Exists(path & shortfn & ext) Then
+                            File.Delete(path & shortfn & ext)
+                        End If
+
+                        Rename(fn, path & shortfn & ext)
+
+                        If AllowOverwrite And File.Exists(path & shortfn) Then
+                            Directory.Delete(path & shortfn)
+                        End If
+
+                        If AllowOverwrite Or Not File.Exists(path & shortfn) Then
+                            ArchiveExtract(path & shortfn & ext)
+                        End If
+
+                        nProcessed = nProcessed + 1
+                    Catch ex As Exception
+                        MessageBox.Show("ShortenFilename - " & ex.Message)
+                    End Try
                 End If
-                lastshortfn = shortfn
-                shortfn = shortfn & "_" & Chr(cnt)
-                Try
-                    If AllowOverwrite And File.Exists(path & shortfn & ext) Then
-                        File.Delete(path & shortfn & ext)
-                    End If
-
-                    Rename(fn, path & shortfn & ext)
-
-                    If AllowOverwrite And File.Exists(path & shortfn) Then
-                        Directory.Delete(path & shortfn)
-                    End If
-
-                    If AllowOverwrite Or Not File.Exists(path & shortfn) Then
-                        ArchiveExtract(path & shortfn & ext)
-                    End If
-
-                    nProcessed = nProcessed + 1
-                Catch ex As Exception
-                    MessageBox.Show("ShortenFilename - " & ex.Message)
-                End Try
             End If
 
             x = CInt(i * 100 / n)
@@ -265,13 +273,26 @@ Module JHGModule1
         Select Case ext.ToUpper
             Case "ZIP", "RAR", "7Z", "TAR", "GZIP"
                 ss = filename.Split(CChar("_"))
-                For i = 2 To ss.GetUpperBound(0)
-                    If ss(i) = "attempt" Then
-                        ShortFilename = ss(i - 1)
+
+                If ss.GetUpperBound(0) = 1 Then
+                    If ss(1).Substring(1, 1) = "." Then   ' no need to shorten it - it already has been done.
+                        ShortFilename = filename
                         flagZipFile = True
-                        i = ss.GetUpperBound(0)
+                    Else
+                        ShortFilename = ss(1)    ' go ahead and shorten filename
+                        flagZipFile = True
                     End If
-                Next i
+
+                Else
+
+                    For i = 2 To ss.GetUpperBound(0)
+                        If ss(i) = "attempt" Then         ' This is designed to work with Blackboard files
+                            ShortFilename = ss(i - 1)
+                            flagZipFile = True
+                            i = ss.GetUpperBound(0)
+                        End If
+                    Next i
+                End If
             Case Else
                 flagZipFile = False
         End Select
