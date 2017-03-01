@@ -112,7 +112,7 @@ Partial Class frmMain
         Me.btnProcessApps.Margin = New System.Windows.Forms.Padding(2)
         Me.btnProcessApps.Name = "btnProcessApps"
         Me.btnProcessApps.Size = New System.Drawing.Size(128, 33)
-        Me.btnProcessApps.TabIndex = 1
+        Me.btnProcessApps.TabIndex = 2
         Me.btnProcessApps.Text = "Start Processing"
         Me.btnProcessApps.UseVisualStyleBackColor = False
         '
@@ -146,7 +146,7 @@ Partial Class frmMain
         Me.btnOutput.Location = New System.Drawing.Point(9, 42)
         Me.btnOutput.Name = "btnOutput"
         Me.btnOutput.Size = New System.Drawing.Size(134, 34)
-        Me.btnOutput.TabIndex = 8
+        Me.btnOutput.TabIndex = 0
         Me.btnOutput.Text = "View Assessment"
         Me.btnOutput.UseVisualStyleBackColor = False
         '
@@ -185,7 +185,7 @@ Partial Class frmMain
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Size = New System.Drawing.Size(678, 24)
-        Me.MenuStrip1.TabIndex = 25
+        Me.MenuStrip1.TabIndex = 0
         Me.MenuStrip1.Text = "MenuStrip1"
         '
         'ConfigureAppToolStripMenuItem
@@ -261,7 +261,7 @@ Partial Class frmMain
         Me.btnSelectFile.Margin = New System.Windows.Forms.Padding(2)
         Me.btnSelectFile.Name = "btnSelectFile"
         Me.btnSelectFile.Size = New System.Drawing.Size(128, 29)
-        Me.btnSelectFile.TabIndex = 32
+        Me.btnSelectFile.TabIndex = 3
         Me.btnSelectFile.Text = "Select File"
         Me.btnSelectFile.UseVisualStyleBackColor = False
         '
@@ -388,7 +388,7 @@ Partial Class frmMain
         Me.btnDetail.Location = New System.Drawing.Point(309, 43)
         Me.btnDetail.Name = "btnDetail"
         Me.btnDetail.Size = New System.Drawing.Size(129, 32)
-        Me.btnDetail.TabIndex = 41
+        Me.btnDetail.TabIndex = 2
         Me.btnDetail.Text = "Summary Detail"
         Me.btnDetail.UseVisualStyleBackColor = False
         '
@@ -398,7 +398,7 @@ Partial Class frmMain
         Me.btnAssignSummary.Location = New System.Drawing.Point(149, 43)
         Me.btnAssignSummary.Name = "btnAssignSummary"
         Me.btnAssignSummary.Size = New System.Drawing.Size(154, 33)
-        Me.btnAssignSummary.TabIndex = 40
+        Me.btnAssignSummary.TabIndex = 1
         Me.btnAssignSummary.Text = "Assignment Summary"
         Me.btnAssignSummary.UseVisualStyleBackColor = False
         '
@@ -407,7 +407,7 @@ Partial Class frmMain
         Me.btnExit.Location = New System.Drawing.Point(595, 46)
         Me.btnExit.Name = "btnExit"
         Me.btnExit.Size = New System.Drawing.Size(71, 26)
-        Me.btnExit.TabIndex = 39
+        Me.btnExit.TabIndex = 4
         Me.btnExit.Text = "Exit"
         Me.btnExit.UseVisualStyleBackColor = True
         '
@@ -417,7 +417,7 @@ Partial Class frmMain
         Me.btnViewPlagiarism.Location = New System.Drawing.Point(444, 43)
         Me.btnViewPlagiarism.Name = "btnViewPlagiarism"
         Me.btnViewPlagiarism.Size = New System.Drawing.Size(145, 33)
-        Me.btnViewPlagiarism.TabIndex = 23
+        Me.btnViewPlagiarism.TabIndex = 3
         Me.btnViewPlagiarism.Text = "Plagiarism Summary"
         Me.btnViewPlagiarism.UseVisualStyleBackColor = False
         '
@@ -439,29 +439,29 @@ Partial Class frmMain
         Me.cbxJustUnzip.Margin = New System.Windows.Forms.Padding(2)
         Me.cbxJustUnzip.Name = "cbxJustUnzip"
         Me.cbxJustUnzip.Size = New System.Drawing.Size(334, 21)
-        Me.cbxJustUnzip.TabIndex = 45
+        Me.cbxJustUnzip.TabIndex = 2
         Me.cbxJustUnzip.Text = "Just Unzip && shorten filenames (No Assessment)"
         Me.cbxJustUnzip.UseVisualStyleBackColor = True
         '
         'rbnSingleProject
         '
         Me.rbnSingleProject.AutoSize = True
-        Me.rbnSingleProject.Checked = True
         Me.rbnSingleProject.Location = New System.Drawing.Point(7, 3)
         Me.rbnSingleProject.Name = "rbnSingleProject"
         Me.rbnSingleProject.Size = New System.Drawing.Size(113, 21)
         Me.rbnSingleProject.TabIndex = 46
-        Me.rbnSingleProject.TabStop = True
         Me.rbnSingleProject.Text = "Single Project"
         Me.rbnSingleProject.UseVisualStyleBackColor = True
         '
         'rbnBlackboardZip
         '
         Me.rbnBlackboardZip.AutoSize = True
+        Me.rbnBlackboardZip.Checked = True
         Me.rbnBlackboardZip.Location = New System.Drawing.Point(7, 21)
         Me.rbnBlackboardZip.Name = "rbnBlackboardZip"
         Me.rbnBlackboardZip.Size = New System.Drawing.Size(380, 21)
         Me.rbnBlackboardZip.TabIndex = 47
+        Me.rbnBlackboardZip.TabStop = True
         Me.rbnBlackboardZip.Text = "Single Zip File Containing Multiple Zip Files (Blackboard)"
         Me.rbnBlackboardZip.UseVisualStyleBackColor = True
         '
@@ -545,7 +545,7 @@ Partial Class frmMain
         Me.Panel3.Location = New System.Drawing.Point(21, 135)
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(447, 69)
-        Me.Panel3.TabIndex = 52
+        Me.Panel3.TabIndex = 0
         '
         'rbnMoodle
         '
@@ -554,7 +554,6 @@ Partial Class frmMain
         Me.rbnMoodle.Name = "rbnMoodle"
         Me.rbnMoodle.Size = New System.Drawing.Size(263, 21)
         Me.rbnMoodle.TabIndex = 48
-        Me.rbnMoodle.TabStop = True
         Me.rbnMoodle.Text = "Folder with Multiple Zip Files (Moodle)"
         Me.rbnMoodle.UseVisualStyleBackColor = True
         '
@@ -567,7 +566,7 @@ Partial Class frmMain
         Me.Panel2.Location = New System.Drawing.Point(21, 237)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(447, 72)
-        Me.Panel2.TabIndex = 51
+        Me.Panel2.TabIndex = 1
         '
         'rbnShowOnlyReq
         '
@@ -631,7 +630,7 @@ Partial Class frmMain
         Me.GroupBox2.Location = New System.Drawing.Point(9, 532)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(657, 187)
-        Me.GroupBox2.TabIndex = 49
+        Me.GroupBox2.TabIndex = 1
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Assignment Detail"
         '
@@ -690,13 +689,13 @@ Partial Class frmMain
         Me.rbnAppCFG.Name = "rbnAppCFG"
         Me.rbnAppCFG.Size = New System.Drawing.Size(358, 20)
         Me.rbnAppCFG.TabIndex = 59
-        Me.rbnAppCFG.TabStop = True
         Me.rbnAppCFG.Text = "Use Application Specific Configuration (Recommended)"
         Me.rbnAppCFG.UseVisualStyleBackColor = True
         '
         'rbnDefaultCFG
         '
         Me.rbnDefaultCFG.AutoSize = True
+        Me.rbnDefaultCFG.Checked = True
         Me.rbnDefaultCFG.Location = New System.Drawing.Point(35, 21)
         Me.rbnDefaultCFG.Name = "rbnDefaultCFG"
         Me.rbnDefaultCFG.Size = New System.Drawing.Size(177, 20)

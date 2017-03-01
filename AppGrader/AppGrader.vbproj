@@ -7,9 +7,9 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A746376B-54D0-44B7-A024-52F66E9774F6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>AppGraderPro.My.MyApplication</StartupObject>
-    <RootNamespace>AppGraderPro</RootNamespace>
-    <AssemblyName>AppGraderPro</AssemblyName>
+    <StartupObject>AppGrader.My.MyApplication</StartupObject>
+    <RootNamespace>AppGrader</RootNamespace>
+    <AssemblyName>AppGrader</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -36,7 +36,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.1.0.0</ApplicationVersion>
+    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -47,7 +47,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>AppGraderPro.xml</DocumentationFile>
+    <DocumentationFile>AppGrader.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
@@ -59,16 +59,16 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>AppGraderPro.xml</DocumentationFile>
+    <DocumentationFile>AppGrader.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>C52788BBB77477529B201E2866487B114C46F2BF</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>5E6FBB7E410F0283A966A89ED0DDFA76FB7AE89F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>AppGrader_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>AppGrader_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -77,7 +77,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>faviconPro.ico</ApplicationIcon>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ionic.Zip">
@@ -238,6 +238,7 @@
     </Content>
     <Content Include="faviconPro.ico" />
     <None Include="app.config" />
+    <None Include="AppGrader_1_TemporaryKey.pfx" />
     <None Include="AppGrader_TemporaryKey.pfx" />
     <Content Include="templates\defaultConfig.cfg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

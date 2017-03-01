@@ -206,7 +206,7 @@ Module JHGModule1
             ' check to see if the filename has already been shortened.
             ' see if it has a structure of   name_a.zip
             strEnding = ReturnLastField(fn, "_")
-            If strEnding.Length - ext.Length > 1 Then  '  this indicates we just have more than a single letter in suffix
+            If strEnding.Length - ext.Length > 0 Then ' > 1 Then  '  this indicates we have more than a single letter in suffix =========== I disabled this and allowed this to run for all files
                 If ShortenFilename(fn, shortfn) Then
                     If shortfn.Contains(".") Then shortfn = TrimAfter(shortfn, ".", True)
                     If shortfn = lastshortfn Then

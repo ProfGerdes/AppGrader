@@ -20,8 +20,6 @@ Public Class frmMain
     Dim IntegratedStudentAssignment(NSummary) As MyItems
     Dim IntegratedForm(nForm) As MyItems
 
-
-
     Structure crcdatum
         Dim UserID As String
         Dim Filename As String
@@ -318,7 +316,7 @@ Public Class frmMain
 
         ' -------------------------------------------------------------------------------------------------
         ' First check to see if they have specified a template for the gradesheets, if the user specified
-        ' that they want grade sheets. It it is not specified, warn the user and exit processing.
+        ' that they want grade sheets. If it is not specified, warn the user and exit processing.
         ' -------------------------------------------------------------------------------------------------
         GenerateGradesheets = cbxLoadWordTemplate.Checked
         If cbxLoadWordTemplate.Checked Then
@@ -430,7 +428,6 @@ Public Class frmMain
             If p.Req Then ii += 1
         Next
 
-
         InitializeStudentReport()
         ' ===================================================================================
         nstudents = strDir.GetUpperBound(0)
@@ -517,6 +514,40 @@ Public Class frmMain
                 HasSLNFile = CBool(StudentAssignment.hasSLN.Status)
                 HasVBProjFile = CBool(StudentAssignment.hasVBproj.Status)
 
+
+
+                ' ===================================================================================================
+                ' Create a reports Folder
+                If (Not Directory.Exists(path & "\Reports")) Then
+                    Directory.CreateDirectory(path & "\Reports")
+                End If
+
+                ' ---------------------Copy grading template files (Word File) ----------------------------
+                ' This will only generate a grade sheet in the _a submission for the student when they submit multiple zip files.
+                ' it copies the selected tempate an renames it StudentID_Feedback.doc or docx     
+                If GenerateGradesheets And StudentAssignment.StudentID.EndsWith("_a") Then
+                    If lblSelectedTemplate.Text.Contains(".doc") Then  ' Accepts both doc and docx files
+
+                        Dim s1a As String
+                        If lblSelectedTemplate.Text.Contains(":") Then
+                            s1a = lblSelectedTemplate.Text
+                        Else
+                            s1a = lblDir.Text & "\" & lblSelectedTemplate.Text
+                        End If
+
+                        '   Dim s1b As String = path & "\Reports\" & StudentAssignment.StudentID & "_Feedback." & ReturnLastField(lblSelectedTemplate.Text, ".")
+
+                        ' modified to place the template in the student folder instead of the reports folder
+                        Dim s1b As String = path & "\" & StudentAssignment.StudentID & "_Feedback." & ReturnLastField(lblSelectedTemplate.Text, ".")
+                        FileCopy(s1a, s1b)
+
+                    End If
+                End If
+                ' ---------------------------------------------------------------------------------------------------
+                ' ====================================================================================================
+
+
+
                 ' display a message if there is no SLN or vbProj file.
                 If Not HasSLNFile And Not HasVBProjFile Then
                     worker.ReportProgress(-3, StudentAssignment.StudentID & " has no SLN or vbProj file. The submission cannot be assessed.")
@@ -554,20 +585,30 @@ Public Class frmMain
                     Dim sr As StreamReader
                     ' ======================================================================================================================
 
-                    ' Create a reports Folder
-                    If (Not Directory.Exists(path & "\Reports")) Then
-                        Directory.CreateDirectory(path & "\Reports")
-                    End If
+                    ' '' '' Create a reports Folder
+                    '' ''If (Not Directory.Exists(path & "\Reports")) Then
+                    '' ''    Directory.CreateDirectory(path & "\Reports")
+                    '' ''End If
 
-                    ' ---------------------Copy grading template files (Word File) ----------------------------
-                    ' This will only generate a grade sheet in the _a submission for the student when they submit multiple zip files.
-                    ' it copies the selected tempate an renames it StudentID_Feedback.doc or docx     
-                    If GenerateGradesheets And StudentAssignment.StudentID.EndsWith("_a") Then
-                        If lblSelectedTemplate.Text.Contains(".doc") Then  ' Accepts both doc and docx files
-                            FileCopy(lblDir.Text & "\" & lblSelectedTemplate.Text, path & "\Reports\" & StudentAssignment.StudentID & "_Feedback." & ReturnLastField(lblSelectedTemplate.Text, "."))
-                        End If
-                    End If
-                    ' ---------------------------------------------------------------------------------------------------
+                    ' '' '' ---------------------Copy grading template files (Word File) ----------------------------
+                    ' '' '' This will only generate a grade sheet in the _a submission for the student when they submit multiple zip files.
+                    ' '' '' it copies the selected tempate an renames it StudentID_Feedback.doc or docx     
+                    '' ''If GenerateGradesheets And StudentAssignment.StudentID.EndsWith("_a") Then
+                    '' ''    If lblSelectedTemplate.Text.Contains(".doc") Then  ' Accepts both doc and docx files
+
+                    '' ''        Dim s1a As String
+                    '' ''        If lblSelectedTemplate.Text.Contains(":") Then
+                    '' ''            s1a = lblSelectedTemplate.Text
+                    '' ''        Else
+                    '' ''            s1a = lblDir.Text & "\" & lblSelectedTemplate.Text
+                    '' ''        End If
+
+                    '' ''        Dim s1b As String = path & "\Reports\" & StudentAssignment.StudentID & "_Feedback." & ReturnLastField(lblSelectedTemplate.Text, ".")
+                    '' ''        FileCopy(s1a, s1b)
+
+                    '' ''    End If
+                    '' ''End If
+                    ' '' '' ---------------------------------------------------------------------------------------------------
 
                     ' ---------------------------------------------------------------------------------------------------
                     ' Build summary of student work
@@ -710,10 +751,14 @@ Public Class frmMain
                         AppDir = IO.Path.GetDirectoryName(filename)
 
                         ' read in source file
-                        sr = New StreamReader(filename)
+                        If File.Exists(filename) Then                    ' THis should not happen, but I have seen it. Need to flag it in the output - jhg
+                            sr = New StreamReader(filename)
 
-                        filesource = sr.ReadToEnd
-                        sr.Close()
+                            filesource = sr.ReadToEnd
+                            sr.Close()
+                        Else
+                            filesource = ""
+                        End If
 
                         ' ---- check for form  -------
                         BuildReport("Assessment Results for " & ReturnLastField(filename, "\"), StudentAssignment, StudentAppForm, StudentAppSummary, strStudentReport)
@@ -866,7 +911,7 @@ Public Class frmMain
                 DupFlag = False
                 For i = 0 To Submissions.Count - 2
                     With Submissions(i)
-                        If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") Then
+                        If Not .Filename.ToUpper.Contains("DESIGNER.VB") And Not .Filename.ToUpper.Contains("ASSEMBLYINFO.VB") And Not .Filename.ToUpper.Contains("APPLICATIONEVENTS.VB") Then
                             ShortFilename = ReturnLastField(.Filename, "\")
                             If Submissions(i).vbCRC = Submissions(i + 1).vbCRC Or DupFlag = True Then
                                 sw.WriteLine(("*" & vbTab & "'" & .vbCRC.PadRight(8) & vbTab & ShortFilename & vbTab & .UserID & vbTab & .Filename))
@@ -1060,6 +1105,10 @@ Public Class frmMain
 
             End If '  If Not cbxJustUnzip.Checked
         End If ' if isFacultyVersion
+
+        CreateDoneFolder()
+
+
         ' --------------------------------------------------------------------------------
         timeend = Now
 
@@ -1201,7 +1250,12 @@ Public Class frmMain
         sw.WriteLine("Student Files" & vbTab & nstudentfiles.ToString("n1"))
         sw.WriteLine("Instructor Apps" & vbTab & ninstructorapps.ToString("n1"))
         sw.WriteLine("Instructor Files" & vbTab & ninstructorfiles.ToString("n1"))
-        sw.WriteLine("Average LOC" & vbTab & (averageLOC / nstudentfiles).ToString("n2"))
+        If nstudentfiles > 0 Then
+            sw.WriteLine("Average LOC" & vbTab & (averageLOC / nstudentfiles).ToString("n2"))
+        Else
+            sw.WriteLine("Average LOC" & vbTab & "---")
+        End If
+
         sw.WriteLine("")
         dd = timeLoadInstructorFiles.Subtract(timeStart)
         sw.WriteLine("Load Instructor files" & vbTab & timeLoadInstructorFiles.ToString("hh:mm:ss.fff tt") & vbTab & dd.ToString("ss\.fff"))
@@ -1252,7 +1306,7 @@ Public Class frmMain
 
         timeLoadInstructorFiles2 = Now
         If Path > "" Then
-            fname = lblDir.Text & "\GUIDData.txt"
+            fname = lblDir.Text & "\GUIDData.txt"     ' ???? jhg 
             sw = File.CreateText(fname)
             ninstructorapps = 0
             ' first read in Instructor Demo Files
@@ -1446,24 +1500,28 @@ Public Class frmMain
             lblTarget.Text = "Target Zip File"
             OpenFileDialog1.InitialDirectory = Environment.SpecialFolder.MyDocuments.ToString
             OpenFileDialog1.Filter = "Zip files |*.zip|All files |*.*"
-            OpenFileDialog1.FilterIndex = 0
+            OpenFileDialog1.FilterIndex = 1
             OpenFileDialog1.RestoreDirectory = True
 
             OpenFileDialog1.ShowDialog()
-            lblTargetFile.Text = OpenFileDialog1.FileName
+            'jhg Need to check to see if the user selected something
+            If Not OpenFileDialog1.FileName.ToUpper.Contains(".ZIP") Then
+                ' no file selected, so exit.
+                Exit Sub
+            Else
+                lblTargetFile.Text = OpenFileDialog1.FileName
 
+                AssignmentName = ReturnLastField(lblTargetFile.Text, "\")
+                lblDir.Text = lblTargetFile.Text.Replace("\" & AssignmentName, "")
 
-            AssignmentName = ReturnLastField(lblTargetFile.Text, "\")
-            lblDir.Text = lblTargetFile.Text.Replace("\" & AssignmentName, "")
+                AssignmentName = AssignmentName.Substring(0, AssignmentName.ToUpper.IndexOf(".ZIP"))
+                txtAssignmentName.Text = AssignmentName
 
-
-            AssignmentName = AssignmentName.Substring(0, AssignmentName.ToUpper.IndexOf(".ZIP"))
-            txtAssignmentName.Text = AssignmentName
-
-            ' ------------------------------------------------------------------------------------------
-            ' This deletes the existing file. May want to ask the user about this ????????????????????????????????????????????????????????
-            If Directory.Exists(lblDir.Text & "\" & AssignmentName) Then
-                DeleteDirectory(lblDir.Text & "\" & AssignmentName)
+                ' ------------------------------------------------------------------------------------------
+                ' This deletes the existing file. May want to ask the user about this ????????????????????????????????????????????????????????
+                If Directory.Exists(lblDir.Text & "\" & AssignmentName) Then
+                    DeleteDirectory(lblDir.Text & "\" & AssignmentName)
+                End If
             End If
             ' ------------------------------------------------------------------------------------------
         ElseIf rbnMoodle.Checked Then

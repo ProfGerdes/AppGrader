@@ -55,6 +55,32 @@ Module ValidateVB
 
     End Function
 
+    Sub CreateDoneFolder()
+        Dim fn As String = ""
+        Try
+            If Not Directory.Exists(strOutputPath & "\_Done") Then
+                Directory.CreateDirectory(strOutputPath & "\_Done")
+            End If
+
+            For Each f In Directory.GetFiles(strOutputPath, "*.*", SearchOption.TopDirectoryOnly)
+                fn = f
+                Try
+                    If File.Exists(f) And Not f.ToUpper.Contains(".HTML") Then
+                        File.Move(f, Path.Combine(strOutputPath & "\_Done", Path.GetFileName(f)))
+                    End If
+                Catch
+                End Try
+            Next
+        Catch ex As Exception
+            MessageBox.Show("CreateDoneFolder - " & fn & " - " & ex.Message)
+        End Try
+
+
+    End Sub
+
+
+
+
     Function InitializeFacultyReport() As String
         Dim s As String = ""
         Dim sr As StreamReader
@@ -127,8 +153,12 @@ Module ValidateVB
                     For i = 1 To ss.GetUpperBound(0)
                         If Not ss(i).Contains(".Designer.vb") And Not ss(i).StartsWith("My Project\") And Not ss(i).StartsWith("ApplicationEvents.vb") Then
                             ' These are the files contained in the build
-                            filesinbuild.Add(strRoot & TrimAfter(ss(i), """", True))
-
+                            If File.Exists(strRoot & TrimAfter(ss(i), """", True)) Then ' double check that it exists
+                                filesinbuild.Add(strRoot & TrimAfter(ss(i), """", True))
+                            Else
+                                MessageBox.Show(strRoot & TrimAfter(ss(i), """", True) & " Not found on disk.") ' ????? jhg may want to summarize the list of errors and show after all files processed. 
+                                Beep()
+                            End If
                         End If
                     Next i
                 End If
@@ -379,7 +409,11 @@ Module ValidateVB
         ' Now process each line and assess for flow control elements
 
         For i = 0 To ss.GetUpperBound(0)
-            x = CInt(i * 100 / ss.GetUpperBound(0))
+            If ss.GetUpperBound(0) > 0 Then   ' prevent division by zero 
+                x = CInt(i * 100 / ss.GetUpperBound(0))
+            Else
+                x = 0
+            End If
             worker.ReportProgress(x, "Line by Line")
 
             firstword = TrimAfter(ss(i) + " ", " ", True)
@@ -494,7 +528,7 @@ Module ValidateVB
                     ' accept a comment before or on the same line as the DO
                     With SSummary(EnSummary.CommentDo)
                         .n += 1
-                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                        If (i > 0 AndAlso ss(i - 1).StartsWith("'")) Or ss(i).Contains("'") Then
                             ' build the Good list
                             If .good = Nothing Then
                                 .good &= "(" & lineno(i).ToString & ")"
@@ -577,7 +611,7 @@ Module ValidateVB
                     ' It should be before the for statement. It also accepts it if on the same line. 
                     With SSummary(EnSummary.CommentFor)
                         .n += 1
-                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                        If (i > 0 AndAlso ss(i - 1).StartsWith("'")) Or ss(i).Contains("'") Then
 
                             If .good = Nothing Then
                                 .good &= "(" & lineno(i).ToString & ")"
@@ -620,7 +654,7 @@ Module ValidateVB
                     ' Acceptable comments are either preceeding or on the same line as IF statement.
                     With SSummary(EnSummary.CommentIF)
                         .n += 1
-                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                        If (i > 0 AndAlso ss(i - 1).StartsWith("'")) Or ss(i).Contains("'") Then
                             If .good = Nothing Then
                                 .good &= " (" & lineno(i).ToString & ")"
                             Else
@@ -682,7 +716,7 @@ Module ValidateVB
                     With SSummary(EnSummary.LogicMessageBox)
                         .n += 1
 
-                        If (ss(i - 1).StartsWith("MSGBOX")) Then
+                        If (i > 0 AndAlso ss(i - 1).StartsWith("MSGBOX")) Then
                             .bad &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
                             .cssClass = "itemred"
                         Else
@@ -706,7 +740,7 @@ Module ValidateVB
 
                     ' check for comment. Accept on line before or on the same line.
                     With SSummary(EnSummary.CommentSelect)
-                        If ss(i - 1).StartsWith("'") Or ss(i).Contains("'") Then
+                        If (i > 0 AndAlso ss(i - 1).StartsWith("'")) Or ss(i).Contains("'") Then
                             If .good = Nothing Then
                                 .good &= "(" & lineno(i).ToString & ")"
                             Else
@@ -735,7 +769,7 @@ Module ValidateVB
                     If i < ss.GetUpperBound(0) Then
                         With SSummary(EnSummary.CommentSub)
                             .n += 1
-                            If (ss(i - 1).StartsWith("'") Or ss(i + 1).StartsWith("'")) Then
+                            If ((i > 0 AndAlso ss(i - 1).StartsWith("'")) Or ss(i + 1).StartsWith("'")) Then
                                 .bad &= "<p class=""hangingindent2"">" & bullet & "(" & lineno(i).ToString & ") - " & TrimAfter(ss(i), "(", True) & "</p>" & vbCrLf
                                 .cssClass = "itemred"
                                 .cnt += 1
@@ -793,7 +827,7 @@ Module ValidateVB
                     ' Comment While
                     With SSummary(EnSummary.CommentWhile)
                         .n += 1
-                        If ss(i - 1).StartsWith("'") Then
+                        If (i > 0 AndAlso ss(i - 1).StartsWith("'")) Then
                             If .good = Nothing Then
                                 .good &= "(" & lineno(i).ToString & ")"
                             Else
@@ -1086,19 +1120,24 @@ Module ValidateVB
         With item
             .Status = vbFalse.ToString
 
-            For Each filename As String In filesinbuild
-                Dim sr As New StreamReader(filename)
-                s = sr.ReadToEnd
-                sr.Close()
+            Try
+                For Each filename As String In filesinbuild
+                    Dim sr As New StreamReader(filename)
+                    s = sr.ReadToEnd
+                    sr.Close()
 
-                If s.Contains("splash screen") Or s.Contains("SplashScreen") Then
-                    ' has a splash screen
-                    .Status = vbTrue.ToString
-                    .n += 1
-                    If RemoveFromList Then filesinbuild.Remove(filename)
-                    Exit For
-                End If
-            Next
+                    If s.Contains("splash screen") Or s.Contains("SplashScreen") Then
+                        ' has a splash screen
+                        .Status = vbTrue.ToString
+                        .n += 1
+                        If RemoveFromList Then filesinbuild.Remove(filename)
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show("Error Processessing Check for SplashScreen. " & ex.Message)
+            End Try
+
         End With
     End Function
 
@@ -1172,9 +1211,15 @@ Module ValidateVB
 
 
                 ' accept and cancel button settings in *.resx file
-                sr = New StreamReader(filename.Replace(".vb", ".resx"))
-                s = sr.ReadToEnd
-                sr.Close()
+                If File.Exists(filename.Replace(".vb", ".resx")) Then
+                    sr = New StreamReader(filename.Replace(".vb", ".resx"))
+                    s = sr.ReadToEnd
+                    sr.Close()
+                Else
+                    s = ""
+                End If
+
+
                 If s.Contains("Me.AcceptButton") Then
                     AppForm(EnForm.FormAcceptButton).Status = "<p> <span class=""boldtext"">" & fn & "</span> - " & returnBetween(s, "Me.AcceptButton = ", vbCrLf) & "</p>"
                     AppForm(EnForm.FormAcceptButton).cssClass = "itemgreen"
@@ -1211,20 +1256,23 @@ Module ValidateVB
         Dim s As String
         With item
             .Status = vbFalse.ToString
+            Try
+                For Each filename As String In filesinbuild
+                    Dim sr As New StreamReader(filename)
+                    s = sr.ReadToEnd
+                    sr.Close()
 
-            For Each filename As String In filesinbuild
-                Dim sr As New StreamReader(filename)
-                s = sr.ReadToEnd
-                sr.Close()
-
-                If s.Contains("About Box") Or s.Contains("AboutBox") Then
-                    ' has a splash screen"
-                    .Status = "<p> <span class=""boldtext"">" & filename & " - Is an About Box. This file will not be considered further." & "</p>"
-                    .n += 1
-                    If RemoveFromList Then filesinbuild.Remove(filename)
-                    Exit For
-                End If
-            Next
+                    If s.Contains("About Box") Or s.Contains("AboutBox") Then
+                        ' has a splash screen"
+                        .Status = "<p> <span class=""boldtext"">" & filename & " - Is an About Box. This file will not be considered further." & "</p>"
+                        .n += 1
+                        If RemoveFromList Then filesinbuild.Remove(filename)
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show("Error processing Check For About Box. " & ex.Message)
+            End Try
         End With
     End Sub
 

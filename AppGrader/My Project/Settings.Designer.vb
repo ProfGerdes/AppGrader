@@ -64,9 +64,9 @@ Namespace My
     Friend Module MySettingsProperty
         
         <Global.System.ComponentModel.Design.HelpKeywordAttribute("My.Settings")> _
-        Friend ReadOnly Property Settings() As Global.AppGraderPro.My.MySettings
+        Friend ReadOnly Property Settings() As Global.AppGrader.My.MySettings
             Get
-                Return Global.AppGraderPro.My.MySettings.Default
+                Return Global.AppGrader.My.MySettings.Default
             End Get
         End Property
     End Module
