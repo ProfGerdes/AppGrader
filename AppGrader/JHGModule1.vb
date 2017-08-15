@@ -29,19 +29,21 @@ Module JHGModule1
     Public Function returnBetween(ByRef Str As String, ByVal OpenStr As String, ByVal CloseStr As String, Optional ByVal TrimToClosestr As Boolean = False) As String
         Dim s As String = Str
         Dim SearchStart As Integer = 0, SearchEnd As Integer = 0
-
+        ' both start and end strings must be in string, otherwise a null string is returned. 
         Try
             SearchStart = Str.IndexOf(OpenStr) + OpenStr.Length + 1
             SearchEnd = Str.IndexOf(CloseStr, SearchStart - 1)
-            s = Mid(Str, SearchStart, SearchEnd - SearchStart + 1)
-            If TrimToClosestr Then
-                Str = Str.Substring(SearchEnd)
+            If SearchEnd - SearchStart + 1 > 0 Then
+                s = Mid(Str, SearchStart, SearchEnd - SearchStart + 1)
+                If TrimToClosestr Then
+                    Str = Str.Substring(SearchEnd)
+                End If
+            Else
+                s = ""
             End If
-        Catch
+        Catch ex As exception
             s = ""
         End Try
-
-
         Return s
     End Function
 
@@ -202,7 +204,6 @@ Module JHGModule1
 
         For Each fn As String In IO.Directory.GetFiles(path, ext1, SearchOption.TopDirectoryOnly)
             i = i + 1
-
             ' check to see if the filename has already been shortened.
             ' see if it has a structure of   name_a.zip
             strEnding = ReturnLastField(fn, "_")
@@ -228,7 +229,30 @@ Module JHGModule1
                         End If
 
                         If AllowOverwrite Or Not File.Exists(path & shortfn) Then
-                            ArchiveExtract(path & shortfn & ext)
+                            ArchiveExtract(path & shortfn & ext)  ' this extracts the file, but not recursively, 
+
+                            'find all files contained in this folder
+                            For Each fn2 As String In IO.Directory.GetFiles(path & shortfn & "\", "*.zip", SearchOption.AllDirectories)
+                                ' if any of them are archive files, uncompress them
+                                ArchiveExtract(fn2)
+                            Next
+                            For Each fn2 As String In IO.Directory.GetFiles(path & shortfn & "\", "*.rar", SearchOption.AllDirectories)
+                                ' if any of them are archive files, uncompress them
+                                ArchiveExtract(fn2)
+                            Next
+                            For Each fn2 As String In IO.Directory.GetFiles(path & shortfn & "\", "*.7z", SearchOption.AllDirectories)
+                                ' if any of them are archive files, uncompress them
+                                ArchiveExtract(fn2)
+                            Next
+                            For Each fn2 As String In IO.Directory.GetFiles(path & shortfn & "\", "*.tar", SearchOption.AllDirectories)
+                                ' if any of them are archive files, uncompress them
+                                ArchiveExtract(fn2)
+                            Next
+                            For Each fn2 As String In IO.Directory.GetFiles(path & shortfn & "\", "*.gzip", SearchOption.AllDirectories)
+                                ' if any of them are archive files, uncompress them
+                                ArchiveExtract(fn2)
+                            Next
+
                         End If
 
                         nProcessed = nProcessed + 1
@@ -249,7 +273,7 @@ Module JHGModule1
 
 
     Function ShortenFilename(filename As String, ByRef ShortFilename As String) As Boolean
-        ' this function determines what the shortened filename is. It assumes a structure of 
+        ' this function determines what the shortened filename is.  
         ' It assumes the structure of the files is as follows, with underscores as delimiters
 
         '  Assignment Name _ Student ID _ "attempt" _ Date  Stamp _ submission filename
@@ -357,7 +381,7 @@ Module JHGModule1
                 End If
 
             Catch ex As InvalidExpressionException
-                '     MessageBox.Show(ex.Message)
+                MessageBox.Show(ex.Message)
             End Try
         Loop
     End Sub

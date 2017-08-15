@@ -479,6 +479,7 @@ Public Class frmMain
                     End If
                 Catch ex As Exception
                     Beep()
+                    MessageBox.Show("Error: Student ID = " & StudentAssignment.StudentID & vbCrLf & ex.Message)
                 End Try
 
                 ' ---------------------------------------------------------------------------------------------------
@@ -1231,7 +1232,7 @@ Public Class frmMain
         rbnBlackboardZip.Enabled = True
         rbnSingleProject.Enabled = True
 
-        Me.lblMessage.Text = "Processing Complete"
+        Me.lblMessage.Text = "Processing Complete. " & nstudentfiles.ToString & " Files processed. "
         If GuidIssues Then lblMessage.Text &= " *** GUID Issues Found "
         If MD5Issues Then lblMessage.Text &= " *** MD5 Issues Found "
 
@@ -1706,6 +1707,7 @@ Public Class frmMain
     Private Sub rbnAppCFG_CheckedChanged(sender As Object, e As EventArgs) Handles rbnAppCFG.CheckedChanged
         If rbnAppCFG.Checked And lblConfigFile.Text = "Default Configuration" Then lblConfigFile.Text = ""
     End Sub
+
 
     'Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
     '    '  Dim proc As New System.Diagnostics.Process()

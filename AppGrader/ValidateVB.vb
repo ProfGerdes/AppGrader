@@ -248,40 +248,46 @@ Module ValidateVB
         Dim s As String = ""
         Dim s2 As String = ""
         Try
-            Dim sr As New StreamReader(AppDir & "\" & "My Project\AssemblyInfo.vb")
-            s = sr.ReadToEnd
-            s2 = s
-            sr.Close()
+            If File.Exists(AppDir & "\" & "My Project\AssemblyInfo.vb") Then
+                Dim sr As New StreamReader(AppDir & "\" & "My Project\AssemblyInfo.vb")
+                s = sr.ReadToEnd
+                s2 = s
+                sr.Close()
 
-            's = s2
-            'cfgAssignmentTitle = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
-            'SSummary.AppTitle = cfgAssignmentTitle
+                's = s2
+                'cfgAssignmentTitle = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
+                'SSummary.AppTitle = cfgAssignmentTitle
 
 
-            s = s2
-            SSummary(EnSummary.InfoAppTitle).Status = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
-            s = s2
-            SSummary(EnSummary.InfoDescription).Status = returnBetween(s, "<Assembly: AssemblyDescription(""", """)>", True)
-            s = s2
-            SSummary(EnSummary.InfoCompany).Status = returnBetween(s, "<Assembly: AssemblyCompany(""", """)>", True)
-            s = s2
-            SSummary(EnSummary.InfoProduct).Status = returnBetween(s, "<Assembly: AssemblyProduct(""", """)>", True)
-            s = s2
-            SSummary(EnSummary.InfoCopyright).Status = returnBetween(s, "<Assembly: AssemblyCopyright(""", """)>", True)
-            s = s2
-            SSummary(EnSummary.InfoTrademark).Status = returnBetween(s, "<Assembly: AssemblyTrademark(""", """)>", True)
-            s = s2
-            SSummary(EnSummary.InfoGUID).Status = returnBetween(s, "<Assembly: Guid(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoAppTitle).Status = returnBetween(s, "<Assembly: AssemblyTitle(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoDescription).Status = returnBetween(s, "<Assembly: AssemblyDescription(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoCompany).Status = returnBetween(s, "<Assembly: AssemblyCompany(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoProduct).Status = returnBetween(s, "<Assembly: AssemblyProduct(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoCopyright).Status = returnBetween(s, "<Assembly: AssemblyCopyright(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoTrademark).Status = returnBetween(s, "<Assembly: AssemblyTrademark(""", """)>", True)
+                s = s2
+                SSummary(EnSummary.InfoGUID).Status = returnBetween(s, "<Assembly: Guid(""", """)>", True)
 
-            ' ----------------------------------------------------------------------------------------------
-            If Find_Setting("InfoAppTitle", "CheckAppInfo2").Req Then       ' **************** is this correct? *************** Info AppTile is different than AppTitle
-                'If cfgAssignmentTitle = str5 Then
-                '    strFacReport = (strFacReport & "???")
-                'End If
+                ' ----------------------------------------------------------------------------------------------
+                If Find_Setting("InfoAppTitle", "CheckAppInfo2").Req Then       ' **************** is this correct? *************** Info AppTile is different than AppTitle
+                    'If cfgAssignmentTitle = str5 Then
+                    '    strFacReport = (strFacReport & "???")
+                    'End If
+                End If
+            Else
+                ' file not found
+                Beep()
+                MessageBox.Show("CheckAPPInfo - File does not exist:  " & AppDir & "\" & "My Project\AssemblyInfo.vb", "Missing file in User Submission")
             End If
             ' ----------------------------------------------------------------------------------------------
         Catch ex As Exception
-            MessageBox.Show("CheckAPPInfo - Problem extracting information out of AssemblyInfo.vb. The erro encountered is: " & ex.Message)
+            MessageBox.Show("CheckAPPInfo - Problem extracting information out of AssemblyInfo.vb. The error encountered is: " & ex.Message)
         End Try
     End Sub
 
@@ -1173,10 +1179,15 @@ Module ValidateVB
                         ss = returnBetween(s, "Me.BackColor =", vbCrLf)
                         cArray = ss.Split(delim, StringSplitOptions.None)
                         Try
-                            AppForm(EnForm.FormBackColor).Status = "<p><span class=""boldtext"">" & fn & "</span> - Form color is nongray (#" & ReturnHexEquivalent(TrimAfter(cArray(1), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(2), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(3), ",", True)) & ") </p>"
-                            AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
-                            AppForm(EnForm.FormBackColor).n += 1
-                        Catch
+                            If cArray.GetUpperBound(0) = 0 Then
+                                AppForm(EnForm.FormBackColor).Status = "Form color = " & ss  ' JHG need to look at this. Is this correct?
+                            Else
+                                AppForm(EnForm.FormBackColor).Status = "<p><span class=""boldtext"">" & fn & "</span> - Form color is nongray (#" & ReturnHexEquivalent(TrimAfter(cArray(1), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(2), ",", True)) & ReturnHexEquivalent(TrimAfter(cArray(3), ",", True)) & ") </p>"
+                                AppForm(EnForm.FormBackColor).cssClass = "itemgreen"
+                                AppForm(EnForm.FormBackColor).n += 1
+                            End If
+                        Catch ex As Exception
+                            ' I think the above if statement does away with the need for this
                             AppForm(EnForm.FormBackColor).Status = "Form color = " & ss
                         End Try
                     ElseIf s.Contains("System.Drawing.Color.") Then

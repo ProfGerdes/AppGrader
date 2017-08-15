@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class frmMain
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class frmMain
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
@@ -132,7 +132,7 @@ Partial Class frmMain
         '
         Me.lblNZips.AutoSize = True
         Me.lblNZips.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblNZips.Location = New System.Drawing.Point(154, 732)
+        Me.lblNZips.Location = New System.Drawing.Point(197, 732)
         Me.lblNZips.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblNZips.Name = "lblNZips"
         Me.lblNZips.Size = New System.Drawing.Size(59, 17)
@@ -810,5 +810,4 @@ Partial Class frmMain
     Friend WithEvents rbnAppCFG As System.Windows.Forms.RadioButton
     Friend WithEvents rbnDefaultCFG As System.Windows.Forms.RadioButton
     Friend WithEvents rbnMoodle As System.Windows.Forms.RadioButton
-
 End Class

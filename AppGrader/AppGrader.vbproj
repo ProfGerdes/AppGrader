@@ -65,10 +65,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>5E6FBB7E410F0283A966A89ED0DDFA76FB7AE89F</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>65C63959114D06925A0780B51F4706F2BCD50FAC</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>AppGrader_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>AppGrader_2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -78,6 +78,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ionic.Zip">
@@ -239,6 +242,7 @@
     <Content Include="faviconPro.ico" />
     <None Include="app.config" />
     <None Include="AppGrader_1_TemporaryKey.pfx" />
+    <None Include="AppGrader_2_TemporaryKey.pfx" />
     <None Include="AppGrader_TemporaryKey.pfx" />
     <Content Include="templates\defaultConfig.cfg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
